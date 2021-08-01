@@ -24,16 +24,16 @@ int main()
 	Environment environment(&window, Vector2i(2560, 1260), 300);
 	int numEntities = 1000000;
 	for (int i = 0; i < numEntities; i++) {
-		
+		/*
 		environment.addEntity(
 			new Entity(environment.nextEntityId++, Vector2f(
 				environment.size.x / 5 + rand() % (environment.size.x / 5*3),
-				environment.size.y / 5 + rand() % (environment.size.y / 5*3))));
-		/*
+				environment.size.y / 5 + rand() % (environment.size.y / 5*3))));*/
+		
 				environment.addEntity(
 			new Entity(environment.nextEntityId++, Vector2f(
 				rand() % environment.size.x,
-				rand() % environment.size.y)));*/
+				rand() % environment.size.y)));
 	}
 	UI ui(&window, &environment);
 	int loopNr = 0;

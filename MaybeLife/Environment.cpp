@@ -137,7 +137,7 @@ void Environment::draw(Vector2i upperLeft, Vector2i lowerRight)
 			lines = new VertexArray(sf::Lines, sqrtNumZones * 2);
 		}
 
-	lines->clear();
+	lines->clear(); 
 	if (numZones < 256)
 		drawZones();
 	int innerCount = 0;
