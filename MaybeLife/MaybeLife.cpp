@@ -21,7 +21,7 @@ int main()
 	Vector2i viewPortCoordsBegin = Vector2i(-400, -400);
 	Vector2i viewPortCoordsEnd = Vector2i(400, 400);
 	InputManager inputManager;
-	Environment environment(&window, Vector2i(2560, 1260), 300);
+	Environment environment(&window, Vector2i(2560, 1260), 450);
 	int numEntities = 1000000;
 	for (int i = 0; i < numEntities; i++) {
 		/*
