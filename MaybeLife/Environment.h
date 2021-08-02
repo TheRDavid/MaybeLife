@@ -13,17 +13,16 @@ class Environment
 {
 	
 public:
-	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, int zoneCapacity);
+	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, int zoneCapacity, vector<Entity*>* entities);
 	Zone* zoneAt(Vector2f position);
 	vector<Zone*> neighbours(Zone* zone);
-	void setEntities(Entities* entities);
 	vector<Zone*> zones;
 	void entitiesDoSpread(int firstZone, int lastZone, int threadN);
 	void entitiesDoRandom(int firstZone, int lastZone, int threadN);
 	unsigned long long int nextEntityId, nextZoneId;
 	Vector2i size;
 	void draw();
-	Entities* entities;
+	vector<Entity*>* entities;
 	RenderWindow* window;
 	bool legalPosition(Vector2f position);
 	bool legalPosition_strict(Vector2f position);

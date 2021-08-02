@@ -15,6 +15,7 @@ using namespace sf;
 int main()
 {
 	std::cout << "MaybeLife starting up, oh boi!\n";
+	Vector2i envSize = Vector2i(3400, 1340);
 	sf::RenderWindow window(sf::VideoMode(3400, 1340), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
 	window.setPosition(Vector2i(0, 0));
 	sf::CircleShape shape(100.f);
@@ -23,13 +24,13 @@ int main()
 	Vector2i viewPortCoordsEnd = Vector2i(400, 400);
 	InputManager inputManager;
 	int numEntities = 1000 * 1000, numZones = 1000000, numThreads = 4;
-	Environment environment(&window, Vector2i(3400, 1340), numZones, numThreads, numEntities/numZones);
-	Entities* entities = new Entities(numEntities);
+	vector<Entity*>* entities = new vector<Entity*>();
+	entities->reserve(numEntities);
 	for (int i = 0; i < numEntities; i++) {
-		entities->add(Vector2f(rand() % environment.size.x, rand() % environment.size.y), Vector2f(1, 1), Color::White);
-		//entities->add(Vector2f(environment.size.x / 5 + rand() % environment.size.x / 5 * 3, environment.size.y / 5 + rand() % environment.size.y / 5 * 3), Vector2f(1, 1), Color::White);
+		entities->push_back(new Entity(i, Vector2f(rand() % envSize.x, rand() % envSize.y), Vector2f(1, 1)));
+		//entities->push_back(new Entity(i, Vector2f(environment.size.x / 5 + rand() % environment.size.x / 5 * 3, environment.size.y / 5 + rand() % environment.size.y / 5 * 3), Vector2f(1, 1)));
 	}
-	environment.setEntities(entities);
+	Environment environment(&window, envSize, numZones, numThreads, numEntities / numZones, entities);
 	UI ui(&window, &environment);
 	int loopNr = 0;
 	while (window.isOpen())

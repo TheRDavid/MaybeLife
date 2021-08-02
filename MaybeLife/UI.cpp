@@ -32,7 +32,7 @@ void UI::refresh()
 	fpsString.erase(fpsString.find_last_not_of('0') + 1, std::string::npos);
 	utString.erase(utString.find_last_not_of('0') + 1, std::string::npos);
 	if (true || AppConfig::getInstance().showFPS) {
-		fpsText.setString("Performance: " + fpsString + " / " + utString + " -> " + std::to_string(environment->entities->positions->size()));
+		fpsText.setString("Performance: " + fpsString + " / " + utString + " -> " + std::to_string(environment->entities->size()));
 		window->draw(fpsText);
 	}
 }

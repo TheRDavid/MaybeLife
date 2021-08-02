@@ -11,7 +11,7 @@ public:
 	unsigned long long int id;
 	std::vector<Zone*> neighbours;
 	float xStart, xEnd, yStart, yEnd, xMid, yMid;
-	vector<int> entities;
+	vector<Entity*> entities;
 	bool legalPosition(Vector2f position);
 	std::string toString();
 };

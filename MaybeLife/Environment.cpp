@@ -1,8 +1,9 @@
 #include "Environment.h"
 #include "AppConfig.h"
 
-Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, int zoneCapacity)
+Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, int zoneCapacity, vector<Entity*>* entities)
 {
+	this->entities = entities;
 	numThreads = threads;
 	steps = new int[max(threads, 1)];
 	for (int i = 0; i < max(threads, 1); i++) {
@@ -29,6 +30,24 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	for (int i = 0; i < numZones; i++) {
 		Zone* zone = zones[i];
 		zone->neighbours = neighbours(zone);
+	}
+
+	for (Entity* entity : (*entities)) {
+		Zone* zone = zoneAt(entity->position);
+		entity->zone = zone;
+		zone->entities.push_back(entity);
+	}
+	for (int i = 0; i < numThreads; i++) {
+		steps[i] = 0;
+		int firstZone = i == 0 ? 0 : i * numZones / numThreads;
+		int lastZone = i == 0 ? numZones / numThreads : (i + 1)*numZones / numThreads;
+		cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << endl;
+		if (i == 0) {
+			new thread(&Environment::entitiesDoSpread, this, 0, numZones / numThreads, 0);
+		}
+		else {
+			new thread(&Environment::entitiesDoSpread, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
+		}
 	}
 }
 
@@ -88,28 +107,6 @@ vector<Zone*> Environment::neighbours(Zone* zone)
 	return neighbours;
 }
 
-void Environment::setEntities(Entities * entities)
-{
-	this->entities = entities;
-	for (int i = 0; i < entities->positions->size(); i++) {
-		Zone* zone = zoneAt(entities->positions->at(i));
-		entities->zones->push_back(zone);
-		zone->entities.push_back(i);
-	}
-	for (int i = 0; i < numThreads; i++) {
-		steps[i] = 0;
-		int firstZone = i == 0 ? 0 : i * numZones / numThreads;
-		int lastZone = i == 0 ? numZones / numThreads : (i + 1)*numZones / numThreads;
-		cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << endl;
-		if (i == 0) {
-			new thread(&Environment::entitiesDoSpread, this, 0, numZones / numThreads, 0);
-		}
-		else {
-			new thread(&Environment::entitiesDoSpread, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
-		}
-	}
-
-}
 float RandomNumber(float Min, float Max)
 {
 	return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
@@ -122,7 +119,7 @@ void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
 	int idx = numZones > 256 ? 0 : 256;
 	int stepIdx = max(0, threadN);
 	//cout << "Inside Thread!" << endl;
-	vector<int> toRemove;
+	vector<Entity*> toRemove;
 	toRemove.reserve(500000);
 	while (true) {
 		bool allReady = true;
@@ -143,16 +140,16 @@ void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
 			{
 				toRemove.clear();
 				Zone* zone = zones[i];
-				for (int entity : zone->entities) {
-					if (!zone->legalPosition(entities->positions->at(entity))) {
+				for (Entity* entity : zone->entities) {
+					if (!zone->legalPosition(entity->position)) {
 						toRemove.push_back(entity);
-						Zone* newZone = zoneAt(entities->positions->at(entity));
+						Zone* newZone = zoneAt(entity->position);
 						if (newZone == nullptr) {
-							cout << "Illegal Entity: " << entities->toString(entity) << endl;
+							cout << "Illegal Entity: " << entity->toString() << endl;
 						}
 						else {
 							newZone->entities.push_back(entity);
-							entities->zones->at(entity) = newZone;
+							entity->zone = newZone;
 						}
 					}
 				}
@@ -165,14 +162,14 @@ void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
 			{
 				//	cout << "Step 1.1" << endl;
 				Zone* uZone = zones[i];
-				for (int entity : uZone->entities)
+				for (Entity* entity : uZone->entities)
 				{
 					//	cout << "Step 1.2" << endl;
 					Vector2f dir = Vector2f(RandomNumber(-1,1), RandomNumber(-1, 1));
-					Vector2f ePos = entities->positions->at(entity) + dir;
+					Vector2f ePos = entity->position + dir;
 
 					if (legalPosition_strict(ePos)) {
-						entities->positions->at(entity) = ePos;
+						entity->position = ePos;
 					}
 				}
 			}
@@ -183,12 +180,12 @@ void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
 }
 void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 {
-	bool drawLines = entities->positions->size() <= 1000;
+	bool drawLines = entities->size() <= 1000;
 
 
 	if (drawLines) {
 		if (lines == NULL) {
-			lines = new VertexArray(sf::Lines, entities->positions->size()*entities->positions->size() * 2);
+			lines = new VertexArray(sf::Lines, entities->size()*entities->size() * 2);
 		}
 	}
 	else
@@ -198,7 +195,7 @@ void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 	int idx = numZones > 256 ? 0 : 256;
 	int stepIdx = max(0, threadN);
 	//cout << "Inside Thread!" << endl;
-	vector<int> toRemove;
+	vector<Entity*> toRemove;
 	toRemove.reserve(100);
 	while (true) {
 		bool allReady = true;
@@ -219,16 +216,16 @@ void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 			{
 				toRemove.clear();
 				Zone* zone = zones[i];
-				for (int entity : zone->entities) {
-					if (!zone->legalPosition(entities->positions->at(entity))) {
+				for (Entity* entity : zone->entities) {
+					if (!zone->legalPosition(entity->position)) {
 						toRemove.push_back(entity);
-						Zone* newZone = zoneAt(entities->positions->at(entity));
+						Zone* newZone = zoneAt(entity->position);
 						if (newZone == nullptr) {
-							cout << "Illegal Entity: " << entities->toString(entity) << endl;
+							cout << "Illegal Entity: " << entity->toString() << endl;
 						}
 						else {
 							newZone->entities.push_back(entity);
-							entities->zones->at(entity) = newZone;
+							entity->zone = newZone;
 						}
 					}
 				}
@@ -241,27 +238,27 @@ void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 			{
 				//	cout << "Step 1.1" << endl;
 				Zone* uZone = zones[i];
-				for (int entity : uZone->entities)
+				for (Entity* entity : uZone->entities)
 				{
 					//	cout << "Step 1.2" << endl;
 					float xDir = 0, yDir = 0;
-					Vector2f ePos = entities->positions->at(entity);
+					Vector2f ePos = entity->position;
 					Vector2f newPos = ePos;
 					for (Zone* zone : uZone->neighbours) {
 						//	cout << "Step 1.3" << endl;
-						for (int neighbour : zone->entities)
+						for (Entity* neighbour : zone->entities)
 						{
 							//	cout << "Step 1.4" << endl;
-							if (entity != neighbour) {
+							if (entity->id != neighbour->id) {
 								if (drawLines) {
 									(*lines).append(Vector2f(ePos.x, ePos.y));
-									(*lines).append(Vector2f(entities->positions->at(neighbour).x, entities->positions->at(neighbour).y));
+									(*lines).append(Vector2f(neighbour->position.x, neighbour->position.y));
 								}
-								float dist = pow(ePos.x - entities->positions->at(neighbour).x, 2) + pow(ePos.y - entities->positions->at(neighbour).y, 2);
-								float xd = ePos.x - entities->positions->at(neighbour).x;
+								float dist = pow(ePos.x - neighbour->position.x, 2) + pow(ePos.y - neighbour->position.y, 2);
+								float xd = ePos.x - neighbour->position.x;
 								if (xd != 0)
 									xd = (xd > 0 ? 10 : -10) / dist;
-								float yd = ePos.y - entities->positions->at(neighbour).y;
+								float yd = ePos.y - neighbour->position.y;
 								if (yd != 0)
 									yd = (yd > 0 ? 10 : -10) / dist;
 								xDir += xd;
@@ -274,7 +271,7 @@ void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 					if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
 					newPos = ePos + Vector2f(xDir, yDir);
 					if (legalPosition_strict(newPos)) {
-						entities->positions->at(entity) = newPos;
+						entity->position = newPos;
 					}
 				}
 			}
@@ -286,9 +283,9 @@ void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 
 void Environment::draw()
 {
-	bool drawLines = entities->positions->size() <= 1000;
+	bool drawLines = entities->size() <= 1000;
 	if (rects == NULL) {
-		rects = new VertexArray(sf::Quads, 4 * entities->positions->size());
+		rects = new VertexArray(sf::Quads, 4 * entities->size());
 	}
 
 	if (numZones <= 10000)
@@ -296,17 +293,18 @@ void Environment::draw()
 	int innerCount = 0;
 	int idx = 0, lidx = 0;
 
-	for (int entity = 0; entity < entities->positions->size(); entity++)
+	for (Entity* entity : (*entities))
 	{
-		Vector2f ePos = entities->positions->at(entity);
-		Vector2f eSize = entities->sizes->at(entity);
-		(*rects)[idx].color = entities->colors->at(entity);
+		Vector2f ePos = entity->position;
+		Vector2f eSize = entity->size;
+		Color col = entity->color;
+		(*rects)[idx].color = col;
 		(*rects)[idx++].position = Vector2f(ePos.x - eSize.x, ePos.y - eSize.y);
-		(*rects)[idx].color = entities->colors->at(entity);
+		(*rects)[idx].color = col;
 		(*rects)[idx++].position = Vector2f(ePos.x + eSize.x, ePos.y - eSize.y);
-		(*rects)[idx].color = entities->colors->at(entity);
+		(*rects)[idx].color = col;
 		(*rects)[idx++].position = Vector2f(ePos.x + eSize.x, ePos.y + eSize.y);
-		(*rects)[idx].color = entities->colors->at(entity);
+		(*rects)[idx].color = col;
 		(*rects)[idx++].position = Vector2f(ePos.x - eSize.x, ePos.y + eSize.y);
 	}
 	if (drawLines);
