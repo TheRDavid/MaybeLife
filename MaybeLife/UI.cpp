@@ -1,5 +1,4 @@
 #include "UI.h"
-
 UI::UI(sf::RenderWindow* renderWindow, Environment* environment)
 {
 	this->environment = environment;
@@ -12,24 +11,28 @@ UI::UI(sf::RenderWindow* renderWindow, Environment* environment)
 
 	// set the color
 	fpsText.setFillColor(sf::Color::Red);
+	fpsstart = high_resolution_clock::now();
+	upstart = high_resolution_clock::now();
 }
 
 void UI::refresh()
 {
-	float time = fpsClock.getElapsedTime().asSeconds();
-	float fps = 1.f / time;
-	if (fpsCount == fpsAvgSpan) { fpsCount = 0; }
-	fpsSamples[fpsCount++] = fps;
-	for (int i = 0; i < fpsAvgSpan; i++) {
-		avgFPS += fpsSamples[i];
+	if (drawCallsSince++ == fpsAvgSpan) {
+		int ms = duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - fpsstart).count();
+		fpsString = to_string((float)(fpsAvgSpan * 100000 / ms)/100);
+		fpsstart = high_resolution_clock::now();
+		drawCallsSince = 0;
 	}
-	avgFPS /= fpsAvgSpan;
-	fpsClock.restart().asSeconds();
-	string fpsString = to_string((float)((int)(avgFPS * 100)) / 100);
+	if (environment->steps[0] - stepCountLast >= updateAvgSpan) {
+		int ms = duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - upstart).count();
+		utString = to_string((float)(updateAvgSpan * 100000 / ms)/100);
+		upstart = high_resolution_clock::now();
+		stepCountLast = environment->steps[0];
+	}
 	fpsString.erase(fpsString.find_last_not_of('0') + 1, std::string::npos);
+	utString.erase(utString.find_last_not_of('0') + 1, std::string::npos);
 	if (true || AppConfig::getInstance().showFPS) {
-		fpsText.setString(fpsString + " FPS at " + std::to_string(environment->entities.size()));
+		fpsText.setString("Performance: " + fpsString + " / " + utString + " -> " + std::to_string(environment->entities->positions->size()));
 		window->draw(fpsText);
-		
 	}
 }

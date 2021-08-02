@@ -1,10 +1,10 @@
 #include "Zone.h"
 #include "Entity.h"
-Zone::Zone() : Zone::Zone(-1,0, 0, 1, 1)
+Zone::Zone() : Zone::Zone(-1,0, 0, 1, 1, 1000)
 {
 }
 
-Zone::Zone(unsigned long long int id, float xStart, float xEnd, float yStart, float yEnd)
+Zone::Zone(unsigned long long int id, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
 	this-> id = id;
 	this->xStart = xStart;
@@ -13,7 +13,7 @@ Zone::Zone(unsigned long long int id, float xStart, float xEnd, float yStart, fl
 	this->yEnd = yEnd;
 	xMid = xStart + (xEnd - xStart) / 2;
 	yMid = yStart + (yEnd - yStart) / 2;
-	entities.reserve(100);
+	entities.reserve(capacity);
 }
 
 bool Zone::legalPosition(Vector2f position)

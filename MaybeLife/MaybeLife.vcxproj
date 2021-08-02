@@ -165,6 +165,7 @@
   <ItemGroup>
     <ClCompile Include="ApplicationToolsInputManager.cpp" />
     <ClCompile Include="DeveloperToolsInputManager.cpp" />
+    <ClCompile Include="Entities.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="AppConfig.h" />
     <ClInclude Include="ApplicationToolsInputManager.h" />
     <ClInclude Include="DeveloperToolsInputManager.h" />
+    <ClInclude Include="Entities.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="InputMacros.h" />
