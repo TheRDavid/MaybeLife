@@ -11,14 +11,18 @@ using namespace std;
 using namespace sf;
 class Environment
 {
-	
+
 public:
-	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, int zoneCapacity, vector<Entity*>* entities);
+
+	enum Behaviour {
+		SPREAD, RANDOM
+	};
+
+	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, vector<Entity*>* entities, Environment::Behaviour behaviour);
 	Zone* zoneAt(Vector2f position);
 	vector<Zone*> neighbours(Zone* zone);
 	vector<Zone*> zones;
-	void entitiesDoSpread(int firstZone, int lastZone, int threadN);
-	void entitiesDoRandom(int firstZone, int lastZone, int threadN);
+	void updateEntities(int firstZone, int lastZone, int threadN);
 	unsigned long long int nextEntityId, nextZoneId;
 	Vector2i size;
 	void draw();
@@ -37,6 +41,9 @@ private:
 	Color emptyZoneColor = Color(30, 30, 90, 128);
 	int numThreads;
 	vector<mutex*> locks;
+	Behaviour behaviour;
+	void entitiesDoSpread(int firstZone, int lastZone, int threadN);
+	void entitiesDoRandom(int firstZone, int lastZone, int threadN);
 };
 
 

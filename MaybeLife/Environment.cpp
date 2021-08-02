@@ -1,8 +1,9 @@
 #include "Environment.h"
 #include "AppConfig.h"
 
-Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, int zoneCapacity, vector<Entity*>* entities)
+Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, vector<Entity*>* entities, Environment::Behaviour behaviour)
 {
+	this->behaviour = behaviour;
 	this->entities = entities;
 	numThreads = threads;
 	steps = new int[max(threads, 1)];
@@ -12,6 +13,7 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	zoneRows = max(1,(int)sqrt(_numZones / (size.x / size.y)));
 	zoneCols = _numZones / zoneRows;
 	numZones = zoneCols * zoneRows;
+	int zoneCapacity = 2 * entities->size() / numZones;
 	zones.reserve(numZones);
 	locks.reserve(numZones);
 	window = renderWindow;
@@ -43,10 +45,10 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 		int lastZone = i == 0 ? numZones / numThreads : (i + 1)*numZones / numThreads;
 		cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << endl;
 		if (i == 0) {
-			new thread(&Environment::entitiesDoSpread, this, 0, numZones / numThreads, 0);
+			new thread(&Environment::updateEntities, this, 0, numZones / numThreads, 0);
 		}
 		else {
-			new thread(&Environment::entitiesDoSpread, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
+			new thread(&Environment::updateEntities, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
 		}
 	}
 }
@@ -105,6 +107,19 @@ vector<Zone*> Environment::neighbours(Zone* zone)
 		neighbours.push_back(neighbour);
 	}
 	return neighbours;
+}
+
+void Environment::updateEntities(int firstZone, int lastZone, int threadN)
+{
+	switch (behaviour) {
+	case Behaviour::RANDOM:
+		entitiesDoRandom(firstZone, lastZone, threadN);
+		break;
+	case Behaviour::SPREAD:
+		entitiesDoSpread(firstZone, lastZone, threadN);
+		break;
+	default:break;
+	}
 }
 
 float RandomNumber(float Min, float Max)
@@ -181,7 +196,6 @@ void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
 void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
 {
 	bool drawLines = entities->size() <= 1000;
-
 
 	if (drawLines) {
 		if (lines == NULL) {
