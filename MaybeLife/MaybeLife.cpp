@@ -15,30 +15,26 @@ using namespace sf;
 int main()
 {
 	std::cout << "MaybeLife starting up, oh boi!\n";
-	sf::RenderWindow window(sf::VideoMode(2560, 1260), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
+	sf::RenderWindow window(sf::VideoMode(3400, 1340), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
+	window.setPosition(Vector2i(0, 0));
 	sf::CircleShape shape(100.f);
 	shape.setFillColor(sf::Color::Magenta);
 	Vector2i viewPortCoordsBegin = Vector2i(-400, -400);
 	Vector2i viewPortCoordsEnd = Vector2i(400, 400);
 	InputManager inputManager;
-	Environment environment(&window, Vector2i(2560, 1260), 300);
-	int numEntities = 1000000;
+	int numEntities = 1000 * 1000, numZones = 1000000, numThreads = 4;
+	Environment environment(&window, Vector2i(3400, 1340), numZones, numThreads, numEntities/numZones);
+	Entities* entities = new Entities(numEntities);
 	for (int i = 0; i < numEntities; i++) {
-		/*
-		environment.addEntity(
-			new Entity(environment.nextEntityId++, Vector2f(
-				environment.size.x / 5 + rand() % (environment.size.x / 5*3),
-				environment.size.y / 5 + rand() % (environment.size.y / 5*3))));*/
-		
-				environment.addEntity(
-			new Entity(environment.nextEntityId++, Vector2f(
-				rand() % environment.size.x,
-				rand() % environment.size.y)));
+		entities->add(Vector2f(rand() % environment.size.x, rand() % environment.size.y), Vector2f(1, 1), Color::White);
+		//entities->add(Vector2f(environment.size.x / 5 + rand() % environment.size.x / 5 * 3, environment.size.y / 5 + rand() % environment.size.y / 5 * 3), Vector2f(1, 1), Color::White);
 	}
+	environment.setEntities(entities);
 	UI ui(&window, &environment);
 	int loopNr = 0;
 	while (window.isOpen())
 	{
+		string titleString = environment.stepsToString();
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -53,17 +49,19 @@ int main()
 				// convert it to world coordinates
 				sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
 				Zone* zone = environment.zoneAt(worldPos);
+
 				if (zone == nullptr) {
-					window.setTitle("Outside World");
+					titleString += " Outside World";
 				}
 				else
-					window.setTitle(zone->toString());
+					titleString += " " + zone->toString();
 			}
 		}
-
+		window.setTitle(titleString);
 		window.clear();
-		environment.update();
-		environment.draw(viewPortCoordsBegin, viewPortCoordsEnd);
+		if (numThreads == 0)
+			environment.entitiesDoSpread(0, environment.numZones, -1);
+		environment.draw();
 		ui.refresh();
 		window.display();
 	}
