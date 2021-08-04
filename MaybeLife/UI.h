@@ -22,5 +22,6 @@ private:
 	Environment* environment;
 	Text fpsText;
 	string fpsString = "", utString = "";
+	sf::RectangleShape rectangle;
 };
 

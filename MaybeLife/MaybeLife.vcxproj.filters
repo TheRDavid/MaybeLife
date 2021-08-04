@@ -33,16 +33,7 @@
     <ClCompile Include="MaybeLife.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ApplicationToolsInputManager.cpp">
-      <Filter>Source Files\input</Filter>
-    </ClCompile>
-    <ClCompile Include="DeveloperToolsInputManager.cpp">
-      <Filter>Source Files\input</Filter>
-    </ClCompile>
     <ClCompile Include="InputManager.cpp">
-      <Filter>Source Files\input</Filter>
-    </ClCompile>
-    <ClCompile Include="SimulationToolsInputManager.cpp">
       <Filter>Source Files\input</Filter>
     </ClCompile>
     <ClCompile Include="UI.cpp">
@@ -71,15 +62,6 @@
     <ClInclude Include="InputManager.h">
       <Filter>Header Files\input</Filter>
     </ClInclude>
-    <ClInclude Include="SimulationToolsInputManager.h">
-      <Filter>Header Files\input</Filter>
-    </ClInclude>
-    <ClInclude Include="DeveloperToolsInputManager.h">
-      <Filter>Header Files\input</Filter>
-    </ClInclude>
-    <ClInclude Include="ApplicationToolsInputManager.h">
-      <Filter>Header Files\input</Filter>
-    </ClInclude>
     <ClInclude Include="AppConfig.h">
       <Filter>Header Files\config</Filter>
     </ClInclude>
@@ -96,6 +78,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Entities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
