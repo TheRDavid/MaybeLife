@@ -14,7 +14,7 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	zoneCols = _numZones / zoneRows;
 	numZones = zoneCols * zoneRows;
 	int zoneCapacity = 2 * entities->size() / numZones;
-	zones.reserve(numZones);
+	//zones.reserve(numZones);
 	locks.reserve(numZones);
 	window = renderWindow;
 	nextEntityId = 0;
@@ -27,7 +27,9 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 		int row = floor(i / zoneCols);
 		int col = floor(i - row * zoneCols);
 		float xPos = col * zoneWidth, yPos = row * zoneHeight;
-		zones[i] = new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity);
+		//cout << "New zone at " << row << "," << col << " cap=" << zoneCapacity << " zone has " << zones.size() << endl;
+		zones.push_back(new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity));
+		//zones[i] = new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity);
 	}
 	for (int i = 0; i < numZones; i++) {
 		Zone* zone = zones[i];

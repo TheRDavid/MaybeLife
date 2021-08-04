@@ -11,6 +11,7 @@
 #include "Environment.h"
 #include <string>
 using namespace sf;
+using namespace std;
 
 int main()
 {
@@ -21,8 +22,9 @@ int main()
 	Vector2i viewPortCoordsBegin = Vector2i(-400, -400);
 	Vector2i viewPortCoordsEnd = Vector2i(400, 400);
 	InputManager inputManager;
-	int numEntities = 10 * 1000, numZones = 1 * 10000, numThreads = 4;
+	int numEntities = 10 * 100, numZones = 1 * 1000, numThreads = 4;
 	vector<Entity*>* entities = new vector<Entity*>();
+
 	entities->reserve(numEntities);
 	for (int i = 0; i < numEntities; i++) {
 		//entities->push_back(new Entity(i, Vector2f(rand() % envSize.x, rand() % envSize.y), Vector2f(1, 1)));
