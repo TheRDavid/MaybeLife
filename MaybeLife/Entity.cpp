@@ -4,9 +4,10 @@
 #include "Environment.h"
 static unsigned long long int nextId = 0;
 
-Entity::Entity(unsigned long long int id, Behaviour behaviour, Vector2f position, Vector2f size, Color color)
+Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, Color color)
 {
 	this->id = id;
+	this->environment = environment;
 	this->position = position;
 	this->size = size;
 	this->color = color;
@@ -14,16 +15,16 @@ Entity::Entity(unsigned long long int id, Behaviour behaviour, Vector2f position
 	majorSize = max(size.x, size.y);
 
 }
-Entity::Entity(unsigned long long int id, Behaviour behaviour, Vector2f position, Vector2f size)
+Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size)
 {
 }
-Entity::Entity(unsigned long long int id, Behaviour behaviour, Vector2f position) : Entity(id, behaviour, Vector2f(0, 0), Vector2f(1,1))
+Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position) : Entity(id, environment, behaviour, Vector2f(0, 0), Vector2f(1,1))
 {
 }
-Entity::Entity(unsigned long long int id, Behaviour behaviour) : Entity(id, behaviour, Vector2f(0,0))
+Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour) : Entity(id, environment, behaviour, Vector2f(0,0))
 {
 }
-Entity::Entity(unsigned long long int id) : Entity(id, RANDOM)
+Entity::Entity(unsigned long long int id, Environment* environment) : Entity(id, environment, RANDOM)
 {
 }
 void Entity::update()

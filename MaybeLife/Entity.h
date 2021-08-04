@@ -20,11 +20,11 @@ public:
 	Color color = Color::White;
 	Zone* zone;
 
-	Entity(unsigned long long int id, Behaviour behaviour, Vector2f position, Vector2f size, Color color);
-	Entity(unsigned long long int id, Behaviour behaviour, Vector2f position, Vector2f size);
-	Entity(unsigned long long int id, Behaviour behaviour, Vector2f position);
-	Entity(unsigned long long int id, Behaviour behaviour);
-	Entity(unsigned long long int id);
+	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, Color color);
+	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size);
+	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position);
+	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour);
+	Entity(unsigned long long int id, Environment* environment);
 	void update();
 	void actFall();
 	void actGravitate();

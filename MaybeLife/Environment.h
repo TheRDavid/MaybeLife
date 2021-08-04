@@ -14,7 +14,7 @@ class Environment
 
 public:
 
-	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, vector<Entity*>* entities);
+	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads);
 	Zone* zoneAt(Vector2f position);
 	vector<Zone*> neighbours(Zone* zone);
 	vector<Zone*> zones;
@@ -34,6 +34,7 @@ public:
 	float zoneWidth, zoneHeight;
 	int* steps;
 	void setMaximumNumberOfLines(int newMaxLines);
+	void start(vector<Entity*>* entities);
 	string stepsToString();
 	int numThreads;
 	bool showZones = false, showUI = true, showLines, entityCollision = true;

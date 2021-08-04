@@ -3,16 +3,15 @@
 #include "Utilities.h"
 #include <time.h>
 #include <stdlib.h>
-Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, vector<Entity*>* entities)
+Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads)
 {
 	centerShape.setRadius(gravityShapeRadius);
 	centerShapeSize = Vector2f(gravityShapeRadius / 2, gravityShapeRadius / 2);
-	centerShape.setFillColor(Color(255,255,255,128));
+	centerShape.setFillColor(Color(255, 255, 255, 128));
 	centerShape.setOutlineColor(sf::Color::Red);
 	centerShape.setOutlineThickness(2);
 	centerShape.setPosition(10, 10);
 	gravityCenter = Vector2f(size.x / 2, size.y / 2);
-	this->entities = entities;
 	numThreads = threads;
 	steps = new int[max(threads, 1)];
 	for (int i = 0; i < max(threads, 1); i++) {
@@ -22,34 +21,39 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	zoneCols = _numZones / zoneRows;
 	numZones = zoneCols * zoneRows;
 	showZones = numZones <= 1000;
-	int zoneCapacity = 2 * entities->size() / numZones;
 	zones.reserve(numZones);
 	window = renderWindow;
 	nextEntityId = 0;
 	this->size = size;
 	zoneWidth = size.x / (float)zoneCols;
 	zoneHeight = size.y / (float)zoneRows;
+
+	connectionLines = new VertexArray(sf::Lines, maxLines);
+	zoneLines = new VertexArray(sf::Lines, (zoneCols + zoneRows) * 2);
+}
+
+void Environment::start(vector<Entity*>* entities) {
+	this->entities = entities;
+
+	int zoneCapacity = 2 * entities->size() / numZones;
 	cout << numZones << " Zones with " << zoneRows << " rows and " << zoneCols << " cols, each " << zoneWidth << "x" << zoneHeight << endl;
-	//cout << "At a size of " << renderWindow->getSize().x << "x" << renderWindow->getSize().y << " / " << size.x << "x" << size.y << " with " << sqrtNumZones << "^2 zones, each zone has size: " << zoneWidth << "x" << zoneHeight << endl;
 	for (int i = 0; i < numZones; i++) {
 		int row = floor(i / zoneCols);
 		int col = floor(i - row * zoneCols);
 		float xPos = col * zoneWidth, yPos = row * zoneHeight;
-		zones.push_back(new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity));
-		//	zones[i] = new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity);
-			//zones[i] = new Zone(nextZoneId++, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity);
+		zones.push_back(new Zone(nextZoneId++, this, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity));
 	}
 	for (int i = 0; i < numZones; i++) {
 		Zone* zone = zones[i];
 		zone->neighbours = neighbours(zone);
 	}
-
 	for (Entity* entity : (*entities)) {
 		entity->environment = this;
 		Zone* zone = zoneAt(entity->position);
 		entity->zone = zone;
 		zone->entities.push_back(entity);
 	}
+
 	for (int i = 0; i < numThreads; i++) {
 		steps[i] = 0;
 		int firstZone = i == 0 ? 0 : i * numZones / numThreads;
@@ -62,9 +66,6 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 			new thread(&Environment::updateEntities, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
 		}
 	}
-
-	connectionLines = new VertexArray(sf::Lines, maxLines);
-	zoneLines = new VertexArray(sf::Lines, (zoneCols + zoneRows) * 2);
 }
 
 Zone* Environment::zoneAt(Vector2f position)
@@ -142,28 +143,9 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 		}
 		if (allReady) {
 
-			vector<Entity*> toRemove;
-			toRemove.reserve(100);
 			for (int i = firstZone; i < lastZone; i++)
 			{
-				toRemove.clear();
-				Zone* zone = zones[i];
-				for (Entity* entity : zone->entities) {
-					if (!zone->legalPosition(entity->position)) {
-						toRemove.push_back(entity);
-						Zone* newZone = zoneAt(entity->position);
-						if (newZone == nullptr) {
-							cout << "Illegal Entity: " << entity->to_string() << endl;
-						}
-						else {
-							newZone->entities.push_back(entity);
-							entity->zone = newZone;
-						}
-					}
-				}
-				for (auto &entity : toRemove) {
-					zone->entities.erase(find(zone->entities.begin(), zone->entities.end(), entity));
-				}
+				zones[i]->update();
 			}
 
 			for (int i = firstZone; i < lastZone; i++)
@@ -174,6 +156,7 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 					entity->update();
 				}
 			}
+
 			steps[stepIdx] = steps[stepIdx] + 1;
 			if (entityCollision) {
 				for (int i = firstZone; i < lastZone; i++)

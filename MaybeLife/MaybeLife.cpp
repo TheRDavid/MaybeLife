@@ -30,6 +30,7 @@ int main()
 	vector<Entity*>* entities = new vector<Entity*>();
 	entities->reserve(numEntities);
 	srand(time(NULL));
+	Environment environment(&window, envSize, numZones, numThreads);
 	for (int i = 0; i < numEntities; i++) {
 		Vector2f position;
 		if (boundarySize >= 1)
@@ -37,13 +38,12 @@ int main()
 		else
 			position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
 		entities->push_back(new Entity(
-			i,
+			i, &environment,
 			defaultBehaviour,
 			position,
 			Vector2f(entitySize, entitySize),
 			Color(max(70, rand() % 255), max(70, rand() % 255), max(70, rand() % 255), 255)));
 	}
-	Environment environment(&window, envSize, numZones, numThreads, entities);
 	UI ui(&window, &environment);
 	int loopNr = 0;
 	Zone* zone = environment.zoneAt(Vector2f(0, 0));
@@ -52,6 +52,7 @@ int main()
 	Vector2f startDragPos, endDragPos;
 	bool dragging = false;
 	float currZoom = 4;
+	environment.start(entities);
 	while (window.isOpen())
 	{
 		string titleString = environment.stepsToString();
