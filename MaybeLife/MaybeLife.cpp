@@ -22,13 +22,13 @@ int main()
 	Vector2i viewPortCoordsBegin = Vector2i(-400, -400);
 	Vector2i viewPortCoordsEnd = Vector2i(400, 400);
 	InputManager inputManager;
-	int numEntities = 10 * 100, numZones = 1 * 1000, numThreads = 4;
+	int numEntities = 1000 * 100, numZones = 100 * 1000, numThreads = 0;
 	vector<Entity*>* entities = new vector<Entity*>();
 
 	entities->reserve(numEntities);
 	for (int i = 0; i < numEntities; i++) {
 		//entities->push_back(new Entity(i, Vector2f(rand() % envSize.x, rand() % envSize.y), Vector2f(1, 1)));
-		entities->push_back(new Entity(i, Vector2f((rand() % envSize.x)/2, (rand() % envSize.y)/2), Vector2f(1, 1)));
+		entities->push_back(new Entity(i, Vector2f(((rand() % envSize.x)/2) + (envSize.x / 4), ((rand() % envSize.y)/2)+(envSize.y/4)), Vector2f(1, 1)));
 	}
 	Environment environment(&window, envSize, numZones, numThreads, entities, Environment::Behaviour::SPREAD);
 	UI ui(&window, &environment);
