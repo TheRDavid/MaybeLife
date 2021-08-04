@@ -14,11 +14,7 @@ class Environment
 
 public:
 
-	enum Behaviour {
-		SPREAD, RANDOM, GRAVITATE, SLEEP, FALL
-	};
-
-	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, vector<Entity*>* entities, Environment::Behaviour behaviour);
+	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads, vector<Entity*>* entities);
 	Zone* zoneAt(Vector2f position);
 	vector<Zone*> neighbours(Zone* zone);
 	vector<Zone*> zones;
@@ -40,7 +36,6 @@ public:
 	void setMaximumNumberOfLines(int newMaxLines);
 	string stepsToString();
 	int numThreads;
-	Behaviour behaviour;
 	bool showZones = false, showUI = true, showLines, entityCollision = true;
 	sf::CircleShape centerShape;
 	sf::RectangleShape processedZoneRect;
@@ -50,10 +45,6 @@ private:
 	int processedZone = 0;
 	void drawZones();
 	Color emptyZoneColor = Color(30, 30, 90, 128);
-	void entitiesDoGravitate(int firstZone, int lastZone, int threadN);
-	void entitiesDoRandom(int firstZone, int lastZone, int threadN);
-	void entitiesDoSpread(int firstZone, int lastZone, int threadN);
-	void entitiesDoFall(int firstZone, int lastZone, int threadN);
 	int maxLines = 200000;
 
 	bool colliding(Entity* entity, Vector2f position, Zone* zone);

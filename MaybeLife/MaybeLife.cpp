@@ -23,6 +23,7 @@ int main()
 	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(Vector2i(0, 0));
 	int numEntities = 500 * 1000, numZones = 1000 * 1000, numThreads = 8, entitySize = 1;
+	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
 	float boundarySize = 1;
 	int boundaryWidth = envSize.x * boundarySize, boundaryHeight = envSize.y * boundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
@@ -37,11 +38,12 @@ int main()
 			position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
 		entities->push_back(new Entity(
 			i,
+			defaultBehaviour,
 			position,
 			Vector2f(entitySize, entitySize),
 			Color(max(70, rand() % 255), max(70, rand() % 255), max(70, rand() % 255), 255)));
 	}
-	Environment environment(&window, envSize, numZones, numThreads, entities, Environment::Behaviour::SPREAD);
+	Environment environment(&window, envSize, numZones, numThreads, entities);
 	UI ui(&window, &environment);
 	int loopNr = 0;
 	Zone* zone = environment.zoneAt(Vector2f(0, 0));

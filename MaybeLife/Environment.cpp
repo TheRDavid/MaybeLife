@@ -3,7 +3,7 @@
 #include "Utilities.h"
 #include <time.h>
 #include <stdlib.h>
-Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, vector<Entity*>* entities, Environment::Behaviour behaviour)
+Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads, vector<Entity*>* entities)
 {
 	centerShape.setRadius(gravityShapeRadius);
 	centerShapeSize = Vector2f(gravityShapeRadius / 2, gravityShapeRadius / 2);
@@ -12,7 +12,6 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	centerShape.setOutlineThickness(2);
 	centerShape.setPosition(10, 10);
 	gravityCenter = Vector2f(size.x / 2, size.y / 2);
-	this->behaviour = behaviour;
 	this->entities = entities;
 	numThreads = threads;
 	steps = new int[max(threads, 1)];
@@ -46,6 +45,7 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	}
 
 	for (Entity* entity : (*entities)) {
+		entity->environment = this;
 		Zone* zone = zoneAt(entity->position);
 		entity->zone = zone;
 		zone->entities.push_back(entity);
@@ -166,22 +166,15 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 				}
 			}
 
-			steps[stepIdx] = steps[stepIdx] + 1;
-			switch (behaviour) {
-			case Behaviour::GRAVITATE:
-				entitiesDoGravitate(firstZone, lastZone, threadN);
-				break;
-			case Behaviour::RANDOM:
-				entitiesDoRandom(firstZone, lastZone, threadN);
-				break;
-			case Behaviour::SPREAD:
-				entitiesDoSpread(firstZone, lastZone, threadN);
-				break;
-			case Behaviour::FALL:
-				entitiesDoFall(firstZone, lastZone, threadN);
-				break;
-			default:break;
+			for (int i = firstZone; i < lastZone; i++)
+			{
+				Zone* uZone = zones[i];
+				for (Entity* entity : uZone->entities)
+				{
+					entity->update();
+				}
 			}
+			steps[stepIdx] = steps[stepIdx] + 1;
 			if (entityCollision) {
 				for (int i = firstZone; i < lastZone; i++)
 				{
@@ -211,143 +204,6 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 			}
 		}
 		if (threadN == -1) break;
-	}
-}
-
-float RandomNumber(float Min, float Max)
-{
-	return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
-}
-void Environment::entitiesDoRandom(int firstZone, int lastZone, int threadN)
-{
-	for (int i = firstZone; i < lastZone; i++)
-	{
-		Zone* uZone = zones[i];
-		for (Entity* entity : uZone->entities)
-		{
-			Vector2f dir = Vector2f(RandomNumber(-1, 1), RandomNumber(-1, 1));
-			Vector2f ePos = entity->position + dir;
-
-			if (legalPosition_strict(entity, ePos, uZone)) {
-				entity->position = ePos;
-			}
-		}
-	}
-}
-void Environment::entitiesDoFall(int firstZone, int lastZone, int threadN)
-{
-	for (int i = firstZone; i < lastZone; i++)
-	{
-		Zone* uZone = zones[i];
-		for (Entity* entity : uZone->entities)
-		{
-			Vector2f dir = Vector2f(0, entity->size.y);
-			Vector2f ePos = entity->position + dir;
-
-			if (legalPosition_strict(entity, ePos, uZone)) {
-				entity->position = ePos;
-			}
-			else {
-				srand(time(NULL));
-				int randDir = rand() == 1 ? 1 : -1;
-				dir = Vector2f(randDir * entity->majorSize*2, entity->size.y);
-				ePos = entity->position + dir;
-
-				if (legalPosition_strict(entity, ePos, uZone)) {
-					entity->position = ePos;
-				}
-				else {
-					dir = Vector2f(-randDir * entity->majorSize*2, entity->size.y);
-					ePos = entity->position + dir;
-
-					if (legalPosition_strict(entity, ePos, uZone)) {
-						entity->position = ePos;
-					}
-				}
-			}
-		}
-	}
-}
-void Environment::entitiesDoGravitate(int firstZone, int lastZone, int threadN)
-{
-	for (int i = firstZone; i < lastZone; i++)
-	{
-		Zone* uZone = zones[i];
-		for (Entity* entity : uZone->entities)
-		{
-			Vector2f dir = Vector2f(gravityCenter.x - entity->position.x, gravityCenter.y - entity->position.y);
-			if (dir.x != 0) dir.x = dir.x > 0 ? 1 : -1;
-			if (dir.y != 0) dir.y = dir.y > 0 ? 1 : -1;
-			Vector2f newPos = entity->position + dir;
-			if (legalPosition_strict(entity, newPos, uZone)) {
-				entity->position = newPos;
-			}
-		}
-	}
-}
-
-void Environment::entitiesDoSpread(int firstZone, int lastZone, int threadN)
-{
-	int lineIndex = 0;
-	for (int i = firstZone; i < lastZone; i++)
-	{
-		Zone* uZone = zones[i];
-		for (Entity* entity : uZone->entities)
-		{
-			float xDir = 0, yDir = 0;
-			Vector2f ePos = entity->position;
-			Vector2f newPos = ePos;
-			for (Zone* zone : uZone->neighbours) {
-				for (Entity* neighbour : zone->entities)
-				{
-					float xd = ePos.x - neighbour->position.x;
-					float yd = ePos.y - neighbour->position.y;
-					float dist = pow(xd, 2) + pow(yd, 2);
-					if (entity->id != neighbour->id) {
-						if (xd != 0)
-							xd = (xd > 0 ? 1000 : -1000) / dist;
-						if (yd != 0)
-							yd = (yd > 0 ? 1000 : -1000) / dist;
-						xDir += xd / dist;
-						yDir += yd / dist;
-						/*
-												float xdi = ePos.x - neighbour->position.x;	// 0.4
-												float ydi = ePos.y - neighbour->position.y; // -2.1
-
-												float axdi = fabs(xdi);						// 0.4
-												float aydi = fabs(ydi);						// 2.1
-
-												float xdiWeight = axdi / aydi;				// 0.19
-												float ydiWeight = aydi / axdi;				// 5.25
-
-												if (xdiWeight > ydiWeight) {
-													xdiWeight = 1;							// 0.19
-												}
-												else {
-													ydiWeight = 1;							// 1
-												}
-
-												float xdir = (xdi > 0 ? 1 : -1); // 0.190
-												float ydir = (ydi > 0 ? 1 : -1); // -1
-
-												xDir += xdi == 0 ? 0 : xdir;
-												yDir += ydi == 0 ? 0 : ydir;*/
-					}
-				}
-			}
-			if (xDir != 0) xDir = xDir > 0 ? 1 : -1;
-			if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
-			newPos = ePos + Vector2f(xDir, yDir);
-			if (legalPosition_strict(entity, newPos, uZone)) {
-				entity->position = newPos;
-			}
-			else {
-				newPos = ePos + Vector2f(0, yDir);
-				if (legalPosition_strict(entity, newPos, uZone)) {
-					entity->position = newPos;
-				}
-			}
-		}
 	}
 }
 
