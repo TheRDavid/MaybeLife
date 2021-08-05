@@ -4,7 +4,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <thread>
-#include "Entities.h"
 #include <mutex>
 using namespace std;
 #include "Zone.h"
@@ -25,8 +24,6 @@ public:
 	void draw();
 	vector<Entity*>* entities;
 	RenderWindow* window;
-	bool legalPosition(Vector2f position);
-	bool legalPosition_strict(Entity* entity, Vector2f position, Zone* zone);
 	VertexArray* rects = NULL;
 	VertexArray* connectionLines = NULL;
 	VertexArray* zoneLines = NULL;
@@ -42,15 +39,6 @@ public:
 	sf::RectangleShape processedZoneRect;
 	float gravityShapeRadius = 10;
 	Vector2f centerShapeSize;
-private:
-	int processedZone = 0;
-	void drawZones();
-	Color emptyZoneColor = Color(30, 30, 90, 128);
-	int maxLines = 200000;
-
-	bool colliding(Entity* entity, Vector2f position, Zone* zone);
-	bool colliding(Entity* entity, Zone* zone);
-
 	Vector2f left = Vector2f(-2, 0);
 	Vector2f upLeft = Vector2f(-2, -2);
 	Vector2f up = Vector2f(0, -2);
@@ -59,7 +47,15 @@ private:
 	Vector2f downRight = Vector2f(2, 2);
 	Vector2f down = Vector2f(0, 2);
 	Vector2f downLeft = Vector2f(-2, 2);
-	Vector2f gridDirections[8] = {left, upLeft, up, upRight, right, downRight, down, downLeft};
+	Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
+	bool legalPosition(Vector2f position);
+private:
+	int processedZone = 0;
+	void drawZones();
+	Color emptyZoneColor = Color(30, 30, 90, 128);
+	int maxLines = 2000000;
+
+
 };
 
 

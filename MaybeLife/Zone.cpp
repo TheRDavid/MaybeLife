@@ -4,7 +4,7 @@
 
 Zone::Zone(unsigned long long int id, Environment* environment, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
-	toRemove.reserve(500);
+	toRemove.reserve(25);
 	this-> id = id;
 	this->environment = environment;
 	this->xStart = xStart;

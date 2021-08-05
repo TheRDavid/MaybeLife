@@ -77,6 +77,11 @@ Zone* Environment::zoneAt(Vector2f position)
 	return zones[index];
 }
 
+bool Environment::legalPosition(Vector2f position)
+{
+	return 0 <= position.x && position.x <= size.x && 0 <= position.y && position.y <= size.y;
+}
+
 vector<Zone*> Environment::neighbours(Zone* zone)
 {
 	vector<Zone*> neighbours;
@@ -158,57 +163,9 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 			}
 
 			steps[stepIdx] = steps[stepIdx] + 1;
-			if (entityCollision) {
-				for (int i = firstZone; i < lastZone; i++)
-				{
-					Zone* zone = zones[i];
-					for (Entity* entity : zone->entities) {
-						srand(time(NULL));
-						if (colliding(entity, entity->position, zone)) {
-							bool foundDodge = false;
-							Vector2f dodgePosition;
-							int startDir = rand() % 8, dirCount = 0;
-							while (dirCount++ < 8) {
-								if (++startDir == 8) {
-									startDir = 0;
-								}
-								dodgePosition = Vector2f(gridDirections[startDir].x * entity->size.x, gridDirections[startDir].y * entity->size.y) + entity->position;
-								if (legalPosition_strict(entity, dodgePosition, zone)) {
-									foundDodge = true;
-									break;
-								}
-							}
-							if (foundDodge) {
-								entity->position = dodgePosition;
-							}
-						}
-					}
-				}
-			}
 		}
 		if (threadN == -1) break;
 	}
-}
-
-bool Environment::colliding(Entity* entity, Zone * zone)
-{
-	return colliding(entity, entity->position, zone);
-}
-
-bool Environment::colliding(Entity* entity, Vector2f position, Zone * zone)
-{
-	for (Zone* z : zone->neighbours) {
-		for (Entity* otherEntity : z->entities) {
-			if (entity->id != otherEntity->id
-				&& fabs(position.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-				&& fabs(position.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-				)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 void Environment::draw()
@@ -217,7 +174,7 @@ void Environment::draw()
 		rects = new VertexArray(sf::Quads, 4 * entities->size());
 	}
 
-	if (showZones)
+	if (true && showZones)
 		drawZones();
 
 	int lineIndex = 0;
@@ -271,19 +228,6 @@ void Environment::draw()
 	//connectionLines->clear();
 }
 
-bool Environment::legalPosition_strict(Entity* entity, Vector2f position, Zone* uZone)
-{
-	if (entityCollision && colliding(entity, position, uZone)) {
-		return false;
-	}
-	return 0 < position.x && position.x < size.x && 0 < position.y && position.y < size.y;
-}
-
-bool Environment::legalPosition(Vector2f position)
-{
-	return 0 <= position.x && position.x <= size.x && 0 <= position.y && position.y <= size.y;
-}
-
 void Environment::setMaximumNumberOfLines(int newMaxLines)
 {
 	maxLines = newMaxLines;
@@ -312,9 +256,9 @@ void Environment::drawZones()
 	Color lC = Color(150, 150, 150, 255);
 	for (int i = 0; i < numZones; i++)
 	{
-		Zone zone = *zones[i];
-		countText.setPosition(Vector2f(zone.xStart, zone.yStart));
-		countText.setString(to_string(zone.id) + ": #" + to_string(zone.entities.size()));
+		Zone* zone = zones[i];
+		countText.setPosition(Vector2f(zone->xStart, zone->yStart));
+		countText.setString(to_string(zone->id) + ": #" + to_string(zone->entities.size()));
 		window->draw(countText);
 	}
 	for (int i = 0; i < zoneRows; i++) {

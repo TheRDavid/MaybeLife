@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <time.h>
 #include <SFML/Graphics.hpp>
 using namespace std;
 using namespace sf;

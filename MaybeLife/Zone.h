@@ -7,7 +7,6 @@ class Entity;
 class Environment;
 class Zone {
 public:
-	Zone();
 	Zone(unsigned long long int id, Environment* environment, float xStart, float xEnd, float yStart, float yEnd, int capacity);
 	unsigned long long int id;
 	std::vector<Zone*> neighbours;

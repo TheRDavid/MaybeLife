@@ -15,6 +15,7 @@ using namespace sf;
 
 int main()
 {
+	srand(time(NULL));
 	float sceneZoom = 1;
 	std::cout << "MaybeLife starting up, oh boi!\n";
 	Vector2i envSize = Vector2i(7680, 4320);
@@ -22,14 +23,13 @@ int main()
 	View sceneView(FloatRect(0, 0, envSize.x, envSize.y));
 	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(Vector2i(0, 0));
-	int numEntities = 500 * 1000, numZones = 1000 * 1000, numThreads = 8, entitySize = 1;
+	int numEntities =  100 * 1000, numZones = 1000 * 1000 * 1, numThreads = 8, entitySize = 2;
 	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
-	float boundarySize = 1;
+	float boundarySize = .4;
 	int boundaryWidth = envSize.x * boundarySize, boundaryHeight = envSize.y * boundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
 	vector<Entity*>* entities = new vector<Entity*>();
 	entities->reserve(numEntities);
-	srand(time(NULL));
 	Environment environment(&window, envSize, numZones, numThreads);
 	for (int i = 0; i < numEntities; i++) {
 		Vector2f position;
@@ -42,7 +42,8 @@ int main()
 			defaultBehaviour,
 			position,
 			Vector2f(entitySize, entitySize),
-			Color(max(70, rand() % 255), max(70, rand() % 255), max(70, rand() % 255), 255)));
+			true,
+			Color::White));
 	}
 	UI ui(&window, &environment);
 	int loopNr = 0;
