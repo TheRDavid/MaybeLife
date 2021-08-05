@@ -58,7 +58,6 @@ void Entity::update()
 void Entity::updateCollision()
 {
 	if (colliding(this, position, zone)) {
-		color = Color::Red;
 		bool foundDodge = false;
 		Vector2f dodgePosition;
 		int startDir = ut::randomNumber(0,8), dirCount = 0;
@@ -76,7 +75,6 @@ void Entity::updateCollision()
 		}
 		if (foundDodge) {
 			position = dodgePosition;
-			color = Color::White;
 		}
 	}
 }

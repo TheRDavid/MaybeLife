@@ -23,25 +23,24 @@ int main()
 	View sceneView(FloatRect(0, 0, envSize.x, envSize.y));
 	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(Vector2i(0, 0));
-	int numEntities =  100 * 1000, numZones = 1000 * 1000 * 1, numThreads = 8, entitySize = 2;
-	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
-	float boundarySize = .4;
-	int boundaryWidth = envSize.x * boundarySize, boundaryHeight = envSize.y * boundarySize;
+	int numEntities = 50 * 1000, numZones = 1000 * 1000, numThreads = 8;
+	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SLEEP;
+	float xBoundarySize = .01, yBoundarySize = .85;
+	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
 	vector<Entity*>* entities = new vector<Entity*>();
 	entities->reserve(numEntities);
 	Environment environment(&window, envSize, numZones, numThreads);
 	for (int i = 0; i < numEntities; i++) {
+		float s = 1 + rand() % 5;
+		Vector2f entitySize = Vector2f(s, s);
 		Vector2f position;
-		if (boundarySize >= 1)
-			position = Vector2f(rand() % envSize.x, rand() % envSize.y);
-		else
-			position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
+		position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
 		entities->push_back(new Entity(
 			i, &environment,
 			defaultBehaviour,
 			position,
-			Vector2f(entitySize, entitySize),
+			entitySize,
 			true,
 			Color::White));
 	}
