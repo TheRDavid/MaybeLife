@@ -15,23 +15,31 @@ InputManager::InputManager(Environment* environment)
 
 void InputManager::setBehaviour(string behaviour)
 {
+	Entity::Behaviour newBehaviour;
 	if (behaviour == "gravitate") {
-		environment->behaviour = Environment::Behaviour::GRAVITATE;
+		newBehaviour = Entity::Behaviour::GRAVITATE;
 	}
 	else if (behaviour == "random") {
-		environment->behaviour = Environment::Behaviour::RANDOM;
+		newBehaviour = Entity::Behaviour::RANDOM;
 	}
 	else if (behaviour == "sleep") {
-		environment->behaviour = Environment::Behaviour::SLEEP;
+		newBehaviour = Entity::Behaviour::SLEEP;
 	}
 	else if (behaviour == "spread") {
-		environment->behaviour = Environment::Behaviour::SPREAD;
+		newBehaviour = Entity::Behaviour::SPREAD;
 	}
 	else if (behaviour == "fall") {
-		environment->behaviour = Environment::Behaviour::FALL;
+		newBehaviour = Entity::Behaviour::FALL;
+	}
+	else if (behaviour == "group") {
+		newBehaviour = Entity::Behaviour::GROUP;
 	}
 	else {
 		cout << "ERROR: Invalid Behaviour" << endl;
+		newBehaviour = Entity::Behaviour::RANDOM;
+	}
+	for (Entity* entity : *(environment->entities)) {
+		entity->behaviour = newBehaviour;
 	}
 }
 

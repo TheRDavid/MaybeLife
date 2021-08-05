@@ -163,7 +163,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Entities.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Environment.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -173,7 +172,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AppConfig.h" />
-    <ClInclude Include="Entities.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="Environment.h" />
     <ClInclude Include="InputMacros.h" />
