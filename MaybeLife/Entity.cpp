@@ -128,8 +128,8 @@ void Entity::actSpread()
 	float xDir = 0, yDir = 0;
 	Vector2f ePos = position;
 	Vector2f newPos = ePos;
-	for (Zone* zone : zone->neighbours) {
-		for (Entity* neighbour : zone->entities)
+	for (Zone* zonen : zone->neighbours) {
+		for (Entity* neighbour : zonen->entities)
 		{
 			float xd = ePos.x - neighbour->position.x;
 			float yd = ePos.y - neighbour->position.y;
