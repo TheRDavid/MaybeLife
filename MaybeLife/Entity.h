@@ -42,7 +42,7 @@ private:
 
 	static int ID()
 	{
-		int ID = 0;
+		static int ID = 0;
 		return ID++;
 	}
 };
