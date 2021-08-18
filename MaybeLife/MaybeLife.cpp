@@ -32,7 +32,7 @@ int main()
 	entities->reserve(numEntities);
 	Environment environment(&window, envSize, numZones, numThreads);
 	for (int i = 0; i < numEntities; i++) {
-		float s = 1;
+		float s = 1 + rand() % 5;
 		Vector2f entitySize = Vector2f(s, s);
 		Vector2f position;
 		position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
@@ -100,7 +100,7 @@ int main()
 					Vector2f worldPos = window.mapPixelToCoords(pixelPos);
 					Entity* entity = new Entity(&environment, defaultBehaviour, worldPos);
 					environment.insertLock.lock();
-					environment.zoneAt(worldPos)->entities.insert(std::pair<unsigned long long int, Entity*>(entity->id, entity));
+					environment.zoneAt(worldPos)->entities.push_back(entity);
 					environment.insertLock.unlock();
 				}
 			}

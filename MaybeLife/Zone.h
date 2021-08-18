@@ -11,7 +11,7 @@ public:
 	unsigned long long int id;
 	std::vector<Zone*> neighbours;
 	float xStart, xEnd, yStart, yEnd, xMid, yMid;
-	map<unsigned long long int, Entity*> entities;
+	vector<Entity*> entities;
 	Environment* environment;
 	void update();
 	bool legalPosition(Vector2f position);

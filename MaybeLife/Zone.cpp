@@ -1,6 +1,7 @@
 #include "Zone.h"
 #include "Environment.h"
 #include "Entity.h"
+#include <algorithm>
 
 Zone::Zone(unsigned long long int id, Environment* environment, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
@@ -18,8 +19,7 @@ Zone::Zone(unsigned long long int id, Environment* environment, float xStart, fl
 void Zone::update()
 {
 	toRemove.clear();
-	for (auto kvp : entities) {
-		Entity* entity = kvp.second;
+	for (Entity* entity : entities) {
 		if (!legalPosition(entity->position)) {
 			toRemove.push_back(entity);
 			Zone* newZone = environment->zoneAt(entity->position);
@@ -27,13 +27,13 @@ void Zone::update()
 				cout << "Illegal Entity: " << entity->to_string() << endl;
 			}
 			else {
-				newZone->entities.insert(std::pair<unsigned long long, Entity*>(entity->id,entity));
+				newZone->entities.push_back(entity);
 				entity->zone = newZone;
 			}
 		}
 	}
 	for (auto &entity : toRemove) {
-		entities.erase(entity->id);
+		entities.erase(std::remove(entities.begin(), entities.end(), entity), entities.end());
 	}
 }
 
