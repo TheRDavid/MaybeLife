@@ -4,9 +4,8 @@
 #include "Environment.h"
 static unsigned long long int nextId = 0;
 
-Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color)
+Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color)
 {
-	this->id = id;
 	this->environment = environment;
 	this->position = position;
 	this->size = size;
@@ -16,19 +15,19 @@ Entity::Entity(unsigned long long int id, Environment* environment, Behaviour be
 	majorSize = max(size.x, size.y);
 
 }
-Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide) : Entity(id, environment, behaviour, position, size, collide, Color::White)
+Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide) : Entity(environment, behaviour, position, size, collide, Color::White)
 {
 }
-Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size) : Entity(id, environment, behaviour, position, size, true)
+Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size) : Entity(environment, behaviour, position, size, true)
 {
 }
-Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position) : Entity(id, environment, behaviour, Vector2f(0, 0), Vector2f(1, 1))
+Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position) : Entity(environment, behaviour, Vector2f(0, 0), Vector2f(1, 1))
 {
 }
-Entity::Entity(unsigned long long int id, Environment* environment, Behaviour behaviour) : Entity(id, environment, behaviour, Vector2f(0,0))
+Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, Vector2f(0,0))
 {
 }
-Entity::Entity(unsigned long long int id, Environment* environment) : Entity(id, environment, RANDOM)
+Entity::Entity(Environment* environment) : Entity(environment, RANDOM)
 {
 }
 void Entity::update()
@@ -130,8 +129,9 @@ void Entity::actSpread()
 	Vector2f ePos = position;
 	Vector2f newPos = ePos;
 	for (Zone* zone : zone->neighbours) {
-		for (Entity* neighbour : zone->entities)
+		for (auto kvp : zone->entities)
 		{
+			Entity* neighbour = kvp.second;
 			float xd = ePos.x - neighbour->position.x;
 			float yd = ePos.y - neighbour->position.y;
 			float dist = pow(xd, 2) + pow(yd, 2);
@@ -150,18 +150,11 @@ void Entity::actSpread()
 	newPos = ePos + Vector2f(xDir, yDir);
 	if (legalPosition_strict(this, newPos, zone)) {
 		position = newPos;
-
-		color = Color::Yellow;
 	}
 	else {
 		newPos = ePos + Vector2f(0, yDir);
 		if (legalPosition_strict(this, newPos, zone)) {
 			position = newPos;
-
-			color = Color::Blue;
-		}
-		else {
-			color = Color::Cyan;
 		}
 	}
 }
@@ -172,8 +165,9 @@ void Entity::actGroup()
 	Vector2f ePos = position;
 	Vector2f newPos = ePos;
 	for (Zone* zone : zone->neighbours) {
-		for (Entity* neighbour : zone->entities)
+		for (auto kvp : zone->entities)
 		{
+			Entity* neighbour = kvp.second;
 			float xd = -ePos.x + neighbour->position.x;
 			float yd = -ePos.y + neighbour->position.y;
 			float dist = pow(xd, 2) + pow(yd, 2);
@@ -192,18 +186,11 @@ void Entity::actGroup()
 	newPos = ePos + Vector2f(xDir, yDir);
 	if (legalPosition_strict(this, newPos, zone)) {
 		position = newPos;
-
-		color = Color::Yellow;
 	}
 	else {
 		newPos = ePos + Vector2f(0, yDir);
 		if (legalPosition_strict(this, newPos, zone)) {
 			position = newPos;
-
-			color = Color::Blue;
-		}
-		else {
-			color = Color::Cyan;
 		}
 	}
 }
@@ -233,136 +220,24 @@ bool Entity::colliding(Entity* entity, Zone * zone)
 bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
 {
 	for (Zone* z : zone->neighbours) {
-		for (Entity* otherEntity : z->entities) {
+		for (auto kvp : z->entities)
+		{
+			Entity* otherEntity = kvp.second;
 			if (entity->id != otherEntity->id
 				&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
 				&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
 				)
 			{
+				color = Color::Red;
 				//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
 				return true;
 			}
 		}
 	}
+	color = Color::White;
 	return false;
 }
 
-/*
-bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
-{
-		for (Entity* otherEntity : zone->entities) {
-			if (entity->id != otherEntity->id
-				&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-				&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-				)
-			{
-				//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-				return true;
-			}
-		}
-		bool leftSide = pos.x - zone->xStart < size.x;
-		bool topSide = pos.y - zone->yStart < size.y;
-		bool downSide = zone->yEnd - pos.y < size.y;
-		bool rightSide = zone->xEnd - pos.x < size.x;
-
-		if (leftSide) {
-			for (Entity* otherEntity : zone->neighbours[1]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (topSide) {
-			for (Entity* otherEntity : zone->neighbours[2]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (downSide) {
-			for (Entity* otherEntity : zone->neighbours[3]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (rightSide) {
-			for (Entity* otherEntity : zone->neighbours[4]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (downSide && rightSide) {
-			for (Entity* otherEntity : zone->neighbours[5]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (topSide && leftSide) {
-			for (Entity* otherEntity : zone->neighbours[6]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (topSide && rightSide) {
-			for (Entity* otherEntity : zone->neighbours[7]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-		if (downSide && leftSide) {
-			for (Entity* otherEntity : zone->neighbours[8]->entities) {
-				if (entity->id != otherEntity->id
-					&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-					&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
-					)
-				{
-					//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
-					return true;
-				}
-			}
-		}
-	return false;
-}*/
 
 bool Entity::legalPosition_strict(Entity* entity, Vector2f checkPosition, Zone* uZone)
 {

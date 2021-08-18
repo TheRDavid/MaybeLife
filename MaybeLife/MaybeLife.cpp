@@ -23,21 +23,20 @@ int main()
 	View sceneView(FloatRect(0, 0, envSize.x, envSize.y));
 	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(Vector2i(0, 0));
-	int numEntities = 50 * 1000, numZones = 1000 * 1000, numThreads = 8;
-	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SLEEP;
-	float xBoundarySize = .01, yBoundarySize = .85;
+	int numEntities = 1000 * 1000, numZones = 1000 * 1000, numThreads = 8;
+	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
+	float xBoundarySize = .85, yBoundarySize = .85;
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
 	vector<Entity*>* entities = new vector<Entity*>();
 	entities->reserve(numEntities);
 	Environment environment(&window, envSize, numZones, numThreads);
 	for (int i = 0; i < numEntities; i++) {
-		float s = 1 + rand() % 5;
+		float s = 1;
 		Vector2f entitySize = Vector2f(s, s);
 		Vector2f position;
 		position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
-		entities->push_back(new Entity(
-			i, &environment,
+		entities->push_back(new Entity(&environment,
 			defaultBehaviour,
 			position,
 			entitySize,
@@ -91,10 +90,19 @@ int main()
 
 			}
 			else if (event.type == sf::Event::MouseButtonPressed) {
-				sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-				startDragPos = window.mapPixelToCoords(pixelPos);
-				dragging = true;
-
+				if (event.mouseButton.button == sf::Mouse::Button::Right) {
+					sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+					startDragPos = window.mapPixelToCoords(pixelPos);
+					dragging = true;
+				}
+				else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
+					sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
+					Vector2f worldPos = window.mapPixelToCoords(pixelPos);
+					Entity* entity = new Entity(&environment, defaultBehaviour, worldPos);
+					environment.insertLock.lock();
+					environment.zoneAt(worldPos)->entities.insert(std::pair<unsigned long long int, Entity*>(entity->id, entity));
+					environment.insertLock.unlock();
+				}
 			}
 			else if (event.type == sf::Event::MouseButtonReleased) {
 				dragging = false;

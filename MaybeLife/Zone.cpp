@@ -13,13 +13,13 @@ Zone::Zone(unsigned long long int id, Environment* environment, float xStart, fl
 	this->yEnd = yEnd;
 	xMid = xStart + (xEnd - xStart) / 2;
 	yMid = yStart + (yEnd - yStart) / 2;
-	entities.reserve(capacity);
 }
 
 void Zone::update()
 {
 	toRemove.clear();
-	for (Entity* entity : entities) {
+	for (auto kvp : entities) {
+		Entity* entity = kvp.second;
 		if (!legalPosition(entity->position)) {
 			toRemove.push_back(entity);
 			Zone* newZone = environment->zoneAt(entity->position);
@@ -27,13 +27,13 @@ void Zone::update()
 				cout << "Illegal Entity: " << entity->to_string() << endl;
 			}
 			else {
-				newZone->entities.push_back(entity);
+				newZone->entities.insert(std::pair<unsigned long long, Entity*>(entity->id,entity));
 				entity->zone = newZone;
 			}
 		}
 	}
 	for (auto &entity : toRemove) {
-		entities.erase(find(entities.begin(), entities.end(), entity));
+		entities.erase(entity->id);
 	}
 }
 

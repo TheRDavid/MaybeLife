@@ -51,7 +51,7 @@ void Environment::start(vector<Entity*>* entities) {
 		entity->environment = this;
 		Zone* zone = zoneAt(entity->position);
 		entity->zone = zone;
-		zone->entities.push_back(entity);
+		zone->entities.insert(std::pair<unsigned long long int, Entity*>(entity->id, entity));
 	}
 
 	for (int i = 0; i < numThreads; i++) {
@@ -156,8 +156,9 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 			for (int i = firstZone; i < lastZone; i++)
 			{
 				Zone* uZone = zones[i];
-				for (Entity* entity : uZone->entities)
+				for (auto kvp : uZone->entities)
 				{
+					Entity* entity = kvp.second;
 					entity->update();
 				}
 			}
@@ -182,11 +183,13 @@ void Environment::draw()
 		for (int i = 0; i < numZones; i++)
 		{
 			Zone* uZone = zones[i];
-			for (Entity* entity : uZone->entities)
+			for (auto kvp : uZone->entities)
 			{
+				Entity* entity = kvp.second;
 				for (Zone* zone : uZone->neighbours) {
-					for (Entity* neighbour : zone->entities)
+					for (auto kvp : zone->entities)
 					{
+						Entity* neighbour = kvp.second;
 						if (lineIndex < (maxLines)) {
 							(*connectionLines)[lineIndex].color = entity->color;
 							(*connectionLines)[lineIndex++].position = entity->position;

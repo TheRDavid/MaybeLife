@@ -17,15 +17,15 @@ public:
 	float majorSize;
 	bool collide;
 
-	unsigned long long int id;
+	unsigned long long int id = ID();
 	Color color = Color::White;
 	Zone* zone;
-	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color);
-	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide);
-	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size);
-	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour, Vector2f position);
-	Entity(unsigned long long int id, Environment* environment, Behaviour behaviour);
-	Entity(unsigned long long int id, Environment* environment);
+	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color);
+	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide);
+	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size);
+	Entity(Environment* environment, Behaviour behaviour, Vector2f position);
+	Entity(Environment* environment, Behaviour behaviour);
+	Entity(Environment* environment);
 	void update();
 	void updateCollision();
 	void actFall();
@@ -38,5 +38,12 @@ public:
 	bool colliding(Entity* entity, Zone* zone);
 	std::string to_string();
 	std::string to_bounds_string();
+private:
+
+	static unsigned long long int ID()
+	{
+		static unsigned long long int ID = 0;
+		return ID++;
+	}
 };
 

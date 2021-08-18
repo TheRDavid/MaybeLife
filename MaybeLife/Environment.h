@@ -49,6 +49,7 @@ public:
 	Vector2f downLeft = Vector2f(-2, 2);
 	Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
 	bool legalPosition(Vector2f position);
+	std::mutex insertLock;
 private:
 	int processedZone = 0;
 	void drawZones();

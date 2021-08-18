@@ -1,5 +1,5 @@
 #pragma once
-#include <unordered_map>
+#include <map>
 #include <SFML/Graphics.hpp>
 using namespace sf;
 using namespace std;
@@ -11,7 +11,7 @@ public:
 	unsigned long long int id;
 	std::vector<Zone*> neighbours;
 	float xStart, xEnd, yStart, yEnd, xMid, yMid;
-	vector<Entity*> entities;
+	map<unsigned long long int, Entity*> entities;
 	Environment* environment;
 	void update();
 	bool legalPosition(Vector2f position);
