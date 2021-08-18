@@ -129,9 +129,8 @@ void Entity::actSpread()
 	Vector2f ePos = position;
 	Vector2f newPos = ePos;
 	for (Zone* zone : zone->neighbours) {
-		for (auto kvp : zone->entities)
+		for (Entity* neighbour : zone->entities)
 		{
-			Entity* neighbour = kvp.second;
 			float xd = ePos.x - neighbour->position.x;
 			float yd = ePos.y - neighbour->position.y;
 			float dist = pow(xd, 2) + pow(yd, 2);
@@ -165,9 +164,8 @@ void Entity::actGroup()
 	Vector2f ePos = position;
 	Vector2f newPos = ePos;
 	for (Zone* zone : zone->neighbours) {
-		for (auto kvp : zone->entities)
+		for (Entity* neighbour : zone->entities)
 		{
-			Entity* neighbour = kvp.second;
 			float xd = -ePos.x + neighbour->position.x;
 			float yd = -ePos.y + neighbour->position.y;
 			float dist = pow(xd, 2) + pow(yd, 2);
@@ -220,21 +218,20 @@ bool Entity::colliding(Entity* entity, Zone * zone)
 bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
 {
 	for (Zone* z : zone->neighbours) {
-		for (auto kvp : z->entities)
+		for (Entity* otherEntity : z->entities)
 		{
-			Entity* otherEntity = kvp.second;
 			if (entity->id != otherEntity->id
-				&& fabs(pos.x - otherEntity->position.x) < (entity->size.x + otherEntity->size.x)
-				&& fabs(pos.y - otherEntity->position.y) < (entity->size.y + otherEntity->size.y)
+				&& fabs(pos.x - otherEntity->position.x) < (entity->size.x/2 + otherEntity->size.x / 2)
+				&& fabs(pos.y - otherEntity->position.y) < (entity->size.y / 2 + otherEntity->size.y / 2)
 				)
 			{
-				color = Color::Red;
+				//color = Color::Red;
 				//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
 				return true;
 			}
 		}
 	}
-	color = Color::White;
+	//color = Color::White;
 	return false;
 }
 
