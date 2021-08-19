@@ -92,7 +92,7 @@ void InputManager::handleEvents()
 				sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
 				endDragPos = worldPos;
 				Vector2f delta = Vector2f((startDragPos.x - endDragPos.x) * currentZoom, (startDragPos.y - endDragPos.y) * currentZoom);
-				cout << "In drag, delta = " << ut::to_string(delta) << endl;
+				cout << "In drag, delta = " << ut::to_string(delta) << " at zoom " << currentZoom << endl;
 				sceneView->move(delta);
 				startDragPos = endDragPos;
 				cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << endl;
@@ -111,23 +111,27 @@ void InputManager::handleEvents()
 				dragging = true;
 			}
 			else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
-				window->setView(*sceneView);
-				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
-				Vector2f worldPos = window->mapPixelToCoords(pixelPos);
-				Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, worldPos);
-				Zone* zone = environment->zoneAt(worldPos);
-				zone->addEntity(entity);
-				cout << "Adding entity" << endl << entity->to_string() << endl << "to zone" << endl << zone->toString() << endl;
-				environment->insertLock.lock();
-				environment->entities->push_back(entity);
-				environment->insertLock.unlock();
+				if (zone != nullptr) {
+					window->setView(*sceneView);
+					sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+					Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+					Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, worldPos);
+					Zone* zone = environment->zoneAt(worldPos);
+					zone->addEntity(entity);
+					cout << "Adding entity" << endl << entity->to_string() << endl << "to zone" << endl << zone->toString() << endl;
+					environment->insertLock.lock();
+					environment->entities->push_back(entity);
+					environment->insertLock.unlock();
+				}
 			}
 			else if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				window->setView(*sceneView);
 				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
 				Vector2f worldPos = window->mapPixelToCoords(pixelPos);
 				environment->selectedZone = environment->zoneAt(worldPos);
-				cout << "Setting Selected Zone: " << endl << environment->selectedZone->toString() << endl;
+				if (environment->selectedZone != nullptr) {
+					cout << "Setting Selected Zone: " << endl << environment->selectedZone->toString() << endl;
+				}
 			}
 		}
 		if (event.type == sf::Event::MouseButtonReleased) {
@@ -162,15 +166,15 @@ void InputManager::handleKeyboardCommands(sf::Event event)
 	if (event.type == sf::Event::KeyPressed) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
 			sceneView->zoom(0.9);
-			currentZoom *= 0.9;
 			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
 			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			currentZoom = (sceneView->getSize().x / uiView->getSize().x + sceneView->getSize().y / uiView->getSize().y) / 2;
 		}
 		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
 			sceneView->zoom(1.1);
-			currentZoom *= 1.1;
 			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
 			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			currentZoom = (sceneView->getSize().x / uiView->getSize().x + sceneView->getSize().y / uiView->getSize().y) / 2;
 		}
 	}
 }

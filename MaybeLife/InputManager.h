@@ -9,7 +9,7 @@ public:
 	Environment* environment;
 	RenderWindow* window;
 	sf::View* sceneView, *uiView;
-	int currentZoom = 4;
+	float currentZoom = 4;
 
 	enum BaseCommand {
 		set_behaviour, // random, spread
