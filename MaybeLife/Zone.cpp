@@ -1,7 +1,10 @@
 #include "Zone.h"
+
+#include <algorithm>
+#include <iostream>
+
 #include "Environment.h"
 #include "Entity.h"
-#include <algorithm>
 
 Zone::Zone(unsigned long long int id, Environment* environment, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
@@ -31,7 +34,7 @@ void Zone::update()
 			toRemove.push_back(entity);
 			Zone* newZone = environment->zoneAt(entity->position);
 			if (newZone == nullptr) {
-				cout << "Illegal Entity: " << entity->to_string() << endl;
+				std::cout << "Illegal Entity: " << entity->to_string() << std::endl;
 			}
 			else {
 				newZone->entities.push_back(entity);
@@ -44,7 +47,7 @@ void Zone::update()
 	}
 }
 
-bool Zone::legalPosition(Vector2f position)
+bool Zone::legalPosition(sf::Vector2f position)
 {
 	return xStart <= position.x && position.x <= xEnd && yStart <= position.y && position.y <= yEnd;
 }

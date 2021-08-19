@@ -1,24 +1,27 @@
 #include "InputManager.h"
-#include "InputMacros.h"
+
 #include <iostream>
 #include <string>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
 #include <thread>
-#include "Utilities.h"
 
-InputManager::InputManager(Environment* environment, RenderWindow* window, sf::View* sceneView, sf::View* uiView)
+#include "Environment.h"
+#include "Utilities.h"
+#include "InputMacros.h"
+
+InputManager::InputManager(Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* uiView)
 {
 	this->environment = environment;
 	this->window = window;
-	new thread(&InputManager::catchInput, this);
+	new std::thread(&InputManager::catchInput, this);
 	this->sceneView = sceneView;
 	this->uiView = uiView;
-	zone = environment->zoneAt(Vector2f(0, 0));
+	zone = environment->zoneAt(sf::Vector2f(0, 0));
 }
 
-void InputManager::setBehaviour(string behaviour)
+void InputManager::setBehaviour(std::string behaviour)
 {
 	Entity::Behaviour newBehaviour;
 	if (behaviour == "gravitate") {
@@ -40,7 +43,7 @@ void InputManager::setBehaviour(string behaviour)
 		newBehaviour = Entity::Behaviour::GROUP;
 	}
 	else {
-		cout << "ERROR: Invalid Behaviour" << endl;
+		std::cout << "ERROR: Invalid Behaviour" << std::endl;
 		newBehaviour = Entity::Behaviour::RANDOM;
 	}
 	for (Entity* entity : *(environment->entities)) {
@@ -48,25 +51,24 @@ void InputManager::setBehaviour(string behaviour)
 	}
 }
 
-void InputManager::setGravityCenter(string x, string y)
+void InputManager::setGravityCenter(std::string x, std::string y)
 {
-	string errorMsg = "ERROR: Invalid Gravity Center";
+	std::string errorMsg = "ERROR: Invalid Gravity Center";
 	try {
-		int centerX = stoi(x);
-		int centerY = stoi(y);
-
-		environment->gravityCenter = Vector2f(centerX, centerY);
+		int centerX = std::stoi(x);
+		int centerY = std::stoi(y);
+		environment->gravityCenter = sf::Vector2f(centerX, centerY);
 		return;
 	}
 	catch (const std::invalid_argument&) {
-		cout << errorMsg << endl;
+		std::cout << errorMsg << std::endl;
 	}
-	cout << errorMsg << endl;
+	std::cout << errorMsg << std::endl;
 }
 
 void InputManager::handleEvents()
 {
-	string titleString = environment->stepsToString();
+	std::string titleString = environment->stepsToString();
 	sf::Event event;
 	if (window->pollEvent(event))
 	{
@@ -91,13 +93,13 @@ void InputManager::handleEvents()
 				// BROKEN ONCE SOOMED IN?!?!?!
 				sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
 				endDragPos = worldPos;
-				Vector2f delta = Vector2f((startDragPos.x - endDragPos.x) * currentZoom, (startDragPos.y - endDragPos.y) * currentZoom);
-				cout << "In drag, delta = " << ut::to_string(delta) << " at zoom " << currentZoom << endl;
+				sf::Vector2f delta = sf::Vector2f((startDragPos.x - endDragPos.x) * currentZoom, (startDragPos.y - endDragPos.y) * currentZoom);
+				std::cout << "In drag, delta = " << ut::to_string(delta) << " at zoom " << currentZoom << std::endl;
 				sceneView->move(delta);
 				startDragPos = endDragPos;
-				cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << endl;
-				environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
-				environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+				std::cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << std::endl;
+				environment->renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+				environment->renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
 			}
 
 		}
@@ -107,18 +109,18 @@ void InputManager::handleEvents()
 				window->setView(*uiView);
 				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
 				startDragPos = window->mapPixelToCoords(pixelPos);
-				cout << "Mouse down at: " << ut::to_string(startDragPos) << endl;
+				std::cout << "Mouse down at: " << ut::to_string(startDragPos) << std::endl;
 				dragging = true;
 			}
 			else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
 				if (zone != nullptr) {
 					window->setView(*sceneView);
 					sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
-					Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+					sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
 					Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, worldPos);
 					Zone* zone = environment->zoneAt(worldPos);
 					zone->addEntity(entity);
-					cout << "Adding entity" << endl << entity->to_string() << endl << "to zone" << endl << zone->toString() << endl;
+					std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->toString() << std::endl;
 					environment->insertLock.lock();
 					environment->entities->push_back(entity);
 					environment->insertLock.unlock();
@@ -127,10 +129,10 @@ void InputManager::handleEvents()
 			else if (event.mouseButton.button == sf::Mouse::Button::Left) {
 				window->setView(*sceneView);
 				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
-				Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+				sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
 				environment->selectedZone = environment->zoneAt(worldPos);
 				if (environment->selectedZone != nullptr) {
-					cout << "Setting Selected Zone: " << endl << environment->selectedZone->toString() << endl;
+					std::cout << "Setting Selected Zone: " << std::endl << environment->selectedZone->toString() << std::endl;
 				}
 			}
 		}
@@ -138,7 +140,7 @@ void InputManager::handleEvents()
 			dragging = false;
 
 		}
-		cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << endl;
+		std::cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << std::endl;
 	}
 	if (zone == nullptr) {
 		titleString += " Outside World";
@@ -151,12 +153,12 @@ void InputManager::handleEvents()
 void InputManager::catchInput()
 {
 	while (true) {
-		cout << ":";
-		string cmd;
-		getline(cin, cmd);
-		istringstream iss(cmd);
-		vector<string> tokens{ istream_iterator<string>{iss},
-					  istream_iterator<string>{} };
+		std::cout << ":";
+		std::string cmd;
+		std::getline(std::cin, cmd);
+		std::istringstream iss(cmd);
+		std::vector<std::string> tokens{ std::istream_iterator<std::string>{iss},
+					  std::istream_iterator<std::string>{} };
 		execute(tokens);
 	}
 }
@@ -166,29 +168,29 @@ void InputManager::handleKeyboardCommands(sf::Event event)
 	if (event.type == sf::Event::KeyPressed) {
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
 			sceneView->zoom(0.9);
-			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
-			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			environment->renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+			environment->renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
 			currentZoom = (sceneView->getSize().x / uiView->getSize().x + sceneView->getSize().y / uiView->getSize().y) / 2;
 		}
 		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
 			sceneView->zoom(1.1);
-			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
-			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			environment->renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+			environment->renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
 			currentZoom = (sceneView->getSize().x / uiView->getSize().x + sceneView->getSize().y / uiView->getSize().y) / 2;
 		}
 	}
 }
 
-void InputManager::execute(vector<string> tokens)
+void InputManager::execute(std::vector<std::string> tokens)
 {
 	if (tokens.size() == 0) return;
-	string command = tokens[0];
+	std::string command = tokens[0];
 	switch (resolveCommand(command)) {
 
 	case set_behaviour:
 		if (tokens.size() != 2)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		setBehaviour(tokens[1]); break;
@@ -196,7 +198,7 @@ void InputManager::execute(vector<string> tokens)
 	case set_collide:
 		if (tokens.size() != 2)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		environment->entityCollision = tokens[1] == "true"; break;
@@ -204,7 +206,7 @@ void InputManager::execute(vector<string> tokens)
 	case show_zones:
 		if (tokens.size() != 2)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		environment->showZones = tokens[1] == "true"; break;
@@ -212,7 +214,7 @@ void InputManager::execute(vector<string> tokens)
 	case show_ui:
 		if (tokens.size() != 2)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		environment->showUI = tokens[1] == "true"; break;
@@ -220,7 +222,7 @@ void InputManager::execute(vector<string> tokens)
 	case show_lines:
 		if (tokens.size() != 2)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		environment->showLines = tokens[1] == "true"; break;
@@ -228,12 +230,12 @@ void InputManager::execute(vector<string> tokens)
 	case set_gravity_center:
 		if (tokens.size() != 3)
 		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
+			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
 		setGravityCenter(tokens[1], tokens[2]); break;
 
 	default:
-		cout << "ERROR: Invalid Command" << endl;
+		std::cout << "ERROR: Invalid Command" << std::endl;
 	}
 }

@@ -1,13 +1,12 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "Environment.h"
-using namespace std;
+class Environment;
 class InputManager
 {
 public:
-	InputManager(Environment* environment, RenderWindow* window, sf::View* sceneView, sf::View* uiView);
+	InputManager(Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* uiView);
 	Environment* environment;
-	RenderWindow* window;
+	sf::RenderWindow* window;
 	sf::View* sceneView, *uiView;
 	float currentZoom = 4;
 
@@ -23,16 +22,16 @@ public:
 		invalid
 	};
 
-	void setBehaviour(string behaviour);
-	void setGravityCenter(string x, string y);
+	void setBehaviour(std::string behaviour);
+	void setGravityCenter(std::string x, std::string y);
 
 	void handleEvents();
 private:
-	Vector2f startDragPos, endDragPos;
+	sf::Vector2f startDragPos, endDragPos;
 	bool dragging = false;
 	void catchInput();
 	void handleKeyboardCommands(sf::Event event);
-	void execute(vector<string> tokens);
+	void execute(std::vector<std::string> tokens);
 	Zone* zone;
 
 	BaseCommand resolveCommand(std::string input) {
