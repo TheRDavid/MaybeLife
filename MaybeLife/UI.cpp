@@ -1,5 +1,6 @@
 #include "UI.h"
 
+#include "Grid.h"
 #include "AppConfig.h"
 
 UI::UI(sf::RenderWindow* renderWindow, Environment* environment, sf::View* uiView)
@@ -44,7 +45,7 @@ void UI::refresh()
 	fpsString.erase(fpsString.find_last_not_of('0') + 1, std::string::npos);
 	utString.erase(utString.find_last_not_of('0') + 1, std::string::npos);
 	if (true || AppConfig::getInstance().showFPS) {
-		fpsText.setString(std::to_string(environment->entities->size()) + " entities\n" + std::to_string(environment->numZones) + " zones\n" + std::to_string(environment->numThreads) + " threads\nFPS: " + fpsString + "\nUPS: " + utString);
+		fpsText.setString(std::to_string(environment->entities->size()) + " entities\n" + std::to_string(environment->entityGrid->numZones) + " zones\n" + std::to_string(environment->numThreads) + " threads\nFPS: " + fpsString + "\nUPS: " + utString);
 		window->draw(fpsText);
 	}
 }

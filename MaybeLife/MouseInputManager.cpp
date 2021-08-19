@@ -1,6 +1,7 @@
 #include "MouseInputManager.h"
 
 #include "Utilities.h"
+#include "Grid.h"
 
 MouseInputManager::MouseInputManager(Commander * commander, Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * uiView)
 {
@@ -22,7 +23,7 @@ void MouseInputManager::handle(sf::Event event)
 
 		// convert it to world coordinates
 		sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
-		commander->setSelectedZone(environment->zoneAt(worldPos));
+		commander->setSelectedZone(environment->entityGrid->zoneAt(worldPos));
 
 		if (dragging) {
 			window->setView(*uiView);
@@ -32,10 +33,10 @@ void MouseInputManager::handle(sf::Event event)
 			endDragPos = worldPos;
 			float currentZoom = (sceneView->getSize().x / environment->size.x + sceneView->getSize().y / environment->size.y) / 2;
 			sf::Vector2f delta = sf::Vector2f((startDragPos.x - endDragPos.x) * currentZoom, (startDragPos.y - endDragPos.y) * currentZoom);
-			std::cout << "In drag, delta = " << ut::to_string(delta) << " at zoom " << currentZoom << std::endl;
+			//std::cout << "In drag, delta = " << ut::to_string(delta) << " at zoom " << currentZoom << std::endl;
 			sceneView->move(delta);
 			startDragPos = endDragPos;
-			std::cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << std::endl;
+			//std::cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << std::endl;
 			environment->renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
 			environment->renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
 		}
@@ -47,7 +48,7 @@ void MouseInputManager::handle(sf::Event event)
 			window->setView(*uiView);
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
 			startDragPos = window->mapPixelToCoords(pixelPos);
-			std::cout << "Mouse down at: " << ut::to_string(startDragPos) << std::endl;
+			//std::cout << "Mouse down at: " << ut::to_string(startDragPos) << std::endl;
 			dragging = true;
 		}
 		else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
@@ -67,6 +68,6 @@ void MouseInputManager::handle(sf::Event event)
 		dragging = false;
 
 	}
-	std::cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << std::endl;
+	//std::cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << std::endl;
 
 }

@@ -11,6 +11,7 @@
 #include "Environment.h"
 #include "Utilities.h"
 #include "InputManager.h"
+#include "Grid.h"
 #include "AppConfig.h"
 
 int main()
@@ -58,7 +59,7 @@ int main()
 			inputManager.handleEvents(event);
 		}
 		if (numThreads == 0)
-			environment.updateEntities(0, environment.numZones, -1);
+			environment.updateEntities(0, environment.entityGrid->numZones, -1);
 		window.clear();
 		environment.draw();
 		if (environment.showUI)

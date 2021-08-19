@@ -16,7 +16,7 @@ public:
 	float majorSize;
 	bool collide;
 
-	int id = ID();
+	unsigned long long int id = ID();
 	sf::Color color = sf::Color::White;
 	Zone* zone;
 	Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color);
@@ -39,9 +39,9 @@ public:
 	std::string to_bounds_string();
 private:
 
-	static int ID()
+	static unsigned long long int ID()
 	{
-		static int ID = 0;
+		static unsigned long long int ID = 0;
 		return ID++;
 	}
 };

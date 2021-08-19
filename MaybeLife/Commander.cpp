@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Environment.h"
+#include "Grid.h"
 
 Commander::Commander(Environment * environment, sf::RenderWindow * window, sf::View* sceneView, sf::View* uiView)
 {
@@ -79,7 +80,7 @@ void Commander::setSelectedZone(Zone * zone)
 
 void Commander::selectZoneAt(sf::Vector2f position)
 {
-	setSelectedZone(environment->zoneAt(position));
+	setSelectedZone(environment->entityGrid->zoneAt(position));
 }
 
 void Commander::setSelectedEntity(Entity * entity)
@@ -90,7 +91,7 @@ void Commander::setSelectedEntity(Entity * entity)
 void Commander::addEntity(sf::Vector2f position)
 {
 	Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, position);
-	Zone* zone = environment->zoneAt(position);
+	Zone* zone = environment->entityGrid->zoneAt(position);
 	zone->addEntity(entity);
 	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->toString() << std::endl;
 	environment->insertLock.lock();
