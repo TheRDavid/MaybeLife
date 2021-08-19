@@ -1,5 +1,6 @@
 #pragma once
 #include <map>
+#include <mutex>
 #include <SFML/Graphics.hpp>
 using namespace sf;
 using namespace std;
@@ -16,6 +17,11 @@ public:
 	void update();
 	bool legalPosition(Vector2f position);
 	std::string toString();
+
+	void addEntity(Entity* entity);
+
 private:
 	vector<Entity*> toRemove;
+	std::vector<Entity*> toAdd;
+	std::mutex entityAccess;
 };

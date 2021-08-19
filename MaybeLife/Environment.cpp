@@ -28,7 +28,6 @@ Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZon
 	zoneWidth = size.x / (float)zoneCols;
 	zoneHeight = size.y / (float)zoneRows;
 
-	connectionLines = new VertexArray(sf::Lines, maxLines);
 	zoneLines = new VertexArray(sf::Lines, (zoneCols + zoneRows) * 2);
 }
 
@@ -55,15 +54,17 @@ void Environment::start(vector<Entity*>* entities) {
 	}
 
 	for (int i = 0; i < numThreads; i++) {
-		steps[i] = 0;
+		steps[i] = -1;
 		int firstZone = i == 0 ? 0 : i * numZones / numThreads;
 		int lastZone = i == 0 ? numZones / numThreads : (i + 1)*numZones / numThreads;
 		cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << endl;
+
 		if (i == 0) {
 			new thread(&Environment::updateEntities, this, 0, numZones / numThreads, 0);
 		}
 		else {
 			new thread(&Environment::updateEntities, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
+
 		}
 	}
 }
@@ -130,6 +131,7 @@ vector<Zone*> Environment::neighbours(Zone* zone)
 	return neighbours;
 }
 
+
 void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 {
 	int stepIdx = max(0, threadN);
@@ -147,7 +149,6 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 			}
 		}
 		if (allReady) {
-
 			for (int i = firstZone; i < lastZone; i++)
 			{
 				zones[i]->update();
@@ -174,66 +175,31 @@ void Environment::draw()
 		rects = new VertexArray(sf::Quads, 4 * entities->size());
 	}
 
-	if (true && showZones)
+	if (showZones)
 		drawZones();
 
+	rects->clear();
 	int lineIndex = 0;
-	if (showLines) {
-		for (int i = 0; i < numZones; i++)
-		{
-			Zone* uZone = zones[i];
-			for (Entity* entity : uZone->entities)
-			{
-				for (Zone* zone : uZone->neighbours) {
-					for (Entity* neighbour : zone->entities)
-					{
-						if (lineIndex < (maxLines)) {
-							(*connectionLines)[lineIndex].color = entity->color;
-							(*connectionLines)[lineIndex++].position = entity->position;
-						}
-						if (lineIndex < (maxLines)) {
-							(*connectionLines)[lineIndex].color = neighbour->color;
-							(*connectionLines)[lineIndex++].position = neighbour->position;
-						}
-					}
-				}
-			}
+	int idx = 0;
+	for (Entity* entity : *entities)
+	{
+		if (inRenderRect(entity)) {
+			Vector2f ePos = entity->position;
+			Vector2f eSize = entity->size;
+			Color col = entity->color;
+			rects->append(Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
+			rects->append(Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
+			rects->append(Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
+			rects->append(Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
 		}
 	}
-	int idx = 0;
-
-	for (Entity* entity : (*entities))
-	{
-		Vector2f ePos = entity->position;
-		Vector2f eSize = entity->size;
-		Color col = entity->color;
-		(*rects)[idx].color = col;
-		(*rects)[idx++].position = Vector2f(ePos.x - eSize.x, ePos.y - eSize.y);
-		(*rects)[idx].color = col;
-		(*rects)[idx++].position = Vector2f(ePos.x + eSize.x, ePos.y - eSize.y);
-		(*rects)[idx].color = col;
-		(*rects)[idx++].position = Vector2f(ePos.x + eSize.x, ePos.y + eSize.y);
-		(*rects)[idx].color = col;
-		(*rects)[idx++].position = Vector2f(ePos.x - eSize.x, ePos.y + eSize.y);
-	}
 
 
-
-	if (showLines)
-		window->draw(*connectionLines);
 	window->draw(*rects);
 	//zoneLines->clear();
 	centerShape.setPosition(Vector2f(gravityCenter.x - gravityShapeRadius, gravityCenter.y - gravityShapeRadius));
 	window->draw(centerShape);
 	//connectionLines->clear();
-}
-
-void Environment::setMaximumNumberOfLines(int newMaxLines)
-{
-	maxLines = newMaxLines;
-	connectionLines->clear();
-	delete(connectionLines);
-	connectionLines = new VertexArray(sf::Lines, maxLines);
 }
 
 string Environment::stepsToString()
@@ -247,20 +213,19 @@ string Environment::stepsToString()
 
 void Environment::drawZones()
 {
-	int ldx = 0;
-	Text countText;
-	countText.setFont(AppConfig::getInstance().mainFont);
-	countText.setCharacterSize(16);
-	countText.setFillColor(Color(90, 90, 90, 180));
-	countText.setStyle(Text::Bold);
-	Color lC = Color(150, 150, 150, 255);
-	for (int i = 0; i < numZones; i++)
-	{
-		Zone* zone = zones[i];
-		countText.setPosition(Vector2f(zone->xStart, zone->yStart));
-		countText.setString(to_string(zone->id) + ": #" + to_string(zone->entities.size()));
-		window->draw(countText);
+
+	if (selectedZone != nullptr) {
+		sf::RectangleShape rectangle;
+		rectangle.setSize(sf::Vector2f(selectedZone->xEnd - selectedZone->xStart, selectedZone->yEnd - selectedZone->yStart));
+		rectangle.setOutlineColor(sf::Color::Red);
+		rectangle.setOutlineThickness(1);
+		rectangle.setFillColor(sf::Color(70, 70, 190, 100));
+		rectangle.setPosition(selectedZone->xStart, selectedZone->yStart);
+		window->draw(rectangle);
 	}
+
+	int ldx = 0;
+	Color lC = Color(150, 150, 150, 255);
 	for (int i = 0; i < zoneRows; i++) {
 		(*zoneLines)[ldx].position = Vector2f(0, i * zoneHeight);
 		(*zoneLines)[ldx++].color = lC;
@@ -275,3 +240,27 @@ void Environment::drawZones()
 	}
 	window->draw(*zoneLines);
 }
+
+bool Environment::inRenderRect(Entity * entity)
+{
+	//cout << entity->to_bounds_string() + " in " << ut::to_string(renderRectPosition) << " x " << ut::to_string(renderRectSize) << endl;
+	return
+		// x overlapping?
+		(entity->position.x + entity->size.x > renderRectPosition.x
+			&& entity->position.x - entity->size.x < renderRectPosition.x + renderRectSize.x)
+		&&
+		// y overlapping?
+		(entity->position.y + entity->size.y > renderRectPosition.y
+			&& entity->position.y - entity->size.y < renderRectPosition.y + renderRectSize.y);
+}
+
+bool Environment::inRenderRect(Zone * zone)
+{
+	return
+		// x overlapping?
+		(zone->xEnd > renderRectPosition.x && zone->xStart < renderRectPosition.x + renderRectSize.x)
+		&&
+		// y overlapping?
+		(zone->yEnd > renderRectPosition.y && zone->yStart < renderRectPosition.y + renderRectSize.y);
+}
+

@@ -6,11 +6,16 @@
 #include <algorithm>
 #include <iterator>
 #include <thread>
+#include "Utilities.h"
 
-InputManager::InputManager(Environment* environment)
+InputManager::InputManager(Environment* environment, RenderWindow* window, sf::View* sceneView, sf::View* uiView)
 {
 	this->environment = environment;
+	this->window = window;
 	new thread(&InputManager::catchInput, this);
+	this->sceneView = sceneView;
+	this->uiView = uiView;
+	zone = environment->zoneAt(Vector2f(0, 0));
 }
 
 void InputManager::setBehaviour(string behaviour)
@@ -43,23 +48,6 @@ void InputManager::setBehaviour(string behaviour)
 	}
 }
 
-void InputManager::setMaxLines(string maxLines)
-{
-	string errorMsg = "ERROR: Invalid Number of Lines";
-	try {
-		int newMaxLines = stoi(maxLines);
-
-		if (newMaxLines >= 0) {
-			environment->setMaximumNumberOfLines(newMaxLines);
-			return;
-		}
-	}
-	catch (const std::invalid_argument&) {
-		cout << errorMsg << endl;
-	}
-	cout << errorMsg << endl;
-}
-
 void InputManager::setGravityCenter(string x, string y)
 {
 	string errorMsg = "ERROR: Invalid Gravity Center";
@@ -76,6 +64,86 @@ void InputManager::setGravityCenter(string x, string y)
 	cout << errorMsg << endl;
 }
 
+void InputManager::handleEvents()
+{
+	string titleString = environment->stepsToString();
+	sf::Event event;
+	if (window->pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+			window->close();
+
+		handleKeyboardCommands(event);
+
+		if (event.type == sf::Event::MouseMoved) {
+			window->setView(*sceneView);
+			sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+
+			// convert it to world coordinates
+			sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+			zone = environment->zoneAt(worldPos);
+
+			if (dragging) {
+				window->setView(*uiView);
+				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+
+				// convert it to world coordinates
+				// BROKEN ONCE SOOMED IN?!?!?!
+				sf::Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+				endDragPos = worldPos;
+				Vector2f delta = Vector2f((startDragPos.x - endDragPos.x) * currentZoom, (startDragPos.y - endDragPos.y) * currentZoom);
+				cout << "In drag, delta = " << ut::to_string(delta) << endl;
+				sceneView->move(delta);
+				startDragPos = endDragPos;
+				cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << endl;
+				environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+				environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			}
+
+		}
+
+		if (event.type == sf::Event::MouseButtonPressed) {
+			if (event.mouseButton.button == sf::Mouse::Button::Right) {
+				window->setView(*uiView);
+				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+				startDragPos = window->mapPixelToCoords(pixelPos);
+				cout << "Mouse down at: " << ut::to_string(startDragPos) << endl;
+				dragging = true;
+			}
+			else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
+				window->setView(*sceneView);
+				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+				Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+				Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, worldPos);
+				Zone* zone = environment->zoneAt(worldPos);
+				zone->addEntity(entity);
+				cout << "Adding entity" << endl << entity->to_string() << endl << "to zone" << endl << zone->toString() << endl;
+				environment->insertLock.lock();
+				environment->entities->push_back(entity);
+				environment->insertLock.unlock();
+			}
+			else if (event.mouseButton.button == sf::Mouse::Button::Left) {
+				window->setView(*sceneView);
+				sf::Vector2i pixelPos = sf::Mouse::getPosition(*window);
+				Vector2f worldPos = window->mapPixelToCoords(pixelPos);
+				environment->selectedZone = environment->zoneAt(worldPos);
+				cout << "Setting Selected Zone: " << endl << environment->selectedZone->toString() << endl;
+			}
+		}
+		if (event.type == sf::Event::MouseButtonReleased) {
+			dragging = false;
+
+		}
+		cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << endl;
+	}
+	if (zone == nullptr) {
+		titleString += " Outside World";
+	}
+	else
+		titleString += " " + zone->toString();
+	window->setTitle(titleString);
+}
+
 void InputManager::catchInput()
 {
 	while (true) {
@@ -89,19 +157,29 @@ void InputManager::catchInput()
 	}
 }
 
+void InputManager::handleKeyboardCommands(sf::Event event)
+{
+	if (event.type == sf::Event::KeyPressed) {
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
+			sceneView->zoom(0.9);
+			currentZoom *= 0.9;
+			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
+			sceneView->zoom(1.1);
+			currentZoom *= 1.1;
+			environment->renderRectPosition = sceneView->getCenter() - Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+			environment->renderRectSize = Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+		}
+	}
+}
+
 void InputManager::execute(vector<string> tokens)
 {
 	if (tokens.size() == 0) return;
 	string command = tokens[0];
 	switch (resolveCommand(command)) {
-
-	case set_max_lines:
-		if (tokens.size() != 2)
-		{
-			cout << "ERROR: Invalid Number of Arguments" << endl;
-			break;
-		}
-		setMaxLines(tokens[1]); break;
 
 	case set_behaviour:
 		if (tokens.size() != 2)

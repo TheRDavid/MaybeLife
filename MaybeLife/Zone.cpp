@@ -18,6 +18,13 @@ Zone::Zone(unsigned long long int id, Environment* environment, float xStart, fl
 
 void Zone::update()
 {
+	entityAccess.lock();
+	for (auto &entity : toAdd) {
+		entities.push_back(entity);
+	}
+	toAdd.clear();
+	entityAccess.unlock();
+
 	toRemove.clear();
 	for (Entity* entity : entities) {
 		if (!legalPosition(entity->position)) {
@@ -45,4 +52,12 @@ bool Zone::legalPosition(Vector2f position)
 std::string Zone::toString()
 {
 	return "Zone [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(entities.size());
+}
+
+void Zone::addEntity(Entity * entity)
+{
+	entity->zone = this;
+	entityAccess.lock();
+	toAdd.push_back(entity);
+	entityAccess.unlock();
 }

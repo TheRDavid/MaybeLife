@@ -5,8 +5,8 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
-using namespace std;
 #include "Zone.h"
+using namespace std;
 using namespace sf;
 class Environment
 {
@@ -25,12 +25,10 @@ public:
 	vector<Entity*>* entities;
 	RenderWindow* window;
 	VertexArray* rects = NULL;
-	VertexArray* connectionLines = NULL;
 	VertexArray* zoneLines = NULL;
 	int numZones, zoneRows, zoneCols;
 	float zoneWidth, zoneHeight;
 	int* steps;
-	void setMaximumNumberOfLines(int newMaxLines);
 	void start(vector<Entity*>* entities);
 	string stepsToString();
 	int numThreads;
@@ -50,13 +48,19 @@ public:
 	Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
 	bool legalPosition(Vector2f position);
 	std::mutex insertLock;
+
+	Vector2f renderRectPosition;
+	Vector2f renderRectSize;
+
+	Zone* selectedZone = nullptr;
+	Entity* selectedEntity = nullptr;
+
 private:
 	int processedZone = 0;
 	void drawZones();
 	Color emptyZoneColor = Color(30, 30, 90, 128);
-	int maxLines = 2000000;
-
-
+	bool inRenderRect(Entity* entity);
+	bool inRenderRect(Zone* zone);
 };
 
 

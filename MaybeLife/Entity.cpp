@@ -21,10 +21,10 @@ Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position,
 Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size) : Entity(environment, behaviour, position, size, true)
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position) : Entity(environment, behaviour, Vector2f(0, 0), Vector2f(1, 1))
+Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position) : Entity(environment, behaviour, position, Vector2f(1, 1))
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, Vector2f(0,0))
+Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, Vector2f(0, 0))
 {
 }
 Entity::Entity(Environment* environment) : Entity(environment, RANDOM)
@@ -59,7 +59,7 @@ void Entity::updateCollision()
 	if (colliding(this, position, zone)) {
 		bool foundDodge = false;
 		Vector2f dodgePosition;
-		int startDir = ut::randomNumber(0,8), dirCount = 0;
+		int startDir = ut::randomNumber(0, 8), dirCount = 0;
 		//cout << id << " collides, startDir = " << startDir << endl;
 		while (dirCount++ < 8) {
 			if (++startDir == 8) {
@@ -218,11 +218,12 @@ bool Entity::colliding(Entity* entity, Zone * zone)
 bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
 {
 	for (Zone* z : zone->neighbours) {
-		for (Entity* otherEntity : z->entities)
+		for (Entity* otherE : z->entities)
 		{
-			if (entity->id != otherEntity->id
-				&& fabs(pos.x - otherEntity->position.x) < (entity->size.x/2 + otherEntity->size.x / 2)
-				&& fabs(pos.y - otherEntity->position.y) < (entity->size.y / 2 + otherEntity->size.y / 2)
+			Entity otherEntity = *otherE;
+			if (entity->id != otherEntity.id
+				&& pow(pos.x - otherEntity.position.x,2) < (entity->size.x / 2 + otherEntity.size.x / 2)
+				&& pow(pos.y - otherEntity.position.y,2) < (entity->size.y / 2 + otherEntity.size.y / 2)
 				)
 			{
 				//color = Color::Red;

@@ -11,6 +11,7 @@
 #include "Environment.h"
 #include <time.h>
 #include <string>
+#include "Utilities.h"
 using namespace sf;
 
 int main()
@@ -23,7 +24,7 @@ int main()
 	View sceneView(FloatRect(0, 0, envSize.x, envSize.y));
 	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(Vector2i(0, 0));
-	int numEntities = 1000 * 1000, numZones = 1000 * 1000, numThreads = 8;
+	int numEntities = 100 * 1000, numZones = 100 * 1000, numThreads = 8;
 	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
 	float xBoundarySize = .85, yBoundarySize = .85;
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
@@ -45,76 +46,14 @@ int main()
 	}
 	UI ui(&window, &environment);
 	int loopNr = 0;
-	Zone* zone = environment.zoneAt(Vector2f(0, 0));
 	window.setFramerateLimit(30);
-	InputManager inputManager(&environment);
-	Vector2f startDragPos, endDragPos;
-	bool dragging = false;
-	float currZoom = 4;
+	InputManager inputManager(&environment, &window, &sceneView, &uiView);
 	environment.start(entities);
+	environment.renderRectPosition = sceneView.getCenter() - Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
+	environment.renderRectSize = Vector2f(sceneView.getSize().x, sceneView.getSize().y);
 	while (window.isOpen())
 	{
-		string titleString = environment.stepsToString();
-		sf::Event event;
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				window.close();
-			else if (event.type == sf::Event::KeyPressed) {
-				if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num1)) {
-					sceneView.zoom(0.9);
-					currZoom *= 0.9;
-				}
-				else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Num2)) {
-					sceneView.zoom(1.1);
-					currZoom *= 1.1;
-				}
-			}
-			else if (event.type == sf::Event::MouseMoved) {
-				sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-
-				// convert it to world coordinates
-				sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-				zone = environment.zoneAt(worldPos);
-
-				if (dragging) {
-					sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-
-					// convert it to world coordinates
-					sf::Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-					endDragPos = worldPos;
-					Vector2f delta = Vector2f((startDragPos.x - endDragPos.x) * currZoom, (startDragPos.y - endDragPos.y) * currZoom);
-					sceneView.move(delta);
-					startDragPos = endDragPos;
-				}
-
-			}
-			else if (event.type == sf::Event::MouseButtonPressed) {
-				if (event.mouseButton.button == sf::Mouse::Button::Right) {
-					sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-					startDragPos = window.mapPixelToCoords(pixelPos);
-					dragging = true;
-				}
-				else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
-					sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
-					Vector2f worldPos = window.mapPixelToCoords(pixelPos);
-					Entity* entity = new Entity(&environment, defaultBehaviour, worldPos);
-					environment.insertLock.lock();
-					environment.zoneAt(worldPos)->entities.push_back(entity);
-					environment.insertLock.unlock();
-				}
-			}
-			else if (event.type == sf::Event::MouseButtonReleased) {
-				dragging = false;
-
-			}
-		}
-		if (zone == nullptr) {
-			titleString += " Outside World";
-		}
-		else
-			titleString += " " + zone->toString();
-		window.setTitle(titleString);
+		inputManager.handleEvents();
 		window.clear();
 		if (numThreads == 0)
 			environment.updateEntities(0, environment.numZones, -1);

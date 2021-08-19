@@ -23,16 +23,16 @@ UI::UI(sf::RenderWindow* renderWindow, Environment* environment)
 
 void UI::refresh()
 {
-		window->draw(rectangle);
+	window->draw(rectangle);
 	if (drawCallsSince++ == fpsAvgSpan) {
 		int ms = duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - fpsstart).count();
-		fpsString = to_string((float)(fpsAvgSpan * 100000 / ms)/100);
+		fpsString = to_string((float)(fpsAvgSpan * 100000 / ms) / 100);
 		fpsstart = high_resolution_clock::now();
 		drawCallsSince = 0;
 	}
 	if (environment->steps[0] - stepCountLast >= updateAvgSpan) {
 		int ms = duration_cast<std::chrono::milliseconds>(high_resolution_clock::now() - upstart).count();
-		utString = to_string((float)(updateAvgSpan * 100000 / ms)/100);
+		utString = to_string((float)(updateAvgSpan * 100000 / ms) / 100);
 		upstart = high_resolution_clock::now();
 		stepCountLast = environment->steps[0];
 	}
