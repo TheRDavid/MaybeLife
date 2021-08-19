@@ -30,7 +30,7 @@ int main()
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
 	std::vector<Entity*>* entities = new std::vector<Entity*>();
 	entities->reserve(numEntities);
-	Environment environment(&window, envSize, numZones, numThreads);
+	Environment environment(&window, envSize, numZones, numThreads, &sceneView);
 	for (int i = 0; i < numEntities; i++) {
 		float s = 1 + rand() % 5;
 		sf::Vector2f entitySize = sf::Vector2f(s, s);
@@ -43,24 +43,26 @@ int main()
 			true,
 			sf::Color::White));
 	}
-	UI ui(&window, &environment);
+	UI ui(&window, &environment, &uiView);
 	int loopNr = 0;
 	window.setFramerateLimit(30);
 	InputManager inputManager(&environment, &window, &sceneView, &uiView);
 	environment.start(entities);
 	environment.renderRectPosition = sceneView.getCenter() - sf::Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
 	environment.renderRectSize = sf::Vector2f(sceneView.getSize().x, sceneView.getSize().y);
+	sf::Event event;
 	while (window.isOpen())
 	{
-		inputManager.handleEvents();
-		window.clear();
+		if (window.pollEvent(event))
+		{
+			inputManager.handleEvents(event);
+		}
 		if (numThreads == 0)
 			environment.updateEntities(0, environment.numZones, -1);
-		window.setView(sceneView);
+		window.clear();
 		environment.draw();
 		if (environment.showUI)
 		{
-			window.setView(uiView);
 			ui.refresh();
 		}
 		window.display();

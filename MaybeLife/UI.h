@@ -7,10 +7,11 @@
 class UI
 {
 public:
-	UI(sf::RenderWindow* window, Environment* environment);
+	UI(sf::RenderWindow* window, Environment* environment, sf::View* uiView);
 	sf::RenderWindow* window;
 	void refresh();
 private:
+	sf::View* uiView;
 	static const int fpsAvgSpan = 30, updateAvgSpan = 30;
 	std::chrono::time_point<std::chrono::high_resolution_clock> fpsstart, upstart;
 	int drawCallsSince = 0, stepCountLast = 0;

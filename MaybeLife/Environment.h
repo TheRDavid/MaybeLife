@@ -9,7 +9,7 @@ class Environment
 
 public:
 
-	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads);
+	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
 	Zone* zoneAt(sf::Vector2f position);
 	std::vector<Zone*> neighbours(Zone* zone);
 	std::vector<Zone*> zones;
@@ -28,7 +28,7 @@ public:
 	void start(std::vector<Entity*>* entities);
 	std::string stepsToString();
 	int numThreads;
-	bool showZones = false, showUI = true, showLines, entityCollision = true;
+	bool showZones = false, showUI = true, entityCollision = true;
 	sf::CircleShape centerShape;
 	sf::RectangleShape processedZoneRect;
 	float gravityShapeRadius = 10;
@@ -52,6 +52,7 @@ public:
 	Entity* selectedEntity = nullptr;
 
 private:
+	sf::View* sceneView;
 	int processedZone = 0;
 	void drawZones();
 	sf::Color emptyZoneColor = sf::Color(30, 30, 90, 128);

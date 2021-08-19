@@ -2,9 +2,10 @@
 
 #include "AppConfig.h"
 
-UI::UI(sf::RenderWindow* renderWindow, Environment* environment)
+UI::UI(sf::RenderWindow* renderWindow, Environment* environment, sf::View* uiView)
 {
 	this->environment = environment;
+	this->uiView = uiView;
 	window = renderWindow;
 	// set the color
 	fpsText.setFont(AppConfig::getInstance().mainFont); // font is a sf::Font
@@ -26,6 +27,7 @@ UI::UI(sf::RenderWindow* renderWindow, Environment* environment)
 
 void UI::refresh()
 {
+	window->setView(*uiView);
 	window->draw(rectangle);
 	if (drawCallsSince++ == fpsAvgSpan) {
 		int ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - fpsstart).count();

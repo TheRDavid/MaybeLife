@@ -8,8 +8,11 @@
 
 #include "AppConfig.h"
 #include "Utilities.h"
-Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads)
+#include "Commander.h"
+
+Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads, sf::View* sceneView)
 {
+	this->sceneView = sceneView;
 	centerShape.setRadius(gravityShapeRadius);
 	centerShapeSize = sf::Vector2f(gravityShapeRadius / 2, gravityShapeRadius / 2);
 	centerShape.setFillColor(sf::Color(255, 255, 255, 128));
@@ -176,6 +179,7 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 
 void Environment::draw()
 {
+	window->setView(*sceneView);
 	if (rects == NULL) {
 		rects = new sf::VertexArray(sf::Quads, 4 * entities->size());
 	}
