@@ -17,18 +17,26 @@
 int main()
 {
 	srand(time(NULL));
-	float sceneZoom = 1;
 	std::cout << "MaybeLife starting up, oh boi!\n";
+
+	/////////////// START CONFIG ///////////////
 	sf::Vector2i envSize = sf::Vector2i(7680, 4320);
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
-	sf::View sceneView(sf::FloatRect(0, 0, envSize.x, envSize.y));
-	sf::View uiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
-	window.setPosition(sf::Vector2i(0, 0));
-	int numEntities = 10 * 1000, numZones = 100 * 1000, numThreads = 8;
+	int numEntities = 100 * 1000;
+	int numZones = 100 * 1000;
+	int numThreads = 8;
 	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
-	float xBoundarySize = .85, yBoundarySize = .85;
+	float xBoundarySize = .85;
+	float yBoundarySize = .85;
+	//////////////// END CONFIG ///////////////
+
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
+	sf::View sceneView(sf::FloatRect(0, 0, envSize.x, envSize.y));
+	sf::View uiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
+
+	window.setPosition(sf::Vector2i(0, 0));
+
 	std::vector<Entity*>* entities = new std::vector<Entity*>();
 	entities->reserve(numEntities);
 	Environment environment(&window, envSize, numZones, numThreads, &sceneView);
