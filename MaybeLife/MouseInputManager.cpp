@@ -37,8 +37,7 @@ void MouseInputManager::handle(sf::Event event)
 			sceneView->move(delta);
 			startDragPos = endDragPos;
 			//std::cout << "VP: center=" << ut::to_string(sceneView->getCenter()) << ", rect=" << ut::to_string(sceneView->getSize()) << std::endl;
-			environment->renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
-			environment->renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+			environment->adjustRenderingRect();
 		}
 
 	}
@@ -66,7 +65,6 @@ void MouseInputManager::handle(sf::Event event)
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		dragging = false;
-
 	}
 	//std::cout << "Dragging: " << dragging << " from " << ut::to_string(startDragPos) << std::endl;
 

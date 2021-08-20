@@ -17,4 +17,3 @@ private:
 	sf::RenderWindow* window;
 	sf::View* sceneView, *uiView;
 };
-

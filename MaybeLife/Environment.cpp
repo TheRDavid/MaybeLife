@@ -68,6 +68,12 @@ bool Environment::legalPosition(sf::Vector2f position)
 	return 0 <= position.x && position.x <= size.x && 0 <= position.y && position.y <= size.y;
 }
 
+void Environment::adjustRenderingRect()
+{
+	renderRectPosition = sceneView->getCenter() - sf::Vector2f(sceneView->getSize().x / 2, sceneView->getSize().y / 2);
+	renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
+}
+
 void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 {
 	int stepIdx = std::max(0, threadN);

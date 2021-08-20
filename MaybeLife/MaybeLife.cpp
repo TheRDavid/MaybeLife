@@ -24,7 +24,7 @@ int main()
 	sf::View sceneView(sf::FloatRect(0, 0, envSize.x, envSize.y));
 	sf::View uiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
 	window.setPosition(sf::Vector2i(0, 0));
-	int numEntities = 1000 * 1000, numZones = 100 * 1000, numThreads = 8;
+	int numEntities = 10 * 1000, numZones = 100 * 1000, numThreads = 8;
 	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
 	float xBoundarySize = .85, yBoundarySize = .85;
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;

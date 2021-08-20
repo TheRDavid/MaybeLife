@@ -48,6 +48,7 @@ public:
 	void start(std::vector<Entity*>* entities);
 	std::string stepsToString();
 	bool legalPosition(sf::Vector2f position);
+	void adjustRenderingRect();
 
 private:
 	sf::View* sceneView;
