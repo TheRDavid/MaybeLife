@@ -1,64 +1,63 @@
 #pragma once
 #include <vector>;
-#include "Entity.h"
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <thread>
 #include <mutex>
+
 #include "Zone.h"
-using namespace std;
-using namespace sf;
+#include "Entity.h"
+class Grid;
 class Environment
 {
 
 public:
+	Grid* entityGrid;
+	std::vector<Entity*>* entities;
+	sf::RenderWindow* window;
 
-	Environment(RenderWindow* renderWindow, Vector2i size, int numZones, int threads);
-	Zone* zoneAt(Vector2f position);
-	vector<Zone*> neighbours(Zone* zone);
-	vector<Zone*> zones;
-	void updateEntities(int firstZone, int lastZone, int threadN);
-	unsigned long long int nextEntityId, nextZoneId;
-	Vector2i size;
-	Vector2f gravityCenter;
-	void draw();
-	vector<Entity*>* entities;
-	RenderWindow* window;
-	VertexArray* rects = NULL;
-	VertexArray* zoneLines = NULL;
-	int numZones, zoneRows, zoneCols;
-	float zoneWidth, zoneHeight;
-	int* steps;
-	void start(vector<Entity*>* entities);
-	string stepsToString();
 	int numThreads;
-	bool showZones = false, showUI = true, showLines, entityCollision = true;
-	sf::CircleShape centerShape;
+
+	bool showZones = false;
+	bool showUI = true;
+	bool entityCollision = true;
+
 	sf::RectangleShape processedZoneRect;
-	float gravityShapeRadius = 10;
-	Vector2f centerShapeSize;
-	Vector2f left = Vector2f(-2, 0);
-	Vector2f upLeft = Vector2f(-2, -2);
-	Vector2f up = Vector2f(0, -2);
-	Vector2f upRight = Vector2f(2, -2);
-	Vector2f right = Vector2f(2, 0);
-	Vector2f downRight = Vector2f(2, 2);
-	Vector2f down = Vector2f(0, 2);
-	Vector2f downLeft = Vector2f(-2, 2);
-	Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
-	bool legalPosition(Vector2f position);
+
+	sf::Vector2f left = sf::Vector2f(-2, 0);
+	sf::Vector2f upLeft = sf::Vector2f(-2, -2);
+	sf::Vector2f up = sf::Vector2f(0, -2);
+	sf::Vector2f upRight = sf::Vector2f(2, -2);
+	sf::Vector2f right = sf::Vector2f(2, 0);
+	sf::Vector2f downRight = sf::Vector2f(2, 2);
+	sf::Vector2f down = sf::Vector2f(0, 2);
+	sf::Vector2f downLeft = sf::Vector2f(-2, 2);
+	sf::Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
+
 	std::mutex insertLock;
 
-	Vector2f renderRectPosition;
-	Vector2f renderRectSize;
+	sf::Vector2i size;
+	sf::Vector2f renderRectPosition;
+	sf::Vector2f renderRectSize;
+	sf::Vector2f gravityCenter;
 
 	Zone* selectedZone = nullptr;
 	Entity* selectedEntity = nullptr;
 
+	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
+	void updateEntities(int firstZone, int lastZone, int threadN);
+	void draw();
+	int* steps;
+	void start(std::vector<Entity*>* entities);
+	std::string stepsToString();
+	bool legalPosition(sf::Vector2f position);
+
 private:
-	int processedZone = 0;
+	sf::View* sceneView;
+	sf::VertexArray* rects = NULL;
+	sf::VertexArray* zoneLines = NULL;
+	sf::Vector2f centerShapeSize;
+	sf::CircleShape centerShape;
+	float gravityShapeRadius = 10;
+
 	void drawZones();
-	Color emptyZoneColor = Color(30, 30, 90, 128);
 	bool inRenderRect(Entity* entity);
 	bool inRenderRect(Zone* zone);
 };

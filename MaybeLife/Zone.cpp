@@ -1,13 +1,15 @@
 #include "Zone.h"
-#include "Environment.h"
-#include "Entity.h"
-#include <algorithm>
 
-Zone::Zone(unsigned long long int id, Environment* environment, float xStart, float xEnd, float yStart, float yEnd, int capacity)
+#include <algorithm>
+#include <iostream>
+
+#include "Grid.h"
+#include "Entity.h"
+
+Zone::Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
 	toRemove.reserve(25);
-	this-> id = id;
-	this->environment = environment;
+	this->grid = grid;
 	this->xStart = xStart;
 	this->xEnd = xEnd;
 	this->yStart = yStart;
@@ -19,7 +21,7 @@ Zone::Zone(unsigned long long int id, Environment* environment, float xStart, fl
 void Zone::update()
 {
 	entityAccess.lock();
-	for (auto &entity : toAdd) {
+	for (auto entity : toAdd) {
 		entities.push_back(entity);
 	}
 	toAdd.clear();
@@ -29,9 +31,9 @@ void Zone::update()
 	for (Entity* entity : entities) {
 		if (!legalPosition(entity->position)) {
 			toRemove.push_back(entity);
-			Zone* newZone = environment->zoneAt(entity->position);
+			Zone* newZone = grid->zoneAt(entity->position);
 			if (newZone == nullptr) {
-				cout << "Illegal Entity: " << entity->to_string() << endl;
+				std::cout << "Illegal Entity: " << entity->to_string() << std::endl;
 			}
 			else {
 				newZone->entities.push_back(entity);
@@ -39,19 +41,19 @@ void Zone::update()
 			}
 		}
 	}
-	for (auto &entity : toRemove) {
+	for (auto entity : toRemove) {
 		entities.erase(std::remove(entities.begin(), entities.end(), entity), entities.end());
 	}
 }
 
-bool Zone::legalPosition(Vector2f position)
+bool Zone::legalPosition(sf::Vector2f position)
 {
 	return xStart <= position.x && position.x <= xEnd && yStart <= position.y && position.y <= yEnd;
 }
 
-std::string Zone::toString()
+std::string Zone::to_string()
 {
-	return "Zone [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(entities.size());
+	return "Zone " + std::to_string(id) + " [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(entities.size());
 }
 
 void Zone::addEntity(Entity * entity)
@@ -60,4 +62,10 @@ void Zone::addEntity(Entity * entity)
 	entityAccess.lock();
 	toAdd.push_back(entity);
 	entityAccess.unlock();
+}
+
+void Zone::addEntityImmediatly(Entity * entity)
+{
+	entity->zone = this;
+	entities.push_back(entity);
 }

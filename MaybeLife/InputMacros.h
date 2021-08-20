@@ -5,5 +5,3 @@
 #define KEY_DOWN(KEY) sf::Keyboard::isKeyPressed(sf::Keyboard::KEY)
 
 #include <SFML/Graphics.hpp>
-
-using namespace sf;

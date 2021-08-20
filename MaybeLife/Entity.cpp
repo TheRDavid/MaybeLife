@@ -1,10 +1,11 @@
 #include "Entity.h"
+
 #include "Zone.h"
 #include "Utilities.h"
 #include "Environment.h"
 static unsigned long long int nextId = 0;
 
-Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color)
+Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color)
 {
 	this->environment = environment;
 	this->position = position;
@@ -12,19 +13,19 @@ Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position,
 	this->color = color;
 	this->collide = collide;
 	this->behaviour = behaviour;
-	majorSize = max(size.x, size.y);
+	majorSize = std::max(size.x, size.y);
 
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide) : Entity(environment, behaviour, position, size, collide, Color::White)
+Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide) : Entity(environment, behaviour, position, size, collide, sf::Color::White)
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size) : Entity(environment, behaviour, position, size, true)
+Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size) : Entity(environment, behaviour, position, size, true)
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, Vector2f position) : Entity(environment, behaviour, position, Vector2f(1, 1))
+Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position) : Entity(environment, behaviour, position, sf::Vector2f(1, 1))
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, Vector2f(0, 0))
+Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, sf::Vector2f(0, 0))
 {
 }
 Entity::Entity(Environment* environment) : Entity(environment, RANDOM)
@@ -58,15 +59,15 @@ void Entity::updateCollision()
 {
 	if (colliding(this, position, zone)) {
 		bool foundDodge = false;
-		Vector2f dodgePosition;
+		sf::Vector2f dodgePosition;
 		int startDir = ut::randomNumber(0, 8), dirCount = 0;
-		//cout << id << " collides, startDir = " << startDir << endl;
+		//std::cout << id << " collides, startDir = " << startDir << std::endl;
 		while (dirCount++ < 8) {
 			if (++startDir == 8) {
 				startDir = 0;
 			}
-			dodgePosition = Vector2f(environment->gridDirections[startDir].x * size.x, environment->gridDirections[startDir].y * size.y) + position;
-			//cout << "Try dodgin to with " << startDir << " -> " << ut::to_string(environment->gridDirections[startDir]) << " to " << ut::to_string(dodgePosition) << endl;
+			dodgePosition = sf::Vector2f(environment->gridDirections[startDir].x * size.x, environment->gridDirections[startDir].y * size.y) + position;
+			//std::cout << "Try dodgin to with " << startDir << " -> " << ut::to_string(environment->gridDirections[startDir]) << " to " << ut::to_string(dodgePosition) << std::endl;
 			if (legalPosition_strict(this, dodgePosition, zone)) {
 				foundDodge = true;
 				break;
@@ -79,22 +80,22 @@ void Entity::updateCollision()
 }
 void Entity::actFall()
 {
-	Vector2f dir = Vector2f(0, size.y);
-	Vector2f ePos = position + dir;
+	sf::Vector2f dir = sf::Vector2f(0, size.y);
+	sf::Vector2f ePos = position + dir;
 
 	if (legalPosition_strict(this, ePos, zone)) {
 		position = ePos;
 	}
 	else {
 		int randDir = rand() == 1 ? 1 : -1;
-		dir = Vector2f(randDir * majorSize * 2, size.y);
+		dir = sf::Vector2f(randDir * majorSize * 2, size.y);
 		ePos = position + dir;
 
 		if (legalPosition_strict(this, ePos, zone)) {
 			position = ePos;
 		}
 		else {
-			dir = Vector2f(-randDir * majorSize * 2, size.y);
+			dir = sf::Vector2f(-randDir * majorSize * 2, size.y);
 			ePos = position + dir;
 
 			if (legalPosition_strict(this, ePos, zone)) {
@@ -105,18 +106,18 @@ void Entity::actFall()
 }
 void Entity::actGravitate()
 {
-	Vector2f dir = Vector2f(environment->gravityCenter.x - position.x, environment->gravityCenter.y - position.y);
+	sf::Vector2f dir = sf::Vector2f(environment->gravityCenter.x - position.x, environment->gravityCenter.y - position.y);
 	if (dir.x != 0) dir.x = dir.x > 0 ? 1 : -1;
 	if (dir.y != 0) dir.y = dir.y > 0 ? 1 : -1;
-	Vector2f newPos = position + dir;
+	sf::Vector2f newPos = position + dir;
 	if (legalPosition_strict(this, newPos, zone)) {
 		position = newPos;
 	}
 }
 void Entity::actRandom()
 {
-	Vector2f dir = Vector2f(ut::randomNumber(-1, 1), ut::randomNumber(-1, 1));
-	Vector2f ePos = position + dir;
+	sf::Vector2f dir = sf::Vector2f(ut::randomNumber(-1, 1), ut::randomNumber(-1, 1));
+	sf::Vector2f ePos = position + dir;
 
 	if (legalPosition_strict(this, ePos, zone)) {
 		position = ePos;
@@ -126,8 +127,8 @@ void Entity::actSpread()
 {
 	int lineIndex = 0;
 	float xDir = 0, yDir = 0;
-	Vector2f ePos = position;
-	Vector2f newPos = ePos;
+	sf::Vector2f ePos = position;
+	sf::Vector2f newPos = ePos;
 	for (Zone* zonen : zone->neighbours) {
 		for (Entity* neighbour : zonen->entities)
 		{
@@ -146,12 +147,12 @@ void Entity::actSpread()
 	}
 	if (xDir != 0) xDir = xDir > 0 ? 1 : -1;
 	if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
-	newPos = ePos + Vector2f(xDir, yDir);
+	newPos = ePos + sf::Vector2f(xDir, yDir);
 	if (legalPosition_strict(this, newPos, zone)) {
 		position = newPos;
 	}
 	else {
-		newPos = ePos + Vector2f(0, yDir);
+		newPos = ePos + sf::Vector2f(0, yDir);
 		if (legalPosition_strict(this, newPos, zone)) {
 			position = newPos;
 		}
@@ -161,8 +162,8 @@ void Entity::actGroup()
 {
 	int lineIndex = 0;
 	float xDir = 0, yDir = 0;
-	Vector2f ePos = position;
-	Vector2f newPos = ePos;
+	sf::Vector2f ePos = position;
+	sf::Vector2f newPos = ePos;
 	for (Zone* zone : zone->neighbours) {
 		for (Entity* neighbour : zone->entities)
 		{
@@ -181,12 +182,12 @@ void Entity::actGroup()
 	}
 	if (xDir != 0) xDir = xDir > 0 ? 1 : -1;
 	if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
-	newPos = ePos + Vector2f(xDir, yDir);
+	newPos = ePos + sf::Vector2f(xDir, yDir);
 	if (legalPosition_strict(this, newPos, zone)) {
 		position = newPos;
 	}
 	else {
-		newPos = ePos + Vector2f(0, yDir);
+		newPos = ePos + sf::Vector2f(0, yDir);
 		if (legalPosition_strict(this, newPos, zone)) {
 			position = newPos;
 		}
@@ -215,7 +216,7 @@ bool Entity::colliding(Entity* entity, Zone * zone)
 }
 
 
-bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
+bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
 {
 	for (Zone* z : zone->neighbours) {
 		for (Entity* otherE : z->entities)
@@ -227,7 +228,7 @@ bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
 				)
 			{
 				//color = Color::Red;
-				//cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << endl;
+				//std::cout << to_bounds_string() << " is stuck with " << otherEntity->to_bounds_string() << std::endl;
 				return true;
 			}
 		}
@@ -237,7 +238,7 @@ bool Entity::colliding(Entity* entity, Vector2f pos, Zone * zone)
 }
 
 
-bool Entity::legalPosition_strict(Entity* entity, Vector2f checkPosition, Zone* uZone)
+bool Entity::legalPosition_strict(Entity* entity, sf::Vector2f checkPosition, Zone* uZone)
 {
 	if (environment->entityCollision && collide && colliding(entity, checkPosition, uZone)) {
 		return false;

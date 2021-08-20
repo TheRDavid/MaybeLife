@@ -1,6 +1,5 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-using namespace sf;
 class Zone;
 class Environment;
 class Entity
@@ -13,36 +12,36 @@ public:
 
 	Environment* environment;
 	Behaviour behaviour = RANDOM;
-	Vector2f position, size;
+	sf::Vector2f position, size;
 	float majorSize;
 	bool collide;
 
-	int id = ID();
-	Color color = Color::White;
+	unsigned long long int id = ID();
+	sf::Color color = sf::Color::White;
 	Zone* zone;
-	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide, Color color);
-	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size, bool collide);
-	Entity(Environment* environment, Behaviour behaviour, Vector2f position, Vector2f size);
-	Entity(Environment* environment, Behaviour behaviour, Vector2f position);
+	Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color);
+	Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide);
+	Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size);
+	Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position);
 	Entity(Environment* environment, Behaviour behaviour);
 	Entity(Environment* environment);
 	void update();
+	bool legalPosition_strict(Entity* entity, sf::Vector2f position, Zone* zone);
+	std::string to_string();
+	std::string to_bounds_string();
+private:
+
 	void updateCollision();
 	void actFall();
 	void actGravitate();
 	void actGroup();
 	void actRandom();
 	void actSpread();
-	bool legalPosition_strict(Entity* entity, Vector2f position, Zone* zone);
-	bool colliding(Entity* entity, Vector2f position, Zone* zone);
+	bool colliding(Entity* entity, sf::Vector2f position, Zone* zone);
 	bool colliding(Entity* entity, Zone* zone);
-	std::string to_string();
-	std::string to_bounds_string();
-private:
-
-	static int ID()
+	static unsigned long long int ID()
 	{
-		static int ID = 0;
+		static unsigned long long int ID = 0;
 		return ID++;
 	}
 };

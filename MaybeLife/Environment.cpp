@@ -1,162 +1,104 @@
 #include "Environment.h"
+
+#include <time.h>
+#include <SFML/Graphics.hpp>
+#include <stdlib.h>
+#include <thread>
+#include <iostream>
+
 #include "AppConfig.h"
 #include "Utilities.h"
-#include <time.h>
-#include <stdlib.h>
-Environment::Environment(RenderWindow * renderWindow, Vector2i size, int _numZones, int threads)
+#include "Commander.h"
+#include "Grid.h"
+
+Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads, sf::View* sceneView)
 {
+	this->sceneView = sceneView;
 	centerShape.setRadius(gravityShapeRadius);
-	centerShapeSize = Vector2f(gravityShapeRadius / 2, gravityShapeRadius / 2);
-	centerShape.setFillColor(Color(255, 255, 255, 128));
+	centerShapeSize = sf::Vector2f(gravityShapeRadius / 2, gravityShapeRadius / 2);
+	centerShape.setFillColor(sf::Color(255, 255, 255, 128));
 	centerShape.setOutlineColor(sf::Color::Red);
 	centerShape.setOutlineThickness(2);
 	centerShape.setPosition(10, 10);
-	gravityCenter = Vector2f(size.x / 2, size.y / 2);
+	gravityCenter = sf::Vector2f(size.x / 2, size.y / 2);
 	numThreads = threads;
-	steps = new int[max(threads, 1)];
-	for (int i = 0; i < max(threads, 1); i++) {
+	steps = new int[std::max(threads, 1)];
+	for (int i = 0; i < std::max(threads, 1); i++) {
 		steps[i] = 0;
 	}
-	zoneRows = max(1, (int)sqrt(_numZones / (size.x / size.y)));
-	zoneCols = _numZones / zoneRows;
-	numZones = zoneCols * zoneRows;
-	showZones = numZones <= 1000;
-	zones.reserve(numZones);
-	window = renderWindow;
-	nextEntityId = 0;
-	this->size = size;
-	zoneWidth = size.x / (float)zoneCols;
-	zoneHeight = size.y / (float)zoneRows;
+	int zoneCapacity = 2 * entities->size() / _numZones;
 
-	zoneLines = new VertexArray(sf::Lines, (zoneCols + zoneRows) * 2);
+	entityGrid = new Grid(_numZones, zoneCapacity, size);
+
+	showZones = entityGrid->numZones <= 1000;
+	window = renderWindow;
+	this->size = size;
+
+	zoneLines = new sf::VertexArray(sf::Lines, (entityGrid->cols + entityGrid->rows) * 2);
 }
 
-void Environment::start(vector<Entity*>* entities) {
+void Environment::start(std::vector<Entity*>* entities) {
 	this->entities = entities;
 
-	int zoneCapacity = 2 * entities->size() / numZones;
-	cout << numZones << " Zones with " << zoneRows << " rows and " << zoneCols << " cols, each " << zoneWidth << "x" << zoneHeight << endl;
-	for (int i = 0; i < numZones; i++) {
-		int row = floor(i / zoneCols);
-		int col = floor(i - row * zoneCols);
-		float xPos = col * zoneWidth, yPos = row * zoneHeight;
-		zones.push_back(new Zone(nextZoneId++, this, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity));
-	}
-	for (int i = 0; i < numZones; i++) {
-		Zone* zone = zones[i];
-		zone->neighbours = neighbours(zone);
-	}
+
 	for (Entity* entity : (*entities)) {
 		entity->environment = this;
-		Zone* zone = zoneAt(entity->position);
-		entity->zone = zone;
-		zone->entities.push_back(entity);
+		Zone* zone = entityGrid->zoneAt(entity->position);
+		zone->addEntityImmediatly(entity);
 	}
 
 	for (int i = 0; i < numThreads; i++) {
 		steps[i] = -1;
-		int firstZone = i == 0 ? 0 : i * numZones / numThreads;
-		int lastZone = i == 0 ? numZones / numThreads : (i + 1)*numZones / numThreads;
-		cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << endl;
+		int firstZone = i == 0 ? 0 : i * entityGrid->numZones / numThreads;
+		int lastZone = i == 0 ? entityGrid->numZones / numThreads : (i + 1)*entityGrid->numZones / numThreads;
+		std::cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << std::endl;
 
 		if (i == 0) {
-			new thread(&Environment::updateEntities, this, 0, numZones / numThreads, 0);
+			new std::thread(&Environment::updateEntities, this, 0, entityGrid->numZones / numThreads, 0);
 		}
 		else {
-			new thread(&Environment::updateEntities, this, i * numZones / numThreads, (i + 1) * numZones / numThreads, i);
+			new std::thread(&Environment::updateEntities, this, i * entityGrid->numZones / numThreads, (i + 1) * entityGrid->numZones / numThreads, i);
 
 		}
 	}
 }
 
-Zone* Environment::zoneAt(Vector2f position)
-{
-	if (!legalPosition(position)) {
-		return nullptr;
-	}
-	int index = (int)(position.y / zoneHeight) * zoneCols + (int)(position.x / zoneWidth);
-	return zones[index];
-}
-
-bool Environment::legalPosition(Vector2f position)
+bool Environment::legalPosition(sf::Vector2f position)
 {
 	return 0 <= position.x && position.x <= size.x && 0 <= position.y && position.y <= size.y;
 }
 
-vector<Zone*> Environment::neighbours(Zone* zone)
-{
-	vector<Zone*> neighbours;
-	neighbours.push_back(zone);
-
-	Zone* neighbour = zoneAt(Vector2f(zone->xMid - zoneWidth, zone->yMid));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid, zone->yMid - zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid, zone->yMid + zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid + zoneWidth, zone->yMid));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid + zoneWidth, zone->yMid + zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid - zoneWidth, zone->yMid - zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid + zoneWidth, zone->yMid - zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	neighbour = zoneAt(Vector2f(zone->xMid - zoneWidth, zone->yMid + zoneHeight));
-	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
-	}
-
-	return neighbours;
-}
-
-
 void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 {
-	int stepIdx = max(0, threadN);
+	int stepIdx = std::max(0, threadN);
 
+	bool allReady = true, catchUp = false;
 	while (true) {
-		bool allReady = true;
+		allReady = true;
+		catchUp = false;
 		for (int i = 0; i < numThreads; i++) {
-			if (steps[i] != steps[stepIdx])
-				allReady = false;
-		}
-		if (!allReady) {
-			for (int i = 0; i < numThreads; i++) {
-				if (steps[stepIdx] < steps[i])
-					allReady = true;
-			}
-		}
-		if (allReady) {
-			for (int i = firstZone; i < lastZone; i++)
+			if (steps[stepIdx] < steps[i])
 			{
-				zones[i]->update();
+				catchUp = true;
+				break;
 			}
+		}
+		if (!catchUp) {
+			for (int i = 0; i < numThreads; i++) {
+				if (steps[i] != steps[stepIdx])
+				{
+					allReady = false;
+					break;
+				}
+			}
+		}
+
+		if (catchUp || allReady) {
 
 			for (int i = firstZone; i < lastZone; i++)
 			{
-				Zone* uZone = zones[i];
+				Zone* uZone = entityGrid->zones[i];
+				uZone->update();
 				for (Entity* entity : uZone->entities)
 				{
 					entity->update();
@@ -165,14 +107,14 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 
 			steps[stepIdx] = steps[stepIdx] + 1;
 		}
-		if (threadN == -1) break;
 	}
 }
 
 void Environment::draw()
 {
+	window->setView(*sceneView);
 	if (rects == NULL) {
-		rects = new VertexArray(sf::Quads, 4 * entities->size());
+		rects = new sf::VertexArray(sf::Quads, 4 * entities->size());
 	}
 
 	if (showZones)
@@ -184,29 +126,26 @@ void Environment::draw()
 	for (Entity* entity : *entities)
 	{
 		if (inRenderRect(entity)) {
-			Vector2f ePos = entity->position;
-			Vector2f eSize = entity->size;
-			Color col = entity->color;
-			rects->append(Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
-			rects->append(Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
-			rects->append(Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
-			rects->append(Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
+			sf::Vector2f ePos = entity->position;
+			sf::Vector2f eSize = entity->size;
+			sf::Color col = entity->color;
+			rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
+			rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
+			rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
+			rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
 		}
 	}
 
-
 	window->draw(*rects);
-	//zoneLines->clear();
-	centerShape.setPosition(Vector2f(gravityCenter.x - gravityShapeRadius, gravityCenter.y - gravityShapeRadius));
+	centerShape.setPosition(sf::Vector2f(gravityCenter.x - gravityShapeRadius, gravityCenter.y - gravityShapeRadius));
 	window->draw(centerShape);
-	//connectionLines->clear();
 }
 
-string Environment::stepsToString()
+std::string Environment::stepsToString()
 {
-	string str = "Steps: ";
-	for (int i = 0; i < max(1, numThreads); i++) {
-		str += " " + to_string(steps[i]);
+	std::string str = "Steps: ";
+	for (int i = 0; i < std::max(1, numThreads); i++) {
+		str += " " + std::to_string(steps[i]);
 	}
 	return str;
 }
@@ -222,20 +161,28 @@ void Environment::drawZones()
 		rectangle.setFillColor(sf::Color(70, 70, 190, 100));
 		rectangle.setPosition(selectedZone->xStart, selectedZone->yStart);
 		window->draw(rectangle);
+		for (Zone* neighbour : selectedZone->neighbours) {
+			rectangle.setSize(sf::Vector2f(neighbour->xEnd - neighbour->xStart, neighbour->yEnd - neighbour->yStart));
+			rectangle.setOutlineColor(sf::Color::Blue);
+			rectangle.setOutlineThickness(1);
+			rectangle.setFillColor(sf::Color(70, 70, 190, 50));
+			rectangle.setPosition(neighbour->xStart, neighbour->yStart);
+			window->draw(rectangle);
+		}
 	}
 
 	int ldx = 0;
-	Color lC = Color(150, 150, 150, 255);
-	for (int i = 0; i < zoneRows; i++) {
-		(*zoneLines)[ldx].position = Vector2f(0, i * zoneHeight);
+	sf::Color lC = sf::Color(150, 150, 150, 255);
+	for (int i = 0; i < entityGrid->rows; i++) {
+		(*zoneLines)[ldx].position = sf::Vector2f(0, i * entityGrid->zoneHeight);
 		(*zoneLines)[ldx++].color = lC;
-		(*zoneLines)[ldx].position = Vector2f(size.x, i * zoneHeight);
+		(*zoneLines)[ldx].position = sf::Vector2f(size.x, i * entityGrid->zoneHeight);
 		(*zoneLines)[ldx++].color = lC;
 	}
-	for (int i = 0; i < zoneCols; i++) {
-		(*zoneLines)[ldx].position = Vector2f(i * zoneWidth, 0);
+	for (int i = 0; i < entityGrid->cols; i++) {
+		(*zoneLines)[ldx].position = sf::Vector2f(i * entityGrid->zoneWidth, 0);
 		(*zoneLines)[ldx++].color = lC;
-		(*zoneLines)[ldx].position = Vector2f(i * zoneWidth, size.y);
+		(*zoneLines)[ldx].position = sf::Vector2f(i * entityGrid->zoneWidth, size.y);
 		(*zoneLines)[ldx++].color = lC;
 	}
 	window->draw(*zoneLines);
@@ -243,7 +190,7 @@ void Environment::drawZones()
 
 bool Environment::inRenderRect(Entity * entity)
 {
-	//cout << entity->to_bounds_string() + " in " << ut::to_string(renderRectPosition) << " x " << ut::to_string(renderRectSize) << endl;
+	//std::cout << entity->to_bounds_string() + " in " << ut::to_string(renderRectPosition) << " x " << ut::to_string(renderRectSize) << std::endl;
 	return
 		// x overlapping?
 		(entity->position.x + entity->size.x > renderRectPosition.x

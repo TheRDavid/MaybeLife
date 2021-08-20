@@ -4,64 +4,64 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/System/String.hpp>
-#include "MaybeLife.h"
-#include "InputManager.h"
-#include "AppConfig.h"
-#include "UI.h"
-#include "Environment.h"
 #include <time.h>
 #include <string>
+
+#include "UI.h"
+#include "Environment.h"
 #include "Utilities.h"
-using namespace sf;
+#include "InputManager.h"
+#include "Grid.h"
+#include "AppConfig.h"
 
 int main()
 {
 	srand(time(NULL));
 	float sceneZoom = 1;
 	std::cout << "MaybeLife starting up, oh boi!\n";
-	Vector2i envSize = Vector2i(7680, 4320);
+	sf::Vector2i envSize = sf::Vector2i(7680, 4320);
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
-	View sceneView(FloatRect(0, 0, envSize.x, envSize.y));
-	View uiView(FloatRect(0, 0, window.getSize().x, window.getSize().y));
-	window.setPosition(Vector2i(0, 0));
+	sf::View sceneView(sf::FloatRect(0, 0, envSize.x, envSize.y));
+	sf::View uiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
+	window.setPosition(sf::Vector2i(0, 0));
 	int numEntities = 1000 * 1000, numZones = 100 * 1000, numThreads = 8;
 	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
 	float xBoundarySize = .85, yBoundarySize = .85;
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
-	vector<Entity*>* entities = new vector<Entity*>();
+	std::vector<Entity*>* entities = new std::vector<Entity*>();
 	entities->reserve(numEntities);
-	Environment environment(&window, envSize, numZones, numThreads);
+	Environment environment(&window, envSize, numZones, numThreads, &sceneView);
 	for (int i = 0; i < numEntities; i++) {
 		float s = 1 + rand() % 5;
-		Vector2f entitySize = Vector2f(s, s);
-		Vector2f position;
-		position = Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
+		sf::Vector2f entitySize = sf::Vector2f(s, s);
+		sf::Vector2f position;
+		position = sf::Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
 		entities->push_back(new Entity(&environment,
 			defaultBehaviour,
 			position,
 			entitySize,
 			true,
-			Color::White));
+			sf::Color::White));
 	}
-	UI ui(&window, &environment);
+	UI ui(&window, &environment, &uiView);
 	int loopNr = 0;
 	window.setFramerateLimit(30);
 	InputManager inputManager(&environment, &window, &sceneView, &uiView);
 	environment.start(entities);
-	environment.renderRectPosition = sceneView.getCenter() - Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
-	environment.renderRectSize = Vector2f(sceneView.getSize().x, sceneView.getSize().y);
+	environment.renderRectPosition = sceneView.getCenter() - sf::Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
+	environment.renderRectSize = sf::Vector2f(sceneView.getSize().x, sceneView.getSize().y);
+	sf::Event event;
 	while (window.isOpen())
 	{
-		inputManager.handleEvents();
+		if (window.pollEvent(event))
+		{
+			inputManager.handleEvents(event);
+		}
 		window.clear();
-		if (numThreads == 0)
-			environment.updateEntities(0, environment.numZones, -1);
-		window.setView(sceneView);
 		environment.draw();
 		if (environment.showUI)
 		{
-			window.setView(uiView);
 			ui.refresh();
 		}
 		window.display();
