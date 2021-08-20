@@ -28,6 +28,9 @@
     <Filter Include="Source Files\display">
       <UniqueIdentifier>{38319343-c1bc-44b8-9a3c-886f44977f57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\json">
+      <UniqueIdentifier>{3f4b8380-7e18-4c43-b1e0-5600dcefd0c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MaybeLife.cpp">
@@ -103,6 +106,12 @@
     </ClInclude>
     <ClInclude Include="Commander.h">
       <Filter>Header Files\input</Filter>
+    </ClInclude>
+    <ClInclude Include="SimConfig.h">
+      <Filter>Header Files\config</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files\json</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

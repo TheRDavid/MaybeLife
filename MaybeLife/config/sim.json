@@ -1,0 +1,6 @@
+{
+	"numEntities":100000, 
+	"numZones":50000, 
+	"numThreads":8,
+	"defaultBehaviour":"group"
+}

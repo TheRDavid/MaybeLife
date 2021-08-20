@@ -20,29 +20,7 @@ void Commander::setEntityCollision(bool enabled)
 
 void Commander::setBehaviour(std::string behaviour)
 {
-	Entity::Behaviour newBehaviour;
-	if (behaviour == "gravitate") {
-		newBehaviour = Entity::Behaviour::GRAVITATE;
-	}
-	else if (behaviour == "random") {
-		newBehaviour = Entity::Behaviour::RANDOM;
-	}
-	else if (behaviour == "sleep") {
-		newBehaviour = Entity::Behaviour::SLEEP;
-	}
-	else if (behaviour == "spread") {
-		newBehaviour = Entity::Behaviour::SPREAD;
-	}
-	else if (behaviour == "fall") {
-		newBehaviour = Entity::Behaviour::FALL;
-	}
-	else if (behaviour == "group") {
-		newBehaviour = Entity::Behaviour::GROUP;
-	}
-	else {
-		std::cout << "ERROR: Invalid Behaviour" << std::endl;
-		newBehaviour = Entity::Behaviour::RANDOM;
-	}
+	Entity::Behaviour newBehaviour = Entity::to_behaviour(behaviour);
 	for (Entity* entity : *(environment->entities)) {
 		entity->behaviour = newBehaviour;
 	}

@@ -13,19 +13,19 @@
 #include "InputManager.h"
 #include "Grid.h"
 #include "AppConfig.h"
+#include "SimConfig.h"
 
 int main()
 {
 	srand(time(NULL));
 	std::cout << "MaybeLife starting up, oh boi!\n";
-
 	/////////////// START CONFIG ///////////////
 	sf::Vector2i envSize = sf::Vector2i(7680, 4320);
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
-	int numEntities = 100 * 1000;
-	int numZones = 100 * 1000;
-	int numThreads = 8;
-	Entity::Behaviour defaultBehaviour = Entity::Behaviour::SPREAD;
+	int numEntities = SimConfig::getInstance().getNumEntities();
+	int numZones = SimConfig::getInstance().getNumZones();
+	int numThreads = SimConfig::getInstance().getNumThreads();
+	Entity::Behaviour defaultBehaviour = SimConfig::getInstance().getDefaultBehaviour();
 	float xBoundarySize = .85;
 	float yBoundarySize = .85;
 	//////////////// END CONFIG ///////////////

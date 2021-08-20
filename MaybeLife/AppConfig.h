@@ -10,7 +10,7 @@ public:
 	}
 private:
 	AppConfig() {
-		mainFont.loadFromFile("media/fonts/main.ttf");
+		mainFont.loadFromFile("media/fonts/main.otf");
 	}
 
 };

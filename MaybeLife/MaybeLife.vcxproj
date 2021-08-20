@@ -184,8 +184,10 @@
     <ClInclude Include="Grid.h" />
     <ClInclude Include="InputMacros.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="KeyboardInputManager.h" />
     <ClInclude Include="MouseInputManager.h" />
+    <ClInclude Include="SimConfig.h" />
     <ClInclude Include="UI.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Zone.h" />

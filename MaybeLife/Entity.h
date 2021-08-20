@@ -29,6 +29,9 @@ public:
 	bool legalPosition_strict(Entity* entity, sf::Vector2f position, Zone* zone);
 	std::string to_string();
 	std::string to_bounds_string();
+
+	static Behaviour to_behaviour(std::string behaviour);
+
 private:
 
 	void updateCollision();

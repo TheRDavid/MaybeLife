@@ -1,5 +1,7 @@
 #include "Entity.h"
 
+#include <iostream>
+
 #include "Zone.h"
 #include "Utilities.h"
 #include "Environment.h"
@@ -196,6 +198,33 @@ void Entity::actGroup()
 std::string Entity::to_bounds_string()
 {
 	return "@" + ut::to_string(position) + " sized " + ut::to_string(size);
+}
+Entity::Behaviour Entity::to_behaviour(std::string behaviour)
+{
+	Behaviour newBehaviour;
+	if (behaviour == "gravitate") {
+		newBehaviour = Entity::Behaviour::GRAVITATE;
+	}
+	else if (behaviour == "random") {
+		newBehaviour = Entity::Behaviour::RANDOM;
+	}
+	else if (behaviour == "sleep") {
+		newBehaviour = Entity::Behaviour::SLEEP;
+	}
+	else if (behaviour == "spread") {
+		newBehaviour = Entity::Behaviour::SPREAD;
+	}
+	else if (behaviour == "fall") {
+		newBehaviour = Entity::Behaviour::FALL;
+	}
+	else if (behaviour == "group") {
+		newBehaviour = Entity::Behaviour::GROUP;
+	}
+	else {
+		std::cout << "ERROR: Invalid Behaviour" << std::endl;
+		newBehaviour = Entity::Behaviour::SLEEP;
+	}
+	return newBehaviour;
 }
 std::string Entity::to_string()
 {
