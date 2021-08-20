@@ -10,7 +10,6 @@ public:
 
 	Grid(int _numZones, int zoneCapacity, sf::Vector2i size);
 
-	std::vector<Zone*> neighbours(Zone* zone);
 	std::vector<Zone*> zones;
 	int numZones;
 	int cols;
@@ -21,5 +20,9 @@ public:
 	bool legalPosition(sf::Vector2f position);
 	Zone* zoneAt(sf::Vector2f position);
 	std::string to_string();
+
+private:
+
+	std::vector<Zone*> neighbours(Zone* zone);
 };
 

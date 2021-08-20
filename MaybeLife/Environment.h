@@ -13,20 +13,14 @@ public:
 	std::vector<Entity*>* entities;
 	sf::RenderWindow* window;
 
-	sf::VertexArray* rects = NULL;
-	sf::VertexArray* zoneLines = NULL;
-
 	int numThreads;
-	float gravityShapeRadius = 10;
 
 	bool showZones = false;
 	bool showUI = true;
 	bool entityCollision = true;
 
-	sf::CircleShape centerShape;
 	sf::RectangleShape processedZoneRect;
 
-	sf::Vector2f centerShapeSize;
 	sf::Vector2f left = sf::Vector2f(-2, 0);
 	sf::Vector2f upLeft = sf::Vector2f(-2, -2);
 	sf::Vector2f up = sf::Vector2f(0, -2);
@@ -57,6 +51,11 @@ public:
 
 private:
 	sf::View* sceneView;
+	sf::VertexArray* rects = NULL;
+	sf::VertexArray* zoneLines = NULL;
+	sf::Vector2f centerShapeSize;
+	sf::CircleShape centerShape;
+	float gravityShapeRadius = 10;
 
 	void drawZones();
 	bool inRenderRect(Entity* entity);

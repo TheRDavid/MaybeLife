@@ -76,6 +76,7 @@ void Commander::setGravityCenter(std::string x, std::string y)
 void Commander::setSelectedZone(Zone * zone)
 {
 	selectedZone = zone;
+	environment->selectedZone = zone;
 }
 
 void Commander::selectZoneAt(sf::Vector2f position)
@@ -93,7 +94,7 @@ void Commander::addEntity(sf::Vector2f position)
 	Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, position);
 	Zone* zone = environment->entityGrid->zoneAt(position);
 	zone->addEntity(entity);
-	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->toString() << std::endl;
+	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->to_string() << std::endl;
 	environment->insertLock.lock();
 	environment->entities->push_back(entity);
 	environment->insertLock.unlock();

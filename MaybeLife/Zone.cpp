@@ -51,7 +51,7 @@ bool Zone::legalPosition(sf::Vector2f position)
 	return xStart <= position.x && position.x <= xEnd && yStart <= position.y && position.y <= yEnd;
 }
 
-std::string Zone::toString()
+std::string Zone::to_string()
 {
 	return "Zone " + std::to_string(id) + " [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(entities.size());
 }

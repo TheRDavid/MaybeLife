@@ -40,7 +40,7 @@ Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int
 void Environment::start(std::vector<Entity*>* entities) {
 	this->entities = entities;
 
-	
+
 	for (Entity* entity : (*entities)) {
 		entity->environment = this;
 		Zone* zone = entityGrid->zoneAt(entity->position);
@@ -72,28 +72,33 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 {
 	int stepIdx = std::max(0, threadN);
 
+	bool allReady = true, catchUp = false;
 	while (true) {
-		bool allReady = true;
+		allReady = true;
+		catchUp = false;
 		for (int i = 0; i < numThreads; i++) {
-			if (steps[i] != steps[stepIdx])
-				allReady = false;
-		}
-		if (!allReady) {
-			for (int i = 0; i < numThreads; i++) {
-				if (steps[stepIdx] < steps[i])
-					allReady = true;
-			}
-		}
-		if (allReady) {
-
-			for (int i = firstZone; i < lastZone; i++)
+			if (steps[stepIdx] < steps[i])
 			{
-				entityGrid->zones[i]->update();
+				catchUp = true;
+				break;
 			}
+		}
+		if (!catchUp) {
+			for (int i = 0; i < numThreads; i++) {
+				if (steps[i] != steps[stepIdx])
+				{
+					allReady = false;
+					break;
+				}
+			}
+		}
+
+		if (catchUp || allReady) {
 
 			for (int i = firstZone; i < lastZone; i++)
 			{
 				Zone* uZone = entityGrid->zones[i];
+				uZone->update();
 				for (Entity* entity : uZone->entities)
 				{
 					entity->update();
@@ -102,7 +107,6 @@ void Environment::updateEntities(int firstZone, int lastZone, int threadN)
 
 			steps[stepIdx] = steps[stepIdx] + 1;
 		}
-		if (threadN == -1) break;
 	}
 }
 
@@ -157,6 +161,14 @@ void Environment::drawZones()
 		rectangle.setFillColor(sf::Color(70, 70, 190, 100));
 		rectangle.setPosition(selectedZone->xStart, selectedZone->yStart);
 		window->draw(rectangle);
+		for (Zone* neighbour : selectedZone->neighbours) {
+			rectangle.setSize(sf::Vector2f(neighbour->xEnd - neighbour->xStart, neighbour->yEnd - neighbour->yStart));
+			rectangle.setOutlineColor(sf::Color::Blue);
+			rectangle.setOutlineThickness(1);
+			rectangle.setFillColor(sf::Color(70, 70, 190, 50));
+			rectangle.setPosition(neighbour->xStart, neighbour->yStart);
+			window->draw(rectangle);
+		}
 	}
 
 	int ldx = 0;

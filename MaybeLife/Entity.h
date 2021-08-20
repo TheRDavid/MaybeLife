@@ -26,19 +26,19 @@ public:
 	Entity(Environment* environment, Behaviour behaviour);
 	Entity(Environment* environment);
 	void update();
+	bool legalPosition_strict(Entity* entity, sf::Vector2f position, Zone* zone);
+	std::string to_string();
+	std::string to_bounds_string();
+private:
+
 	void updateCollision();
 	void actFall();
 	void actGravitate();
 	void actGroup();
 	void actRandom();
 	void actSpread();
-	bool legalPosition_strict(Entity* entity, sf::Vector2f position, Zone* zone);
 	bool colliding(Entity* entity, sf::Vector2f position, Zone* zone);
 	bool colliding(Entity* entity, Zone* zone);
-	std::string to_string();
-	std::string to_bounds_string();
-private:
-
 	static unsigned long long int ID()
 	{
 		static unsigned long long int ID = 0;
