@@ -8,6 +8,8 @@
 
 Zone::Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
+	entities.reserve(25);
+	toAdd.reserve(25);
 	toRemove.reserve(25);
 	this->grid = grid;
 	this->xStart = xStart;
