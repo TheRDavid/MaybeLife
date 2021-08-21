@@ -252,8 +252,8 @@ bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
 		{
 			Entity otherEntity = *otherE;
 			if (entity->id != otherEntity.id
-				&& pow(pos.x - otherEntity.position.x,2) < (entity->size.x / 2 + otherEntity.size.x / 2)
-				&& pow(pos.y - otherEntity.position.y,2) < (entity->size.y / 2 + otherEntity.size.y / 2)
+				&& abs(pos.x - otherEntity.position.x) < (entity->size.x + otherEntity.size.x)
+				&& abs(pos.y - otherEntity.position.y) < (entity->size.y + otherEntity.size.y)
 				)
 			{
 				//color = Color::Red;

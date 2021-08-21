@@ -12,6 +12,10 @@ namespace ut {
 		return "[" + std::to_string(vector.x) + "," + std::to_string(vector.y) + "]";
 	}
 
+	inline std::string to_string(sf::Color color) {
+		return "[r=" + std::to_string(color.r) + " g=" + std::to_string(color.g) + " b=" + std::to_string(color.b) + " a=" + std::to_string(color.a) + "]";
+	}
+
 	inline float randomNumber(float Min, float Max)
 	{
 		return ((float(rand()) / float(RAND_MAX)) * (Max - Min)) + Min;
