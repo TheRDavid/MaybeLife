@@ -28,8 +28,26 @@
     <Filter Include="Source Files\display">
       <UniqueIdentifier>{38319343-c1bc-44b8-9a3c-886f44977f57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\json">
-      <UniqueIdentifier>{3f4b8380-7e18-4c43-b1e0-5600dcefd0c3}</UniqueIdentifier>
+    <Filter Include="Header Files\display\GUI">
+      <UniqueIdentifier>{f0dfd100-343a-4294-9c04-ff489493a3aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\display\GUI">
+      <UniqueIdentifier>{f8d738a3-f029-4751-a14f-07d5c89addf4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\util">
+      <UniqueIdentifier>{4cbf8085-1712-48e1-8226-b4c9d585a70d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\sim">
+      <UniqueIdentifier>{b906fd3b-a395-4212-812a-405b7a3f3b05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sim">
+      <UniqueIdentifier>{7baead6e-798c-488a-819b-a537fb0cc6e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\display\SimGUI">
+      <UniqueIdentifier>{6e637fd9-1615-49c1-be78-b4f643a1ce75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\display\SimGUI">
+      <UniqueIdentifier>{5a303189-ee6b-4195-8386-54dd2b481ad5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -42,18 +60,6 @@
     <ClCompile Include="UI.cpp">
       <Filter>Source Files\display</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Environment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Zone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Grid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MouseInputManager.cpp">
       <Filter>Source Files\input</Filter>
     </ClCompile>
@@ -65,6 +71,33 @@
     </ClCompile>
     <ClCompile Include="Commander.cpp">
       <Filter>Source Files\input</Filter>
+    </ClCompile>
+    <ClCompile Include="GUI.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Element.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files\sim</Filter>
+    </ClCompile>
+    <ClCompile Include="Environment.cpp">
+      <Filter>Source Files\sim</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>Source Files\sim</Filter>
+    </ClCompile>
+    <ClCompile Include="Zone.cpp">
+      <Filter>Source Files\sim</Filter>
+    </ClCompile>
+    <ClCompile Include="Panel.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="TextPanel.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="StatusPanel.cpp">
+      <Filter>Source Files\display\SimGUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -79,21 +112,6 @@
     </ClInclude>
     <ClInclude Include="UI.h">
       <Filter>Header Files\display</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Environment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Zone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Utilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MouseInputManager.h">
       <Filter>Header Files\input</Filter>
@@ -110,8 +128,38 @@
     <ClInclude Include="SimConfig.h">
       <Filter>Header Files\config</Filter>
     </ClInclude>
+    <ClInclude Include="GUI.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Element.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
     <ClInclude Include="json.hpp">
-      <Filter>Header Files\json</Filter>
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="Utilities.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files\sim</Filter>
+    </ClInclude>
+    <ClInclude Include="Environment.h">
+      <Filter>Header Files\sim</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Header Files\sim</Filter>
+    </ClInclude>
+    <ClInclude Include="Zone.h">
+      <Filter>Header Files\sim</Filter>
+    </ClInclude>
+    <ClInclude Include="Panel.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="TextPanel.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="StatusPanel.h">
+      <Filter>Header Files\display\SimGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

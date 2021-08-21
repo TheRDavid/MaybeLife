@@ -136,9 +136,13 @@ void Environment::draw()
 			sf::Vector2f eSize = entity->size;
 			sf::Color col = entity->color;
 			rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
+			(*rects)[idx++].color = col;
 			rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
+			(*rects)[idx++].color = col;
 			rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
+			(*rects)[idx++].color = col;
 			rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
+			(*rects)[idx++].color = col;
 		}
 	}
 
