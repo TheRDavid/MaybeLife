@@ -8,7 +8,7 @@
 
 Zone::Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity)
 {
-	entities.reserve(25);
+	m_entities.reserve(25);
 	toAdd.reserve(25);
 	toRemove.reserve(25);
 	this->grid = grid;
@@ -24,27 +24,27 @@ void Zone::update()
 {
 	entityAccess.lock();
 	for (auto entity : toAdd) {
-		entities.push_back(entity);
+		m_entities.push_back(entity);
 	}
 	toAdd.clear();
 	entityAccess.unlock();
 
 	toRemove.clear();
-	for (Entity* entity : entities) {
-		if (!legalPosition(entity->position)) {
+	for (Entity* entity : m_entities) {
+		if (!legalPosition(entity->m_position)) {
 			toRemove.push_back(entity);
-			Zone* newZone = grid->zoneAt(entity->position);
+			Zone* newZone = grid->zoneAt(entity->m_position);
 			if (newZone == nullptr) {
 				std::cout << "Illegal Entity: " << entity->to_string() << std::endl;
 			}
 			else {
-				newZone->entities.push_back(entity);
+				newZone->m_entities.push_back(entity);
 				entity->zone = newZone;
 			}
 		}
 	}
 	for (auto entity : toRemove) {
-		entities.erase(std::remove(entities.begin(), entities.end(), entity), entities.end());
+		m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
 	}
 }
 
@@ -55,7 +55,7 @@ bool Zone::legalPosition(sf::Vector2f position)
 
 std::string Zone::to_string()
 {
-	return "Zone " + std::to_string(id) + " [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(entities.size());
+	return "Zone " + std::to_string(m_id) + " [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(m_entities.size());
 }
 
 void Zone::addEntity(Entity * entity)
@@ -69,5 +69,5 @@ void Zone::addEntity(Entity * entity)
 void Zone::addEntityImmediatly(Entity * entity)
 {
 	entity->zone = this;
-	entities.push_back(entity);
+	m_entities.push_back(entity);
 }

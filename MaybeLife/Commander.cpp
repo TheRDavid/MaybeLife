@@ -7,73 +7,50 @@
 
 Commander::Commander(Environment * environment, sf::RenderWindow * window, sf::View* sceneView, sf::View* uiView)
 {
-	this->environment = environment;
-	this->window = window;
-	this->sceneView = sceneView;
-	this->uiView = uiView;
+	this->m_environment = environment;
+	this->m_window = window;
+	this->m_sceneView = sceneView;
+	this->m_guiView = uiView;
 }
 
 void Commander::setEntityCollision(bool enabled)
 {
-	environment->entityCollision = enabled;
-}
-
-void Commander::setBehaviour(std::string behaviour)
-{
-	Entity::Behaviour newBehaviour = Entity::to_behaviour(behaviour);
-	for (Entity* entity : *(environment->entities)) {
-		entity->behaviour = newBehaviour;
-	}
+	m_environment->m_entityCollision = enabled;
 }
 
 void Commander::setUIVisible(bool visible)
 {
-	environment->showUI = visible;
+	m_environment->m_showUI = visible;
 }
 
 void Commander::setZonesVisible(bool visible)
 {
-	environment->showZones = visible;
-}
-
-void Commander::setGravityCenter(std::string x, std::string y)
-{
-	std::string errorMsg = "ERROR: Invalid Gravity Center";
-	try {
-		int centerX = std::stoi(x);
-		int centerY = std::stoi(y);
-		environment->gravityCenter = sf::Vector2f(centerX, centerY);
-		return;
-	}
-	catch (const std::invalid_argument&) {
-		std::cout << errorMsg << std::endl;
-	}
-	std::cout << errorMsg << std::endl;
+	m_environment->m_showZones = visible;
 }
 
 void Commander::setSelectedZone(Zone * zone)
 {
-	selectedZone = zone;
-	environment->selectedZone = zone;
+	m_selectedZone = zone;
+	m_environment->m_selectedZone = zone;
 }
 
 void Commander::selectZoneAt(sf::Vector2f position)
 {
-	setSelectedZone(environment->entityGrid->zoneAt(position));
+	setSelectedZone(m_environment->m_entityGrid->zoneAt(position));
 }
 
 void Commander::setSelectedEntity(Entity * entity)
 {
-	selectedEntity = entity;
+	m_selectedEntity = entity;
 }
 
 void Commander::addEntity(sf::Vector2f position)
 {
-	Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, position, sf::Vector2f(4,4));
-	Zone* zone = environment->entityGrid->zoneAt(position);
+	Entity* entity = new Entity(m_environment, position, sf::Vector2f(4,4));
+	Zone* zone = m_environment->m_entityGrid->zoneAt(position);
 	zone->addEntity(entity);
 	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->to_string() << std::endl;
-	environment->insertLock.lock();
-	environment->entities->push_back(entity);
-	environment->insertLock.unlock();
+	m_environment->m_insertLock.lock();
+	m_environment->m_entities->push_back(entity);
+	m_environment->m_insertLock.unlock();
 }

@@ -17,12 +17,12 @@ namespace gui
 		void update();
 		void handle(sf::Event event);
 
-		gui::Panel* mainPanel;
+		gui::Panel* m_mainPanel;
 
 	private:
-		sf::RenderWindow* window;
-		sf::View* guiView;
-		Commander* commander;
+		sf::RenderWindow* m_window;
+		sf::View* m_guiView;
+		Commander* m_commander;
 	};
 
 }

@@ -7,68 +7,45 @@
 #include "Environment.h"
 static unsigned long long int nextId = 0;
 
-Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color)
+Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color)
 {
-	this->environment = environment;
-	this->position = position;
-	this->size = size;
+	this->m_environment = environment;
+	this->m_position = position;
+	this->m_size = size;
 	this->color = color;
-	this->collide = collide;
-	this->behaviour = behaviour;
-	majorSize = std::max(size.x, size.y);
+	this->m_collide = collide;
 
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size, bool collide) : Entity(environment, behaviour, position, size, collide, sf::Color::White)
+Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size, bool collide) : Entity(environment, position, size, collide, sf::Color::White)
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position, sf::Vector2f size) : Entity(environment, behaviour, position, size, true)
+Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size) : Entity(environment, position, size, true)
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour, sf::Vector2f position) : Entity(environment, behaviour, position, sf::Vector2f(1, 1))
+Entity::Entity(Environment* environment, sf::Vector2f position) : Entity(environment, position, sf::Vector2f(1, 1))
 {
 }
-Entity::Entity(Environment* environment, Behaviour behaviour) : Entity(environment, behaviour, sf::Vector2f(0, 0))
-{
-}
-Entity::Entity(Environment* environment) : Entity(environment, RANDOM)
+Entity::Entity(Environment* environment) : Entity(environment, sf::Vector2f(0, 0))
 {
 }
 void Entity::update()
 {
-	switch (behaviour) {
-	case Behaviour::FALL:
-		actFall();
-		break;
-	case Behaviour::GRAVITATE:
-		actGravitate();
-		break;
-	case Behaviour::GROUP:
-		actGroup();
-		break;
-	case Behaviour::RANDOM:
-		actRandom();
-		break;
-	case Behaviour::SPREAD:
-		actSpread();
-		break;
-	default:break;
-	}
-	if (environment->entityCollision && collide) {
+	if (m_environment->m_entityCollision && m_collide) {
 		updateCollision();
 	}
 }
 void Entity::updateCollision()
 {
-	if (colliding(this, position, zone)) {
+	if (colliding(this, m_position, zone)) {
 		bool foundDodge = false;
 		sf::Vector2f dodgePosition;
 		int startDir = ut::randomNumber(0, 8), dirCount = 0;
-		//std::cout << id << " collides, startDir = " << startDir << std::endl;
+		//std::cout << m_id << " collides, startDir = " << startDir << std::endl;
 		while (dirCount++ < 8) {
 			if (++startDir == 8) {
 				startDir = 0;
 			}
-			dodgePosition = sf::Vector2f(environment->gridDirections[startDir].x * size.x, environment->gridDirections[startDir].y * size.y) + position;
+			dodgePosition = sf::Vector2f(m_environment->gridDirections[startDir].x * m_size.x, m_environment->gridDirections[startDir].y * m_size.y) + m_position;
 			//std::cout << "Try dodgin to with " << startDir << " -> " << ut::to_string(environment->gridDirections[startDir]) << " to " << ut::to_string(dodgePosition) << std::endl;
 			if (legalPosition_strict(this, dodgePosition, zone)) {
 				foundDodge = true;
@@ -76,184 +53,43 @@ void Entity::updateCollision()
 			}
 		}
 		if (foundDodge) {
-			position = dodgePosition;
-		}
-	}
-}
-void Entity::actFall()
-{
-	sf::Vector2f dir = sf::Vector2f(0, size.y);
-	sf::Vector2f ePos = position + dir;
-
-	if (legalPosition_strict(this, ePos, zone)) {
-		position = ePos;
-	}
-	else {
-		int randDir = rand() == 1 ? 1 : -1;
-		dir = sf::Vector2f(randDir * majorSize * 2, size.y);
-		ePos = position + dir;
-
-		if (legalPosition_strict(this, ePos, zone)) {
-			position = ePos;
-		}
-		else {
-			dir = sf::Vector2f(-randDir * majorSize * 2, size.y);
-			ePos = position + dir;
-
-			if (legalPosition_strict(this, ePos, zone)) {
-				position = ePos;
-			}
-		}
-	}
-}
-void Entity::actGravitate()
-{
-	sf::Vector2f dir = sf::Vector2f(environment->gravityCenter.x - position.x, environment->gravityCenter.y - position.y);
-	if (dir.x != 0) dir.x = dir.x > 0 ? 1 : -1;
-	if (dir.y != 0) dir.y = dir.y > 0 ? 1 : -1;
-	sf::Vector2f newPos = position + dir;
-	if (legalPosition_strict(this, newPos, zone)) {
-		position = newPos;
-	}
-}
-void Entity::actRandom()
-{
-	sf::Vector2f dir = sf::Vector2f(ut::randomNumber(-1, 1), ut::randomNumber(-1, 1));
-	sf::Vector2f ePos = position + dir;
-
-	if (legalPosition_strict(this, ePos, zone)) {
-		position = ePos;
-	}
-}
-void Entity::actSpread()
-{
-	int lineIndex = 0;
-	float xDir = 0, yDir = 0;
-	sf::Vector2f ePos = position;
-	sf::Vector2f newPos = ePos;
-	for (Zone* zonen : zone->neighbours) {
-		for (Entity* neighbour : zonen->entities)
-		{
-			float xd = ePos.x - neighbour->position.x;
-			float yd = ePos.y - neighbour->position.y;
-			float dist = pow(xd, 2) + pow(yd, 2);
-			if (id != neighbour->id) {
-				if (xd != 0)
-					xd = (xd > 0 ? 1000 : -1000);
-				if (yd != 0)
-					yd = (yd > 0 ? 1000 : -1000);
-				xDir += xd / dist;
-				yDir += yd / dist;
-			}
-		}
-	}
-	if (xDir != 0) xDir = xDir > 0 ? 1 : -1;
-	if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
-	newPos = ePos + sf::Vector2f(xDir, yDir);
-	if (legalPosition_strict(this, newPos, zone)) {
-		position = newPos;
-	}
-	else {
-		newPos = ePos + sf::Vector2f(0, yDir);
-		if (legalPosition_strict(this, newPos, zone)) {
-			position = newPos;
-		}
-	}
-}
-void Entity::actGroup()
-{
-	int lineIndex = 0;
-	float xDir = 0, yDir = 0;
-	sf::Vector2f ePos = position;
-	sf::Vector2f newPos = ePos;
-	for (Zone* zone : zone->neighbours) {
-		for (Entity* neighbour : zone->entities)
-		{
-			float xd = -ePos.x + neighbour->position.x;
-			float yd = -ePos.y + neighbour->position.y;
-			float dist = pow(xd, 2) + pow(yd, 2);
-			if (id != neighbour->id) {
-				if (xd != 0)
-					xd = (xd > 0 ? 1000 : -1000);
-				if (yd != 0)
-					yd = (yd > 0 ? 1000 : -1000);
-				xDir += xd * dist;
-				yDir += yd * dist;
-			}
-		}
-	}
-	if (xDir != 0) xDir = xDir > 0 ? 1 : -1;
-	if (yDir != 0) yDir = yDir > 0 ? 1 : -1;
-	newPos = ePos + sf::Vector2f(xDir, yDir);
-	if (legalPosition_strict(this, newPos, zone)) {
-		position = newPos;
-	}
-	else {
-		newPos = ePos + sf::Vector2f(0, yDir);
-		if (legalPosition_strict(this, newPos, zone)) {
-			position = newPos;
+			m_position = dodgePosition;
 		}
 	}
 }
 std::string Entity::to_bounds_string()
 {
-	return "@" + ut::to_string(position) + " sized " + ut::to_string(size);
+	return "@" + ut::to_string(m_position) + " sized " + ut::to_string(m_size);
 }
-Entity::Behaviour Entity::to_behaviour(std::string behaviour)
-{
-	Behaviour newBehaviour;
-	if (behaviour == "gravitate") {
-		newBehaviour = Entity::Behaviour::GRAVITATE;
-	}
-	else if (behaviour == "random") {
-		newBehaviour = Entity::Behaviour::RANDOM;
-	}
-	else if (behaviour == "sleep") {
-		newBehaviour = Entity::Behaviour::SLEEP;
-	}
-	else if (behaviour == "spread") {
-		newBehaviour = Entity::Behaviour::SPREAD;
-	}
-	else if (behaviour == "fall") {
-		newBehaviour = Entity::Behaviour::FALL;
-	}
-	else if (behaviour == "group") {
-		newBehaviour = Entity::Behaviour::GROUP;
-	}
-	else {
-		std::cout << "ERROR: Invalid Behaviour" << std::endl;
-		newBehaviour = Entity::Behaviour::SLEEP;
-	}
-	return newBehaviour;
-}
+
 std::string Entity::to_string()
 {
-	return "Entity " + std::to_string(id) + " " + to_bounds_string();
+	return "Entity " + std::to_string(m_id) + " " + to_bounds_string();
 }
 bool operator<(const Entity& l, const Entity& r)
 {
-	return l.id < r.id; // keep the same order
+	return l.m_id < r.m_id; // keep the same order
 }
 bool operator>(const Entity& l, const Entity& r)
 {
-	return l.id > r.id; // keep the same order
+	return l.m_id > r.m_id; // keep the same order
 }
 
 bool Entity::colliding(Entity* entity, Zone * zone)
 {
-	return colliding(entity, entity->position, zone);
+	return colliding(entity, entity->m_position, zone);
 }
 
 
 bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
 {
-	for (Zone* z : zone->neighbours) {
-		for (Entity* otherE : z->entities)
+	for (Zone* z : zone->m_neighbours) {
+		for (Entity* otherE : z->m_entities)
 		{
 			Entity otherEntity = *otherE;
-			if (entity->id != otherEntity.id
-				&& abs(pos.x - otherEntity.position.x) < (entity->size.x + otherEntity.size.x)
-				&& abs(pos.y - otherEntity.position.y) < (entity->size.y + otherEntity.size.y)
+			if (entity->m_id != otherEntity.m_id
+				&& abs(pos.x - otherEntity.m_position.x) < (entity->m_size.x + otherEntity.m_size.x)
+				&& abs(pos.y - otherEntity.m_position.y) < (entity->m_size.y + otherEntity.m_size.y)
 				)
 			{
 				//color = Color::Red;
@@ -269,8 +105,8 @@ bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
 
 bool Entity::legalPosition_strict(Entity* entity, sf::Vector2f checkPosition, Zone* uZone)
 {
-	if (environment->entityCollision && collide && colliding(entity, checkPosition, uZone)) {
+	if (m_environment->m_entityCollision && m_collide && colliding(entity, checkPosition, uZone)) {
 		return false;
 	}
-	return 0 < checkPosition.x && checkPosition.x < environment->size.x && 0 < checkPosition.y && checkPosition.y < environment->size.y;
+	return 0 < checkPosition.x && checkPosition.x < m_environment->m_size.x && 0 < checkPosition.y && checkPosition.y < m_environment->m_size.y;
 }

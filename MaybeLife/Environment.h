@@ -10,17 +10,17 @@ class Environment
 {
 
 public:
-	Grid* entityGrid;
-	std::vector<Entity*>* entities;
-	sf::RenderWindow* window;
+	Grid* m_entityGrid;
+	std::vector<Entity*>* m_entities;
+	sf::RenderWindow* m_window;
 
-	int numThreads;
+	int m_numThreads;
 
-	bool showZones = false;
-	bool showUI = true;
-	bool entityCollision = true;
+	bool m_showZones = false;
+	bool m_showUI = true;
+	bool m_entityCollision = true;
 
-	sf::RectangleShape processedZoneRect;
+	sf::RectangleShape m_processedZoneRect;
 
 	sf::Vector2f left = sf::Vector2f(-2, 0);
 	sf::Vector2f upLeft = sf::Vector2f(-2, -2);
@@ -32,15 +32,14 @@ public:
 	sf::Vector2f downLeft = sf::Vector2f(-2, 2);
 	sf::Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
 
-	std::mutex insertLock;
+	std::mutex m_insertLock;
 
-	sf::Vector2i size;
-	sf::Vector2f renderRectPosition;
-	sf::Vector2f renderRectSize;
-	sf::Vector2f gravityCenter;
+	sf::Vector2i m_size;
+	sf::Vector2f m_renderRectPosition;
+	sf::Vector2f m_renderRectSize;
 
-	Zone* selectedZone = nullptr;
-	Entity* selectedEntity = nullptr;
+	Zone* m_selectedZone = nullptr;
+	Entity* m_selectedEntity = nullptr;
 
 	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
 	void updateEntities();
@@ -53,13 +52,10 @@ public:
 	void adjustRenderingRect();
 
 private:
-	sf::View* sceneView;
-	std::vector<sf::Vector2i> ranges;
-	sf::VertexArray* rects = NULL;
-	sf::VertexArray* zoneLines = NULL;
-	sf::Vector2f centerShapeSize;
-	sf::CircleShape centerShape;
-	float gravityShapeRadius = 10;
+	sf::View* m_sceneView;
+	std::vector<sf::Vector2i> m_zoneProcessingRanges;
+	sf::VertexArray* m_rects = NULL;
+	sf::VertexArray* m_zoneLines = NULL;
 
 	void drawZones();
 	bool inRenderRect(Entity* entity);

@@ -12,8 +12,8 @@ StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 		1,
 		true)
 {
-	this->environment = environment;
-	statusText = new gui::TextPanel(
+	this->m_environment = environment;
+	m_statusText = new gui::TextPanel(
 		window,
 		sf::Vector2f(20, 15),
 		sf::Vector2f(0, 0),
@@ -24,8 +24,8 @@ StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 		"Uninitialized",
 		24
 	);
-	addChild(statusText);
-	name = "StatusPanel";
+	addChild(m_statusText);
+	m_name = "StatusPanel";
 }
 
 
@@ -84,28 +84,28 @@ inline std::string timeDescription(int timeSteps) {
 
 void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 {
-	if (drawCallsSince++ == fpsAvgSpan) {
-		int ms = std::max<long long>(1, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - fpsstart).count());
-		fpsString = std::to_string((float)(fpsAvgSpan * 100000 / ms) / 100);
-		fpsstart = std::chrono::high_resolution_clock::now();
-		drawCallsSince = 0;
+	if (m_drawCallsSince++ == m_fpsAvgSpan) {
+		int ms = std::max<long long>(1, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_fpsstart).count());
+		m_fpsString = std::to_string((float)(m_fpsAvgSpan * 100000 / ms) / 100);
+		m_fpsstart = std::chrono::high_resolution_clock::now();
+		m_drawCallsSince = 0;
 	}
-	if (environment->steps - stepCountLast >= updateAvgSpan) {
-		int ms = std::max<long long>(1, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - upstart).count());
-		utString = std::to_string((float)(updateAvgSpan * 100000 / ms) / 100);
-		upstart = std::chrono::high_resolution_clock::now();
-		stepCountLast = environment->steps;
+	if (m_environment->steps - m_stepCountLast >= m_updateAvgSpan) {
+		int ms = std::max<long long>(1, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - m_upstart).count());
+		m_utString = std::to_string((float)(m_updateAvgSpan * 100000 / ms) / 100);
+		m_upstart = std::chrono::high_resolution_clock::now();
+		m_stepCountLast = m_environment->steps;
 	}
-	fpsString.erase(fpsString.find_last_not_of('0') + 1, std::string::npos);
-	utString.erase(utString.find_last_not_of('0') + 1, std::string::npos);
-	if (true || AppConfig::getInstance().showFPS) {
-		statusText->setText(
-			"Entities: " + shorthand(environment->entities->size()) + "\n"
-			+ "Zones: " + shorthand(environment->entityGrid->numZones) + "\n"
-			+ "Threads: " + std::to_string(environment->numThreads) + "\n"
-			+ "FPS: " + fpsString + "\n"
-			+ "UPS: " + utString + "\n"
-			+ "Date: " + timeDescription(environment->steps));
+	m_fpsString.erase(m_fpsString.find_last_not_of('0') + 1, std::string::npos);
+	m_utString.erase(m_utString.find_last_not_of('0') + 1, std::string::npos);
+	if (true || AppConfig::getInstance().m_showFPS) {
+		m_statusText->setText(
+			"Entities: " + shorthand(m_environment->m_entities->size()) + "\n"
+			+ "Zones: " + shorthand(m_environment->m_entityGrid->m_numZones) + "\n"
+			+ "Threads: " + std::to_string(m_environment->m_numThreads) + "\n"
+			+ "FPS: " + m_fpsString + "\n"
+			+ "UPS: " + m_utString + "\n"
+			+ "Date: " + timeDescription(m_environment->steps));
 	}
 	Panel::drawSelf(relativePosition);
 }

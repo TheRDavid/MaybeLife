@@ -6,14 +6,14 @@
 class StatusPanel : public gui::Panel
 {
 public:
-	Environment* environment;
-	gui::TextPanel* statusText;
+	Environment* m_environment;
+	gui::TextPanel* m_statusText;
 
-	StatusPanel(Environment * environment, sf::RenderWindow * window);
-	static const int fpsAvgSpan = 30, updateAvgSpan = 30;
-	std::chrono::time_point<std::chrono::high_resolution_clock> fpsstart, upstart;
-	int drawCallsSince = 0, stepCountLast = 0;
-	std::string fpsString = "", utString = "";
+	StatusPanel(Environment * environment, sf::RenderWindow * m_window);
+	static const int m_fpsAvgSpan = 30, m_updateAvgSpan = 30;
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_fpsstart, m_upstart;
+	int m_drawCallsSince = 0, m_stepCountLast = 0;
+	std::string m_fpsString = "", m_utString = "";
 	virtual void drawSelf(sf::Vector2f relativePosition);
 
 };

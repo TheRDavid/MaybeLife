@@ -8,20 +8,20 @@
 class Element
 {
 public:
-	std::string name = "Element";
-	sf::RenderWindow *window;
-	Element* parent;
-	std::vector<Element*> children;
-	sf::Vector2f position, size, drawPosition;
-	sf::VertexArray triangleStrips, quads;
+	std::string m_name = "Element";
+	sf::RenderWindow *m_window;
+	Element* m_parent;
+	std::vector<Element*> m_children;
+	sf::Vector2f m_position, m_size, m_drawPosition;
+	sf::VertexArray m_triangleStrips, m_quads;
 
-	sf::Vector2i lastDragPosition;
-	bool draggable = false;
-	bool dragging = false;
-	bool mouseHover = false;
-	bool focused = false;
+	sf::Vector2i m_lastDragPosition;
+	bool m_draggable = false;
+	bool m_dragging = false;
+	bool m_mouseHover = false;
+	bool m_focused = false;
 
-	Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable);
+	Element(sf::RenderWindow* m_window, sf::Vector2f position, sf::Vector2f size, bool draggable);
 
 	void handle(sf::Event event);
 
@@ -41,16 +41,16 @@ public:
 		draw(sf::Vector2f(0, 0));
 	}
 	void draw(sf::Vector2f relativePosition) {
-		drawPosition = relativePosition + position;
+		m_drawPosition = relativePosition + m_position;
 		drawSelf(relativePosition);
 		drawChildren(relativePosition);
 
 
-		if (dragging) {
-			sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
-			sf::Vector2i delta = mousePos - lastDragPosition;
-			position += sf::Vector2f(delta.x, delta.y);
-			lastDragPosition = mousePos;
+		if (m_dragging) {
+			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_window);
+			sf::Vector2i delta = mousePos - m_lastDragPosition;
+			m_position += sf::Vector2f(delta.x, delta.y);
+			m_lastDragPosition = mousePos;
 		}
 
 	}

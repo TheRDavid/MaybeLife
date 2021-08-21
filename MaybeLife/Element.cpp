@@ -6,16 +6,15 @@
 
 Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable)
 {
-	this->window = window;
-	this->parent = parent;
-	this->draggable = draggable;
-	this->size = size;
-	this->position = position;
-	lastDragPosition = sf::Vector2i(position.x, position.y);
-	this->drawPosition = position;
-	triangleStrips = sf::VertexArray(sf::TriangleStrip, 30);
-	quads = sf::VertexArray(sf::Quads, 20);
-	if (draggable)
+	this->m_window = window;
+	this->m_draggable = draggable;
+	this->m_size = size;
+	this->m_position = position;
+	m_lastDragPosition = sf::Vector2i(position.x, position.y);
+	this->m_drawPosition = position;
+	m_triangleStrips = sf::VertexArray(sf::TriangleStrip, 30);
+	m_quads = sf::VertexArray(sf::Quads, 20);
+	if (m_draggable)
 	{
 		onMousePressed = &Element::dragStart;
 		onMouseReleased = &Element::dragEnd;
@@ -25,22 +24,22 @@ Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f s
 void Element::handle(sf::Event event)
 {
 	bool hovering = mouseHovering();
-	if (draggable)
+	if (m_draggable)
 
 	if (onMouseMove != nullptr && event.type == event.MouseMoved && hovering)
 	{
 		(this->*onMouseMove)(event);
 	}
 
-	if (onMouseEnter != nullptr && event.type == event.MouseMoved && hovering && !mouseHover)
+	if (onMouseEnter != nullptr && event.type == event.MouseMoved && hovering && !m_mouseHover)
 	{
-		mouseHover = true;
+		m_mouseHover = true;
 		(this->*onMouseEnter)(event);
 	}
 
-	if (onMouseExit != nullptr && event.type == event.MouseMoved && !hovering && mouseHover)
+	if (onMouseExit != nullptr && event.type == event.MouseMoved && !hovering && m_mouseHover)
 	{
-		mouseHover = false;
+		m_mouseHover = false;
 		(this->*onMouseExit)(event);
 	}
 
@@ -54,16 +53,16 @@ void Element::handle(sf::Event event)
 		(this->*onMouseReleased)(event);
 	}
 
-	if (onKeyPressed != nullptr && event.type == event.KeyPressed && focused)
+	if (onKeyPressed != nullptr && event.type == event.KeyPressed && m_focused)
 	{
 		(this->*onKeyPressed)(event);
 	}
 
-	if (onKeyReleased != nullptr && event.type == event.KeyReleased && focused)
+	if (onKeyReleased != nullptr && event.type == event.KeyReleased && m_focused)
 	{
 		(this->*onKeyReleased)(event);
 	}
-	for (Element* child : children)
+	for (Element* child : m_children)
 	{
 		child->handle(event);
 	}
@@ -71,16 +70,16 @@ void Element::handle(sf::Event event)
 
 bool Element::mouseHovering()
 {
-	sf::Vector2i mousePos = sf::Mouse::getPosition(*window);
-	bool xOverlap = mousePos.x > drawPosition.x && mousePos.x < drawPosition.x + size.x;
-	bool yOverlap = mousePos.y > drawPosition.y && mousePos.y < drawPosition.y + size.y;
+	sf::Vector2i mousePos = sf::Mouse::getPosition(*m_window);
+	bool xOverlap = mousePos.x > m_drawPosition.x && mousePos.x < m_drawPosition.x + m_size.x;
+	bool yOverlap = mousePos.y > m_drawPosition.y && mousePos.y < m_drawPosition.y + m_size.y;
 	return xOverlap && yOverlap;
 }
 
 void Element::addChild(Element * element)
 {
-	children.push_back(element);
-	element->parent = this;
+	m_children.push_back(element);
+	element->m_parent = this;
 }
 
 void Element::drawSelf()
@@ -90,19 +89,19 @@ void Element::drawSelf()
 
 void Element::drawChildren(sf::Vector2f relativePosition)
 {
-	for (Element* child : children)
+	for (Element* child : m_children)
 	{
-		child->draw(relativePosition + position);
+		child->draw(relativePosition + m_position);
 	}
 }
 
 void Element::dragStart(sf::Event event)
 {
-	dragging = true;
-	lastDragPosition = sf::Mouse::getPosition(*window);
+	m_dragging = true;
+	m_lastDragPosition = sf::Mouse::getPosition(*m_window);
 }
 
 void Element::dragEnd(sf::Event event)
 {
-	dragging = false;
+	m_dragging = false;
 }

@@ -12,32 +12,28 @@ class SimConfig {
 public:
 
 	int getNumEntities() {
-		return data["numEntities"];
+		return m_data["numEntities"];
 	}
 
 	int getNumZones() {
-		return data["numZones"];
+		return m_data["numZones"];
 	}
 
 	int getNumThreads() {
-		return data["numThreads"];
-	}
-
-	Entity::Behaviour getDefaultBehaviour() {
-		return Entity::to_behaviour(data["defaultBehaviour"]);
+		return m_data["numThreads"];
 	}
 
 	static SimConfig& getInstance() {
-		static SimConfig theInstance;
-		return theInstance;
+		static SimConfig m_theInstance;
+		return m_theInstance;
 	}
 private:
 
-	json data;
+	json m_data;
 
 	SimConfig() {
-		std::ifstream("config/sim.json") >> data;
-		std::cout << "Sim Config: " << data << std::endl;
+		std::ifstream("config/sim.json") >> m_data;
+		std::cout << "Sim Config: " << m_data << std::endl;
 	}
 
 };

@@ -8,9 +8,6 @@
 #include "Zone.h"
 #include "Commander.h"
 enum BaseCommand {
-	set_behaviour, // random, spread
-	set_gravity_center, // x, y
-	// Switches: 0 -> false, 1 -> true
 	show_ui,
 	show_zones,
 	set_collide,
@@ -24,7 +21,7 @@ public:
 	CLIInputManager(Commander* commander);
 
 private:
-	Commander* commander;
+	Commander* m_commander;
 
 	void catchInput();
 	BaseCommand resolveCommand(std::string input);

@@ -6,10 +6,10 @@ class Grid;
 class Zone {
 public:
 	Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity);
-	unsigned long long int id = ID();
-	std::vector<Zone*> neighbours;
+	unsigned long long int m_id = ID();
+	std::vector<Zone*> m_neighbours;
 	float xStart, xEnd, yStart, yEnd, xMid, yMid;
-	std::vector<Entity*> entities;
+	std::vector<Entity*> m_entities;
 
 	void update();
 	std::string to_string();

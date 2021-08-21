@@ -23,11 +23,11 @@ public:
 	void addEntity(sf::Vector2f position);
 
 private:
-	Environment* environment;
-	sf::RenderWindow* window;
-	sf::View* sceneView, *uiView;
+	Environment* m_environment;
+	sf::RenderWindow* m_window;
+	sf::View* m_sceneView, *m_guiView;
 
-	Zone* selectedZone;
-	Entity* selectedEntity;
+	Zone* m_selectedZone;
+	Entity* m_selectedEntity;
 };
 

@@ -7,23 +7,23 @@
 #include "Utilities.h"
 
 Grid::Grid(int _numZones, int zoneCapacity, sf::Vector2i size) {
-	this->size = size;
-	rows = std::max(1, (int)sqrt(_numZones / (size.x / size.y)));
-	cols = _numZones / rows;
-	numZones = cols * rows;
-	zones.reserve(numZones);
-	zoneWidth = size.x / (float)cols;
-	zoneHeight = size.y / (float)rows;
+	this->m_size = size;
+	m_rows = std::max(1, (int)sqrt(_numZones / (m_size.x / m_size.y)));
+	m_cols = _numZones / m_rows;
+	m_numZones = m_cols * m_rows;
+	m_zones.reserve(m_numZones);
+	m_zoneWidth = m_size.x / (float)m_cols;
+	m_zoneHeight = m_size.y / (float)m_rows;
 
-	for (int i = 0; i < numZones; i++) {
-		int row = floor(i / cols);
-		int col = floor(i - row * cols);
-		float xPos = col * zoneWidth, yPos = row * zoneHeight;
-		zones.push_back(new Zone(this, xPos, xPos + zoneWidth, yPos, yPos + zoneHeight, zoneCapacity));
+	for (int i = 0; i < m_numZones; i++) {
+		int row = floor(i / m_cols);
+		int col = floor(i - row * m_cols);
+		float xPos = col * m_zoneWidth, yPos = row * m_zoneHeight;
+		m_zones.push_back(new Zone(this, xPos, xPos + m_zoneWidth, yPos, yPos + m_zoneHeight, zoneCapacity));
 	}
-	for (int i = 0; i < numZones; i++) {
-		Zone* zone = zones[i];
-		zone->neighbours = neighbours(zone);
+	for (int i = 0; i < m_numZones; i++) {
+		Zone* zone = m_zones[i];
+		zone->m_neighbours = neighbours(zone);
 	}
 
 	std::cout << "Created Grid: \n" << to_string() << std::endl;
@@ -31,50 +31,50 @@ Grid::Grid(int _numZones, int zoneCapacity, sf::Vector2i size) {
 
 std::vector<Zone*> Grid::neighbours(Zone* zone)
 {
-	std::vector<Zone*> neighbours;
-	neighbours.push_back(zone);
+	std::vector<Zone*> m_neighbours;
+	m_neighbours.push_back(zone);
 
-	Zone* neighbour = zoneAt(sf::Vector2f(zone->xMid - zoneWidth, zone->yMid));
+	Zone* neighbour = zoneAt(sf::Vector2f(zone->xMid - m_zoneWidth, zone->yMid));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid, zone->yMid - zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid, zone->yMid - m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid, zone->yMid + zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid, zone->yMid + m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid + zoneWidth, zone->yMid));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid + m_zoneWidth, zone->yMid));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid + zoneWidth, zone->yMid + zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid + m_zoneWidth, zone->yMid + m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid - zoneWidth, zone->yMid - zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid - m_zoneWidth, zone->yMid - m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid + zoneWidth, zone->yMid - zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid + m_zoneWidth, zone->yMid - m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	neighbour = zoneAt(sf::Vector2f(zone->xMid - zoneWidth, zone->yMid + zoneHeight));
+	neighbour = zoneAt(sf::Vector2f(zone->xMid - m_zoneWidth, zone->yMid + m_zoneHeight));
 	if (neighbour != nullptr) {
-		neighbours.push_back(neighbour);
+		m_neighbours.push_back(neighbour);
 	}
 
-	return neighbours;
+	return m_neighbours;
 }
 
 Zone* Grid::zoneAt(sf::Vector2f position)
@@ -82,18 +82,18 @@ Zone* Grid::zoneAt(sf::Vector2f position)
 	if (!legalPosition(position)) {
 		return nullptr;
 	}
-	int index = (int)(position.y / zoneHeight) * cols + (int)(position.x / zoneWidth);
-	return zones[index];
+	int index = (int)(position.y / m_zoneHeight) * m_cols + (int)(position.x / m_zoneWidth);
+	return m_zones[index];
 }
 
 bool Grid::legalPosition(sf::Vector2f position)
 {
-	return 0 <= position.x && position.x <= size.x && 0 <= position.y && position.y <= size.y;
+	return 0 <= position.x && position.x <= m_size.x && 0 <= position.y && position.y <= m_size.y;
 }
 
 std::string Grid::to_string()
 {
-	return "Grid (" + std::to_string(numZones) + "), size=" + ut::to_string(size) + ", cols="
-		+ std::to_string(cols) + ", rows=" + std::to_string(rows) + ", zone width=" + std::to_string(zoneWidth)
-		+ ", zone height=" + std::to_string(zoneHeight);
+	return "Grid (" + std::to_string(m_numZones) + "), size=" + ut::to_string(m_size) + ", cols="
+		+ std::to_string(m_cols) + ", rows=" + std::to_string(m_rows) + ", zone width=" + std::to_string(m_zoneWidth)
+		+ ", zone height=" + std::to_string(m_zoneHeight);
 }

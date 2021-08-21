@@ -25,11 +25,10 @@ int main()
 
 	/////////////// START CONFIG ///////////////
 	sf::Vector2i envSize = sf::Vector2i(7680, 4320);
-	sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
+	sf::RenderWindow m_window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
 	int numEntities = SimConfig::getInstance().getNumEntities();
 	int numZones = SimConfig::getInstance().getNumZones();
 	int numThreads = SimConfig::getInstance().getNumThreads();
-	Entity::Behaviour defaultBehaviour = SimConfig::getInstance().getDefaultBehaviour();
 	float xBoundarySize = .85;
 	float yBoundarySize = .85;
 	//////////////// END CONFIG ///////////////
@@ -37,14 +36,14 @@ int main()
 	int boundaryWidth = envSize.x * xBoundarySize, boundaryHeight = envSize.y * yBoundarySize;
 	float boundaryXStart = (envSize.x - boundaryWidth) / 2, boundaryYStart = (envSize.y - boundaryHeight) / 2;
 	sf::View sceneView(sf::FloatRect(0, 0, envSize.x, envSize.y));
-	sf::View uiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
-	sf::View guiView(sf::FloatRect(0, 0, window.getSize().x, window.getSize().y));
+	sf::View uiView(sf::FloatRect(0, 0, m_window.getSize().x, m_window.getSize().y));
+	sf::View guiView(sf::FloatRect(0, 0, m_window.getSize().x, m_window.getSize().y));
 
-	window.setPosition(sf::Vector2i(0, 0));
+	m_window.setPosition(sf::Vector2i(0, 0));
 
 	std::vector<Entity*>* entities = new std::vector<Entity*>();
 	entities->reserve(numEntities);
-	Environment environment(&window, envSize, numZones, numThreads, &sceneView);
+	Environment environment(&m_window, envSize, numZones, numThreads, &sceneView);
 	for (int i = 0; i < numEntities; i++) {
 		float s = 1 + rand() % 5;
 		sf::Vector2f entitySize = sf::Vector2f(s, s);
@@ -53,39 +52,38 @@ int main()
 		//std::cout << "Color: " << ut::to_string(entityColor) << std::endl;
 		position = sf::Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
 		entities->push_back(new Entity(&environment,
-			defaultBehaviour,
 			position,
 			entitySize,
 			true,
 			entityColor));
 	}
 	int loopNr = 0;
-	window.setFramerateLimit(30);
-	InputManager inputManager(&environment, &window, &sceneView, &uiView);
+	m_window.setFramerateLimit(30);
+	InputManager inputManager(&environment, &m_window, &sceneView, &uiView);
 	environment.start(entities);
-	environment.renderRectPosition = sceneView.getCenter() - sf::Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
-	environment.renderRectSize = sf::Vector2f(sceneView.getSize().x, sceneView.getSize().y);
+	environment.m_renderRectPosition = sceneView.getCenter() - sf::Vector2f(sceneView.getSize().x / 2, sceneView.getSize().y / 2);
+	environment.m_renderRectSize = sf::Vector2f(sceneView.getSize().x, sceneView.getSize().y);
 	sf::Event event;
 
-	gui::GUI gui = gui::GUI(&window, &guiView, inputManager.commander);
-	gui.mainPanel->addChild(new StatusPanel(&environment, &window));
-	StatusPanel* sp = new StatusPanel(&environment, &window);
-	sp->position = sf::Vector2f(100, 300);
-	gui.mainPanel->addChild(sp);
-	while (window.isOpen())
+	gui::GUI gui = gui::GUI(&m_window, &guiView, inputManager.m_commander);
+	gui.m_mainPanel->addChild(new StatusPanel(&environment, &m_window));
+	StatusPanel* sp = new StatusPanel(&environment, &m_window);
+	sp->m_position = sf::Vector2f(100, 300);
+	gui.m_mainPanel->addChild(sp);
+	while (m_window.isOpen())
 	{
-		if (window.pollEvent(event))
+		if (m_window.pollEvent(event))
 		{
 			inputManager.handleEvents(event);
 			gui.handle(event);
 		}
-		window.clear();
+		m_window.clear();
 		environment.draw();
-		if (environment.showUI)
+		if (environment.m_showUI)
 		{
 			gui.update();
 		}
-		window.display();
+		m_window.display();
 	}
 
 	return 0;

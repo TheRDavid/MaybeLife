@@ -12,8 +12,8 @@ public:
 	void handle(sf::Event event);
 
 private:
-	Commander* commander;
-	Environment* environment;
-	sf::RenderWindow* window;
-	sf::View* sceneView, *uiView;
+	Commander* m_commander;
+	Environment* m_environment;
+	sf::RenderWindow* m_window;
+	sf::View* m_sceneView, *m_guiView;
 };

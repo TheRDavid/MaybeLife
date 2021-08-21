@@ -49,6 +49,12 @@
     <Filter Include="Source Files\display\SimGUI">
       <UniqueIdentifier>{5a303189-ee6b-4195-8386-54dd2b481ad5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\sim\concreteEntities">
+      <UniqueIdentifier>{d6f93b80-7778-48a2-bcb4-63815e590045}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sim\concreteEntities">
+      <UniqueIdentifier>{cb5544e7-66cf-45ff-9ad5-7096a984a309}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MaybeLife.cpp">
@@ -95,6 +101,39 @@
     </ClCompile>
     <ClCompile Include="StatusPanel.cpp">
       <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="BadGuy.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Base.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Fighter.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="FoodItem.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="FoodSource.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="GoodGuy.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Peasant.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Person.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Slave.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Wall.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
+    </ClCompile>
+    <ClCompile Include="Worker.cpp">
+      <Filter>Source Files\sim\concreteEntities</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -154,6 +193,39 @@
     </ClInclude>
     <ClInclude Include="StatusPanel.h">
       <Filter>Header Files\display\SimGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BadGuy.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Base.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Fighter.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="FoodItem.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="FoodSource.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="GoodGuy.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Peasant.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Person.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Slave.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Wall.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="Worker.h">
+      <Filter>Header Files\sim\concreteEntities</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
