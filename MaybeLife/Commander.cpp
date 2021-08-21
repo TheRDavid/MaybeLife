@@ -69,7 +69,7 @@ void Commander::setSelectedEntity(Entity * entity)
 
 void Commander::addEntity(sf::Vector2f position)
 {
-	Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, position);
+	Entity* entity = new Entity(environment, Entity::Behaviour::RANDOM, position, sf::Vector2f(4,4));
 	Zone* zone = environment->entityGrid->zoneAt(position);
 	zone->addEntity(entity);
 	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->to_string() << std::endl;

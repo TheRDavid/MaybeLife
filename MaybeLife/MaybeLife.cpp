@@ -71,6 +71,9 @@ int main()
 
 	gui::GUI gui = gui::GUI(&window, &guiView, inputManager.commander);
 	gui.mainPanel->addChild(new StatusPanel(&environment, &window));
+	StatusPanel* sp = new StatusPanel(&environment, &window);
+	sp->position = sf::Vector2f(100, 300);
+	gui.mainPanel->addChild(sp);
 	while (window.isOpen())
 	{
 		if (window.pollEvent(event))

@@ -7,9 +7,9 @@ StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 		window, 
 		sf::Vector2f(40, 40), 
 		sf::Vector2f(350, 210), 
-		sf::Color(255, 255, 255, 220), 
-		sf::Color(140, 140, 140, 255),
-		4,
+		sf::Color(22, 32, 22, 220), 
+		sf::Color(255, 255, 255, 255),
+		1,
 		true)
 {
 	this->environment = environment;
@@ -20,7 +20,7 @@ StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 		sf::Color::Transparent,
 		sf::Color::Transparent,
 		0,
-		sf::Color(20, 20, 40, 255),
+		sf::Color(225, 225, 255, 255),
 		"Uninitialized",
 		24
 	);
