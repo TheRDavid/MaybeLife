@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>;
 #include <mutex>
+#include <future>
 
 #include "Zone.h"
 #include "Entity.h"
@@ -42,9 +43,10 @@ public:
 	Entity* selectedEntity = nullptr;
 
 	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
-	void updateEntities(int firstZone, int lastZone, int threadN);
+	void updateEntities();
+	void updateZoneRange(int firstZone, int lastZone);
 	void draw();
-	int* steps;
+	int steps;
 	void start(std::vector<Entity*>* entities);
 	std::string stepsToString();
 	bool legalPosition(sf::Vector2f position);
@@ -52,6 +54,7 @@ public:
 
 private:
 	sf::View* sceneView;
+	std::vector<sf::Vector2i> ranges;
 	sf::VertexArray* rects = NULL;
 	sf::VertexArray* zoneLines = NULL;
 	sf::Vector2f centerShapeSize;
@@ -61,6 +64,25 @@ private:
 	void drawZones();
 	bool inRenderRect(Entity* entity);
 	bool inRenderRect(Zone* zone);
+
+	std::future<void> zoneProcessor_0,
+		zoneProcessor_1,
+		zoneProcessor_2,
+		zoneProcessor_3,
+		zoneProcessor_4,
+		zoneProcessor_5,
+		zoneProcessor_6,
+		zoneProcessor_7,
+		zoneProcessor_8,
+		zoneProcessor_9,
+		zoneProcessor_10,
+		zoneProcessor_11,
+		zoneProcessor_12,
+		zoneProcessor_13,
+		zoneProcessor_14,
+		zoneProcessor_15,
+		zoneProcessor_16
+		;
 };
 
 

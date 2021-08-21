@@ -7,7 +7,6 @@
 #include <time.h>
 #include <string>
 
-#include "UI.h"
 #include "Environment.h"
 #include "Utilities.h"
 #include "InputManager.h"
@@ -60,7 +59,6 @@ int main()
 			true,
 			entityColor));
 	}
-	UI ui(&window, &environment, &uiView);
 	int loopNr = 0;
 	window.setFramerateLimit(30);
 	InputManager inputManager(&environment, &window, &sceneView, &uiView);
