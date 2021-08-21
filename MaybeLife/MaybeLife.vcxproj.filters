@@ -57,9 +57,6 @@
     <ClCompile Include="InputManager.cpp">
       <Filter>Source Files\input</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
-      <Filter>Source Files\display</Filter>
-    </ClCompile>
     <ClCompile Include="MouseInputManager.cpp">
       <Filter>Source Files\input</Filter>
     </ClCompile>
@@ -109,9 +106,6 @@
     </ClInclude>
     <ClInclude Include="AppConfig.h">
       <Filter>Header Files\config</Filter>
-    </ClInclude>
-    <ClInclude Include="UI.h">
-      <Filter>Header Files\display</Filter>
     </ClInclude>
     <ClInclude Include="MouseInputManager.h">
       <Filter>Header Files\input</Filter>

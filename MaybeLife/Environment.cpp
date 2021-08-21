@@ -22,10 +22,7 @@ Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int
 	centerShape.setPosition(10, 10);
 	gravityCenter = sf::Vector2f(size.x / 2, size.y / 2);
 	numThreads = threads;
-	steps = new int[std::max(threads, 1)];
-	for (int i = 0; i < std::max(threads, 1); i++) {
-		steps[i] = 0;
-	}
+	steps = 0;
 	int zoneCapacity = 2 * entities->size() / _numZones;
 
 	entityGrid = new Grid(_numZones, zoneCapacity, size);
@@ -48,19 +45,12 @@ void Environment::start(std::vector<Entity*>* entities) {
 	}
 
 	for (int i = 0; i < numThreads; i++) {
-		steps[i] = -1;
 		int firstZone = i == 0 ? 0 : i * entityGrid->numZones / numThreads;
 		int lastZone = i == 0 ? entityGrid->numZones / numThreads : (i + 1)*entityGrid->numZones / numThreads;
 		std::cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << std::endl;
-
-		if (i == 0) {
-			new std::thread(&Environment::updateEntities, this, 0, entityGrid->numZones / numThreads, 0);
-		}
-		else {
-			new std::thread(&Environment::updateEntities, this, i * entityGrid->numZones / numThreads, (i + 1) * entityGrid->numZones / numThreads, i);
-
-		}
+		ranges.push_back(sf::Vector2i(firstZone, lastZone));
 	}
+	new std::thread(&Environment::updateEntities, this);
 }
 
 bool Environment::legalPosition(sf::Vector2f position)
@@ -74,45 +64,100 @@ void Environment::adjustRenderingRect()
 	renderRectSize = sf::Vector2f(sceneView->getSize().x, sceneView->getSize().y);
 }
 
-void Environment::updateEntities(int firstZone, int lastZone, int threadN)
+void Environment::updateZoneRange(int firstZone, int lastZone)
 {
-	int stepIdx = std::max(0, threadN);
+	for (int i = firstZone; i < lastZone; i++)
+	{
+		Zone* uZone = entityGrid->zones[i];
+		uZone->update();
+		for (Entity* entity : uZone->entities)
+		{
+			entity->update();
+		}
+	}
+}
 
-	bool allReady = true, catchUp = false;
+void Environment::updateEntities()
+{
 	while (true) {
-		allReady = true;
-		catchUp = false;
-		for (int i = 0; i < numThreads; i++) {
-			if (steps[stepIdx] < steps[i])
+		int rangeIndex = 0;
+		for (auto range : ranges)
+		{
+			switch (rangeIndex++)
 			{
-				catchUp = true;
+			case 0: zoneProcessor_0 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 1: zoneProcessor_1 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 2: zoneProcessor_2 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 3: zoneProcessor_3 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 4: zoneProcessor_4 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 5: zoneProcessor_5 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 6: zoneProcessor_6 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 7: zoneProcessor_7 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 8: zoneProcessor_8 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 9: zoneProcessor_9 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 10: zoneProcessor_10 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 11: zoneProcessor_11 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 12: zoneProcessor_12 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 13: zoneProcessor_13 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 14: zoneProcessor_14 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
+				break;
+			case 15: zoneProcessor_15 = std::async(&Environment::updateZoneRange, this, range.x, range.y);
 				break;
 			}
 		}
-		if (!catchUp) {
-			for (int i = 0; i < numThreads; i++) {
-				if (steps[i] != steps[stepIdx])
-				{
-					allReady = false;
-					break;
-				}
-			}
-		}
-
-		if (catchUp || allReady) {
-
-			for (int i = firstZone; i < lastZone; i++)
+		for (int i = 0; i < rangeIndex; i++)
+		{
+			switch (i)
 			{
-				Zone* uZone = entityGrid->zones[i];
-				uZone->update();
-				for (Entity* entity : uZone->entities)
-				{
-					entity->update();
-				}
+			case 0: zoneProcessor_0.wait();
+				break;
+			case 1: zoneProcessor_1.wait();
+				break;
+			case 2: zoneProcessor_2.wait();
+				break;
+			case 3: zoneProcessor_3.wait();
+				break;
+			case 4: zoneProcessor_4.wait();
+				break;
+			case 5: zoneProcessor_5.wait();
+				break;
+			case 6: zoneProcessor_6.wait();
+				break;
+			case 7: zoneProcessor_7.wait();
+				break;
+			case 8: zoneProcessor_8.wait();
+				break;
+			case 9: zoneProcessor_9.wait();
+				break;
+			case 10: zoneProcessor_10.wait();
+				break;
+			case 11: zoneProcessor_11.wait();
+				break;
+			case 12: zoneProcessor_12.wait();
+				break;
+			case 13: zoneProcessor_13.wait();
+				break;
+			case 14: zoneProcessor_14.wait();
+				break;
+			case 15: zoneProcessor_15.wait();
+				break;
 			}
-
-			steps[stepIdx] = steps[stepIdx] + 1;
 		}
+		steps++;
 	}
 }
 
@@ -155,7 +200,7 @@ std::string Environment::stepsToString()
 {
 	std::string str = "Steps: ";
 	for (int i = 0; i < std::max(1, numThreads); i++) {
-		str += " " + std::to_string(steps[i]);
+		str += " " + std::to_string(steps);
 	}
 	return str;
 }
@@ -220,4 +265,5 @@ bool Environment::inRenderRect(Zone * zone)
 		// y overlapping?
 		(zone->yEnd > renderRectPosition.y && zone->yStart < renderRectPosition.y + renderRectSize.y);
 }
+
 

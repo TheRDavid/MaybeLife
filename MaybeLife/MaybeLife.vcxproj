@@ -179,7 +179,6 @@
     <ClCompile Include="Panel.cpp" />
     <ClCompile Include="StatusPanel.cpp" />
     <ClCompile Include="TextPanel.cpp" />
-    <ClCompile Include="UI.cpp" />
     <ClCompile Include="Zone.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -200,7 +199,6 @@
     <ClInclude Include="SimConfig.h" />
     <ClInclude Include="StatusPanel.h" />
     <ClInclude Include="TextPanel.h" />
-    <ClInclude Include="UI.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Zone.h" />
   </ItemGroup>

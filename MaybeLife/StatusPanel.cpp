@@ -90,11 +90,11 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 		fpsstart = std::chrono::high_resolution_clock::now();
 		drawCallsSince = 0;
 	}
-	if (environment->steps[0] - stepCountLast >= updateAvgSpan) {
+	if (environment->steps - stepCountLast >= updateAvgSpan) {
 		int ms = std::max<long long>(1, std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - upstart).count());
 		utString = std::to_string((float)(updateAvgSpan * 100000 / ms) / 100);
 		upstart = std::chrono::high_resolution_clock::now();
-		stepCountLast = environment->steps[0];
+		stepCountLast = environment->steps;
 	}
 	fpsString.erase(fpsString.find_last_not_of('0') + 1, std::string::npos);
 	utString.erase(utString.find_last_not_of('0') + 1, std::string::npos);
@@ -105,7 +105,7 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 			+ "Threads: " + std::to_string(environment->numThreads) + "\n"
 			+ "FPS: " + fpsString + "\n"
 			+ "UPS: " + utString + "\n"
-			+ "Date: " + timeDescription(environment->steps[0]));
+			+ "Date: " + timeDescription(environment->steps));
 	}
 	Panel::drawSelf(relativePosition);
 }
