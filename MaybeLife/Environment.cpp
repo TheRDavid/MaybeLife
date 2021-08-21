@@ -119,7 +119,7 @@ void Environment::updateEntities()
 				break;
 			}
 		}
-		for (int i = 0; i< rangeIndex;i++)
+		for (int i = 0; i < rangeIndex; i++)
 		{
 			switch (i)
 			{
@@ -265,4 +265,5 @@ bool Environment::inRenderRect(Zone * zone)
 		// y overlapping?
 		(zone->yEnd > renderRectPosition.y && zone->yStart < renderRectPosition.y + renderRectSize.y);
 }
+
 

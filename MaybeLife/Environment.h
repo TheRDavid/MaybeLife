@@ -65,6 +65,7 @@ private:
 	bool inRenderRect(Entity* entity);
 	bool inRenderRect(Zone* zone);
 
+
 	std::future<void> zoneProcessor_0,
 		zoneProcessor_1,
 		zoneProcessor_2,
