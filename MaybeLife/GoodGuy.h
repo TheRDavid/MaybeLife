@@ -3,5 +3,9 @@
 class GoodGuy :
 	public Fighter
 {
+public:
+	GoodGuy(Environment* environment, sf::Vector2f position);
 };
+
+
 

@@ -3,5 +3,8 @@
 class FoodItem :
 	public Entity
 {
+public:
+	float m_nutrition;
+	FoodItem(Environment* environment, sf::Vector2f position);
 };
 

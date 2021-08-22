@@ -9,10 +9,13 @@
 
 InputManager::InputManager(Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* guiView)
 {
-	m_commander = new Commander(environment, window, sceneView, guiView);
-	m_mouseInputManager = new MouseInputManager(m_commander, environment, window, sceneView, guiView);
-	m_keyboardInputManager = new KeyboardInputManager(m_commander, environment, window, sceneView, guiView);
-	m_cliInputManager = new CLIInputManager(m_commander);
+	Commander::getInstance().m_environment = environment;
+	Commander::getInstance().m_window = window;
+	Commander::getInstance().m_sceneView = sceneView;
+	Commander::getInstance().m_guiView = guiView;
+	m_mouseInputManager = new MouseInputManager(environment, window, sceneView, guiView);
+	m_keyboardInputManager = new KeyboardInputManager(environment, window, sceneView, guiView);
+	m_cliInputManager = new CLIInputManager();
 }
 
 void InputManager::handleEvents(sf::Event event)

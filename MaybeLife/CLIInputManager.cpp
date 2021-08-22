@@ -1,8 +1,7 @@
 #include "CLIInputManager.h"
 
-CLIInputManager::CLIInputManager(Commander * commander)
+CLIInputManager::CLIInputManager()
 {
-	this->m_commander = commander;
 	new std::thread(&CLIInputManager::catchInput, this);
 }
 
@@ -38,7 +37,7 @@ void CLIInputManager::evaluate(std::vector<std::string> tokens)
 			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
-		m_commander->setEntityCollision(tokens[1] == "true"); break;
+		Commander::getInstance().setEntityCollision(tokens[1] == "true"); break;
 
 	case show_zones:
 		if (tokens.size() != 2)
@@ -46,7 +45,7 @@ void CLIInputManager::evaluate(std::vector<std::string> tokens)
 			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
-		m_commander->setZonesVisible(tokens[1] == "true"); break;
+		Commander::getInstance().setZonesVisible(tokens[1] == "true"); break;
 
 	case show_ui:
 		if (tokens.size() != 2)
@@ -54,7 +53,7 @@ void CLIInputManager::evaluate(std::vector<std::string> tokens)
 			std::cout << "ERROR: Invalid Number of Arguments" << std::endl;
 			break;
 		}
-		m_commander->setUIVisible(tokens[1] == "true"); break;
+		Commander::getInstance().setGUIVisible(tokens[1] == "true"); break;
 
 	default:
 		std::cout << "ERROR: Invalid Command" << std::endl;

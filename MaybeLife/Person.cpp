@@ -1,8 +1,8 @@
 #include "Person.h"
 
-Person::Person(Environment* environment, sf::Vector2f position, int health, int speed, bool good) : Entity(environment)
+Person::Person(Environment* environment, sf::Vector2f position, sf::Vector2f size, float health, float speed, bool good)
+	: Entity(environment, position, size), m_health(health), m_speed(speed), m_good(good)
 {
-	this->m_position = position;
 }
 
 void Person::move(sf::Vector2f dir)

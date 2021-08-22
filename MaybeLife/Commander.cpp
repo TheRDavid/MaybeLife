@@ -5,22 +5,14 @@
 #include "Environment.h"
 #include "Grid.h"
 
-Commander::Commander(Environment * environment, sf::RenderWindow * window, sf::View* sceneView, sf::View* uiView)
-{
-	this->m_environment = environment;
-	this->m_window = window;
-	this->m_sceneView = sceneView;
-	this->m_guiView = uiView;
-}
-
 void Commander::setEntityCollision(bool enabled)
 {
 	m_environment->m_entityCollision = enabled;
 }
 
-void Commander::setUIVisible(bool visible)
+void Commander::setGUIVisible(bool visible)
 {
-	m_environment->m_showUI = visible;
+	m_environment->m_showGUI = visible;
 }
 
 void Commander::setZonesVisible(bool visible)
@@ -44,13 +36,22 @@ void Commander::setSelectedEntity(Entity * entity)
 	m_selectedEntity = entity;
 }
 
-void Commander::addEntity(sf::Vector2f position)
+void Commander::addEntity(Entity* entity)
 {
-	Entity* entity = new Entity(m_environment, position, sf::Vector2f(4,4));
-	Zone* zone = m_environment->m_entityGrid->zoneAt(position);
+	Zone* zone = m_environment->m_entityGrid->zoneAt(entity->m_position);
 	zone->addEntity(entity);
 	std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->to_string() << std::endl;
 	m_environment->m_insertLock.lock();
 	m_environment->m_entities->push_back(entity);
 	m_environment->m_insertLock.unlock();
+}
+
+void Commander::deleteEntity(Entity* entity)
+{
+	entity->m_zone->removeEntity(entity);
+	m_environment->m_insertLock.lock();
+	m_environment->m_entities->erase(std::remove(m_environment->m_entities->begin(), m_environment->m_entities->end(), entity), m_environment->m_entities->end());
+	m_environment->m_insertLock.unlock();
+	delete entity;
+	entity = nullptr;
 }

@@ -18,10 +18,9 @@ enum BaseCommand {
 class CLIInputManager
 {
 public:
-	CLIInputManager(Commander* commander);
+	CLIInputManager();
 
 private:
-	Commander* m_commander;
 
 	void catchInput();
 	BaseCommand resolveCommand(std::string input);

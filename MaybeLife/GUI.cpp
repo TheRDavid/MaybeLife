@@ -2,11 +2,10 @@
 
 #include "Utilities.h"
 using namespace gui;
-GUI::GUI(sf::RenderWindow * window, sf::View * guiView, Commander * commander)
+GUI::GUI(sf::RenderWindow * window, sf::View * guiView)
 {
 	this->m_window = window;
 	this->m_guiView = guiView;
-	this->m_commander = commander;
 	m_mainPanel = new Panel(m_window, sf::Vector2f(0,0), m_guiView->getSize(), sf::Color::Transparent, sf::Color::Transparent, 0, false);
 	m_mainPanel->m_name = "MainPanel";
 }

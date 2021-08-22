@@ -8,11 +8,10 @@
 class MouseInputManager
 {
 public:
-	MouseInputManager(Commander* commander, Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* uiView);
+	MouseInputManager(Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* uiView);
 
 	void handle(sf::Event event);
 private:
-	Commander* m_commander;
 	Environment* m_environment;
 	sf::RenderWindow* m_window;
 	sf::View* m_sceneView, *m_guiView;

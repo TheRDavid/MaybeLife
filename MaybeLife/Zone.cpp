@@ -39,7 +39,7 @@ void Zone::update()
 			}
 			else {
 				newZone->m_entities.push_back(entity);
-				entity->zone = newZone;
+				entity->m_zone = newZone;
 			}
 		}
 	}
@@ -60,14 +60,21 @@ std::string Zone::to_string()
 
 void Zone::addEntity(Entity * entity)
 {
-	entity->zone = this;
+	entity->m_zone = this;
 	entityAccess.lock();
 	toAdd.push_back(entity);
 	entityAccess.unlock();
 }
 
+void Zone::removeEntity(Entity * entity)
+{
+	entityAccess.lock();
+	toRemove.push_back(entity);
+	entityAccess.unlock();
+}
+
 void Zone::addEntityImmediatly(Entity * entity)
 {
-	entity->zone = this;
+	entity->m_zone = this;
 	m_entities.push_back(entity);
 }

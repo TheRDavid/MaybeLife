@@ -12,7 +12,7 @@ Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f siz
 	this->m_environment = environment;
 	this->m_position = position;
 	this->m_size = size;
-	this->color = color;
+	this->m_color = color;
 	this->m_collide = collide;
 
 }
@@ -36,7 +36,7 @@ void Entity::update()
 }
 void Entity::updateCollision()
 {
-	if (colliding(this, m_position, zone)) {
+	if (colliding(this, m_position, m_zone)) {
 		bool foundDodge = false;
 		sf::Vector2f dodgePosition;
 		int startDir = ut::randomNumber(0, 8), dirCount = 0;
@@ -47,7 +47,7 @@ void Entity::updateCollision()
 			}
 			dodgePosition = sf::Vector2f(m_environment->gridDirections[startDir].x * m_size.x, m_environment->gridDirections[startDir].y * m_size.y) + m_position;
 			//std::cout << "Try dodgin to with " << startDir << " -> " << ut::to_string(environment->gridDirections[startDir]) << " to " << ut::to_string(dodgePosition) << std::endl;
-			if (legalPosition_strict(this, dodgePosition, zone)) {
+			if (legalPosition_strict(this, dodgePosition, m_zone)) {
 				foundDodge = true;
 				break;
 			}

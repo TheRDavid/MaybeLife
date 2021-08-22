@@ -12,12 +12,14 @@ class Environment
 public:
 	Grid* m_entityGrid;
 	std::vector<Entity*>* m_entities;
+	std::vector<Entity*>* m_toAdd;
+	std::vector<Entity*>* m_toRemove;
 	sf::RenderWindow* m_window;
 
 	int m_numThreads;
 
 	bool m_showZones = false;
-	bool m_showUI = true;
+	bool m_showGUI = true;
 	bool m_entityCollision = true;
 
 	sf::RectangleShape m_processedZoneRect;

@@ -4,9 +4,8 @@
 
 #include "Utilities.h"
 
-KeyboardInputManager::KeyboardInputManager(Commander * commander, Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * guiView)
+KeyboardInputManager::KeyboardInputManager(Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * guiView)
 {
-	this->m_commander = commander;
 	this->m_environment = environment;
 	this->m_window = window;
 	this->m_sceneView = sceneView;

@@ -29,7 +29,10 @@ Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int
 
 void Environment::start(std::vector<Entity*>* entities) {
 	this->m_entities = entities;
-
+	m_toAdd = new std::vector<Entity*>();
+	m_toAdd->reserve(30);
+	m_toRemove = new std::vector<Entity*>();
+	m_toAdd->reserve(30);
 
 	for (Entity* entity : (*m_entities)) {
 		entity->m_environment = this;
@@ -74,6 +77,19 @@ void Environment::updateEntities()
 {
 	while (true) {
 		int rangeIndex = 0;
+
+		m_insertLock.lock();
+		for (auto entity : *m_toAdd) {
+			m_entities->push_back(entity);
+		}
+		m_toAdd->clear();
+		m_insertLock.unlock();
+
+		for (auto entity : *m_toRemove) {
+			m_entities->erase(std::remove(m_entities->begin(), m_entities->end(), entity), m_entities->end());
+		}
+		m_toRemove->clear();
+
 		for (auto range : m_zoneProcessingRanges)
 		{
 			switch (rangeIndex++)
@@ -172,7 +188,7 @@ void Environment::draw()
 		if (inRenderRect(entity)) {
 			sf::Vector2f ePos = entity->m_position;
 			sf::Vector2f eSize = entity->m_size;
-			sf::Color col = entity->color;
+			sf::Color col = entity->m_color;
 			m_rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
 			(*m_rects)[idx++].color = col;
 			m_rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));

@@ -11,8 +11,32 @@ using json = nlohmann::json;
 class SimConfig {
 public:
 
-	int getNumEntities() {
-		return m_data["numEntities"];
+	int getNumGoodGuys() {
+		return m_data["goodGuys"];
+	}
+
+	int getNumBadGuys() {
+		return m_data["badGuys"];
+	}
+
+	int getNumPeasants() {
+		return m_data["peasants"];
+	}
+
+	int getNumSlaves() {
+		return m_data["slaves"];
+	}
+
+	int getNumFoodSources() {
+		return m_data["numFoodSources"];
+	}
+
+	int getGoodGuysStartNutrition() {
+		return m_data["goodGuysStartNutrition"];
+	}
+
+	int getBadGuysStartNutrition() {
+		return m_data["badGuysStartNutrition"];
 	}
 
 	int getNumZones() {

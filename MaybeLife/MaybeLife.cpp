@@ -8,6 +8,14 @@
 #include <string>
 
 #include "Environment.h"
+
+#include "GoodGuy.h"
+#include "BadGuy.h"
+#include "Slave.h"
+#include "Peasant.h"
+#include "FoodSource.h"
+#include "Base.h"
+
 #include "Utilities.h"
 #include "InputManager.h"
 #include "Grid.h"
@@ -24,9 +32,21 @@ int main()
 	std::cout << "MaybeLife starting up, oh boi!\n";
 
 	/////////////// START CONFIG ///////////////
-	sf::Vector2i envSize = sf::Vector2i(7680, 4320);
+	sf::Vector2i envSize = sf::Vector2i(1920, 1080);
 	sf::RenderWindow m_window(sf::VideoMode(1920, 1080), "SFML works!", sf::Style::Titlebar | sf::Style::Close);
-	int numEntities = SimConfig::getInstance().getNumEntities();
+
+	int numGoodGuys = SimConfig::getInstance().getNumGoodGuys();
+	int numBadGuys = SimConfig::getInstance().getNumBadGuys();
+	int numPeasants = SimConfig::getInstance().getNumPeasants();
+	int numSlaves = SimConfig::getInstance().getNumSlaves();
+
+	int goodGuysStartNutrition = SimConfig::getInstance().getGoodGuysStartNutrition();
+	int badGuysStartNutrition = SimConfig::getInstance().getBadGuysStartNutrition();
+	int numFoodSources = SimConfig::getInstance().getNumFoodSources();
+
+	sf::Vector2f goodBasePos = sf::Vector2f(300, 300);
+	sf::Vector2f badBasePos = sf::Vector2f(1000, 600);
+
 	int numZones = SimConfig::getInstance().getNumZones();
 	int numThreads = SimConfig::getInstance().getNumThreads();
 	float xBoundarySize = .85;
@@ -42,21 +62,60 @@ int main()
 	m_window.setPosition(sf::Vector2i(0, 0));
 
 	std::vector<Entity*>* entities = new std::vector<Entity*>();
-	entities->reserve(numEntities);
+	entities->reserve(2 + 100 + numGoodGuys + numPeasants + numBadGuys + numSlaves);
 	Environment environment(&m_window, envSize, numZones, numThreads, &sceneView);
-	for (int i = 0; i < numEntities; i++) {
-		float s = 1 + rand() % 5;
-		sf::Vector2f entitySize = sf::Vector2f(s, s);
-		sf::Vector2f position;
-		sf::Color entityColor = sf::Color(rand() % 255, rand() % 255, rand() % 255, 255);
-		//std::cout << "Color: " << ut::to_string(entityColor) << std::endl;
-		position = sf::Vector2f(boundaryXStart + (rand() % boundaryWidth), boundaryYStart + (rand() % boundaryHeight));
-		entities->push_back(new Entity(&environment,
-			position,
-			entitySize,
-			true,
-			entityColor));
+
+	for (int i = 0; i < numFoodSources; i++)
+	{
+		entities->push_back(
+			new FoodSource(&environment, sf::Vector2f(rand() % environment.m_size.x, rand() % environment.m_size.y))
+		);
 	}
+
+	entities->push_back(
+		new Base(&environment, goodBasePos, true, goodGuysStartNutrition)
+	);
+
+	entities->push_back(
+		new Base(&environment, badBasePos, false, badGuysStartNutrition)
+	);
+
+	for (int i = 0; i < numGoodGuys; i++) {
+		float posOffsetX = rand() % 200 - 100;
+		float posOffsetY = rand() % 200 - 100;
+		sf::Vector2f position = goodBasePos + sf::Vector2f(posOffsetX, posOffsetY);
+		entities->push_back(
+			new GoodGuy(&environment, position)
+		);
+	}
+
+	for (int i = 0; i < numPeasants; i++) {
+		float posOffsetX = rand() % 300 - 150;
+		float posOffsetY = rand() % 300 - 150;
+		sf::Vector2f position = goodBasePos + sf::Vector2f(posOffsetX, posOffsetY);
+		entities->push_back(
+			new Peasant(&environment, position)
+		);
+	}
+
+	for (int i = 0; i < numBadGuys; i++) {
+		float posOffsetX = rand() % 200 - 100;
+		float posOffsetY = rand() % 200 - 100;
+		sf::Vector2f position = badBasePos + sf::Vector2f(posOffsetX, posOffsetY);
+		entities->push_back(
+			new BadGuy(&environment, position)
+		);
+	}
+
+	for (int i = 0; i < numSlaves; i++) {
+		float posOffsetX = rand() % 300 - 150;
+		float posOffsetY = rand() % 300 - 150;
+		sf::Vector2f position = badBasePos + sf::Vector2f(posOffsetX, posOffsetY);
+		entities->push_back(
+			new Slave(&environment, position)
+		);
+	}
+
 	int loopNr = 0;
 	m_window.setFramerateLimit(30);
 	InputManager inputManager(&environment, &m_window, &sceneView, &uiView);
@@ -65,11 +124,8 @@ int main()
 	environment.m_renderRectSize = sf::Vector2f(sceneView.getSize().x, sceneView.getSize().y);
 	sf::Event event;
 
-	gui::GUI gui = gui::GUI(&m_window, &guiView, inputManager.m_commander);
+	gui::GUI gui = gui::GUI(&m_window, &guiView);
 	gui.m_mainPanel->addChild(new StatusPanel(&environment, &m_window));
-	StatusPanel* sp = new StatusPanel(&environment, &m_window);
-	sp->m_position = sf::Vector2f(100, 300);
-	gui.m_mainPanel->addChild(sp);
 	while (m_window.isOpen())
 	{
 		if (m_window.pollEvent(event))
@@ -79,7 +135,7 @@ int main()
 		}
 		m_window.clear();
 		environment.draw();
-		if (environment.m_showUI)
+		if (environment.m_showGUI)
 		{
 			gui.update();
 		}

@@ -13,7 +13,7 @@ namespace gui
 	class GUI
 	{
 	public:
-		GUI(sf::RenderWindow* window, sf::View* guiView, Commander* commander);
+		GUI(sf::RenderWindow* window, sf::View* guiView);
 		void update();
 		void handle(sf::Event event);
 
@@ -22,7 +22,6 @@ namespace gui
 	private:
 		sf::RenderWindow* m_window;
 		sf::View* m_guiView;
-		Commander* m_commander;
 	};
 
 }

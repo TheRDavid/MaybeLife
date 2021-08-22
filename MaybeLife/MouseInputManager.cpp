@@ -3,9 +3,8 @@
 #include "Utilities.h"
 #include "Grid.h"
 
-MouseInputManager::MouseInputManager(Commander * commander, Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * uiView)
+MouseInputManager::MouseInputManager(Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * uiView)
 {
-	this->m_commander = commander;
 	this->m_environment = environment;
 	this->m_window = window;
 	this->m_sceneView = sceneView;
@@ -23,7 +22,7 @@ void MouseInputManager::handle(sf::Event event)
 
 		// convert it to world coordinates
 		sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-		m_commander->setSelectedZone(m_environment->m_entityGrid->zoneAt(worldPos));
+		Commander::getInstance().setSelectedZone(m_environment->m_entityGrid->zoneAt(worldPos));
 
 		if (m_dragging) {
 			m_window->setView(*m_guiView);
@@ -54,13 +53,13 @@ void MouseInputManager::handle(sf::Event event)
 			m_window->setView(*m_sceneView);
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
 			sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-			m_commander->addEntity(worldPos);
+			///
 		}
 		else if (event.mouseButton.button == sf::Mouse::Button::Left) {
 			m_window->setView(*m_sceneView);
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
 			sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-			m_commander->selectZoneAt(worldPos);
+			Commander::getInstance().selectZoneAt(worldPos);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {

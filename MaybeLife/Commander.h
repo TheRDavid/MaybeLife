@@ -9,23 +9,25 @@ class Environment;
 class Commander
 {
 public:
-	Commander(Environment* environment, sf::RenderWindow* window, sf::View* sceneView, sf::View* uiView);
+	Environment* m_environment;
+	sf::RenderWindow* m_window;
+	sf::View* m_sceneView, *m_guiView;
 
 	void setEntityCollision(bool enabled);
-	void setBehaviour(std::string behaviour);
-	void setUIVisible(bool visible);
+	void setGUIVisible(bool visible);
 	void setZonesVisible(bool visible);
-	void setGravityCenter(std::string x, std::string y);
 
 	void setSelectedZone(Zone* zone);
 	void selectZoneAt(sf::Vector2f position);
 	void setSelectedEntity(Entity* entity);
-	void addEntity(sf::Vector2f position);
+	void addEntity(Entity* entity);
+	void deleteEntity(Entity* entity);
+	static Commander& getInstance() {
+		static Commander theInstance;
+		return theInstance;
+	}
 
 private:
-	Environment* m_environment;
-	sf::RenderWindow* m_window;
-	sf::View* m_sceneView, *m_guiView;
 
 	Zone* m_selectedZone;
 	Entity* m_selectedEntity;

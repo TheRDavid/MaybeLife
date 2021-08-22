@@ -15,6 +15,7 @@ public:
 	std::string to_string();
 
 	void addEntity(Entity* entity);
+	void removeEntity(Entity* entity);
 	void addEntityImmediatly(Entity * entity);
 
 private:
