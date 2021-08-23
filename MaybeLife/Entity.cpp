@@ -36,7 +36,7 @@ void Entity::update()
 }
 void Entity::updateCollision()
 {
-	if (colliding(this, m_position, m_zone)) {
+	if (colliding(shared_from_this(), m_position, m_zone)) {
 		bool foundDodge = false;
 		sf::Vector2f dodgePosition;
 		int startDir = ut::randomNumber(0, 8), dirCount = 0;
@@ -47,7 +47,7 @@ void Entity::updateCollision()
 			}
 			dodgePosition = sf::Vector2f(m_environment->gridDirections[startDir].x * m_size.x, m_environment->gridDirections[startDir].y * m_size.y) + m_position;
 			//std::cout << "Try dodgin to with " << startDir << " -> " << ut::to_string(environment->gridDirections[startDir]) << " to " << ut::to_string(dodgePosition) << std::endl;
-			if (legalPosition_strict(this, dodgePosition, m_zone)) {
+			if (legalPosition_strict(shared_from_this(), dodgePosition, m_zone)) {
 				foundDodge = true;
 				break;
 			}
@@ -62,9 +62,35 @@ std::string Entity::to_bounds_string()
 	return "@" + ut::to_string(m_position) + " sized " + ut::to_string(m_size);
 }
 
+sf::Vector2f Entity::bounceFromEdgeIfNecessary(sf::Vector2f dir)
+{
+	sf::Vector2f newDirection = dir;
+	float minDist = m_size.x + m_size.y;
+
+	if (m_position.x < minDist)
+	{
+		newDirection.x = 1;
+	}
+	else if (m_environment->m_size.x - m_position.x < minDist)
+	{
+		newDirection.x = -1;
+	}
+
+	if (m_position.y < minDist)
+	{
+		newDirection.y = 1;
+	}
+	else if (m_environment->m_size.y - m_position.y < minDist)
+	{
+		newDirection.y = -1;
+	}
+
+	return newDirection;
+}
+
 std::string Entity::to_string()
 {
-	return "Entity " + std::to_string(m_id) + " " + to_bounds_string();
+	return "Entity \"" + m_name+"\" (" + std::to_string(m_id) + ") " + to_bounds_string();
 }
 bool operator<(const Entity& l, const Entity& r)
 {
@@ -75,21 +101,20 @@ bool operator>(const Entity& l, const Entity& r)
 	return l.m_id > r.m_id; // keep the same order
 }
 
-bool Entity::colliding(Entity* entity, Zone * zone)
+bool Entity::colliding(std::shared_ptr<Entity> entity, Zone * zone)
 {
 	return colliding(entity, entity->m_position, zone);
 }
 
 
-bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
+bool Entity::colliding(std::shared_ptr<Entity> entity, sf::Vector2f pos, Zone * zone)
 {
 	for (Zone* z : zone->m_neighbours) {
-		for (Entity* otherE : z->m_entities)
+		for (std::shared_ptr<Entity> otherEntity : z->m_entities)
 		{
-			Entity otherEntity = *otherE;
-			if (entity->m_id != otherEntity.m_id
-				&& abs(pos.x - otherEntity.m_position.x) < (entity->m_size.x + otherEntity.m_size.x)
-				&& abs(pos.y - otherEntity.m_position.y) < (entity->m_size.y + otherEntity.m_size.y)
+			if (entity->m_id != otherEntity->m_id && otherEntity->m_collide
+				&& abs(pos.x - otherEntity->m_position.x) < (entity->m_size.x + otherEntity->m_size.x)
+				&& abs(pos.y - otherEntity->m_position.y) < (entity->m_size.y + otherEntity->m_size.y)
 				)
 			{
 				//color = Color::Red;
@@ -103,7 +128,7 @@ bool Entity::colliding(Entity* entity, sf::Vector2f pos, Zone * zone)
 }
 
 
-bool Entity::legalPosition_strict(Entity* entity, sf::Vector2f checkPosition, Zone* uZone)
+bool Entity::legalPosition_strict(std::shared_ptr<Entity> entity, sf::Vector2f checkPosition, Zone* uZone)
 {
 	if (m_environment->m_entityCollision && m_collide && colliding(entity, checkPosition, uZone)) {
 		return false;

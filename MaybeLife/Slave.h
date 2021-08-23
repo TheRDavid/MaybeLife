@@ -4,6 +4,6 @@ class Slave :
 	public Worker
 {
 public:
-	Slave(Environment* environment, sf::Vector2f position);
+	Slave(Environment* environment, sf::Vector2f position, std::shared_ptr<Base> base);
 };
 

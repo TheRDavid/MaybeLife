@@ -135,6 +135,9 @@
     <ClCompile Include="Worker.cpp">
       <Filter>Source Files\sim\concreteEntities</Filter>
     </ClCompile>
+    <ClCompile Include="GroupMonitorPanel.cpp">
+      <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputMacros.h">
@@ -226,6 +229,9 @@
     </ClInclude>
     <ClInclude Include="Worker.h">
       <Filter>Header Files\sim\concreteEntities</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupMonitorPanel.h">
+      <Filter>Header Files\display\SimGUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

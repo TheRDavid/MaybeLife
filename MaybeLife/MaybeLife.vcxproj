@@ -180,6 +180,7 @@
     <ClCompile Include="FoodSource.cpp" />
     <ClCompile Include="GoodGuy.cpp" />
     <ClCompile Include="Grid.cpp" />
+    <ClCompile Include="GroupMonitorPanel.cpp" />
     <ClCompile Include="GUI.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="KeyboardInputManager.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="FoodSource.h" />
     <ClInclude Include="GoodGuy.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="GroupMonitorPanel.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="InputMacros.h" />
     <ClInclude Include="InputManager.h" />

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Zone.h"
+#include "Entity.h"
 #include "Utilities.h"
 
 Grid::Grid(int _numZones, int zoneCapacity, sf::Vector2i size) {
@@ -14,12 +15,13 @@ Grid::Grid(int _numZones, int zoneCapacity, sf::Vector2i size) {
 	m_zones.reserve(m_numZones);
 	m_zoneWidth = m_size.x / (float)m_cols;
 	m_zoneHeight = m_size.y / (float)m_rows;
+	m_zoneDiagonal = sqrt(pow(m_zoneWidth, 2) + pow(m_zoneHeight, 2));
 
 	for (int i = 0; i < m_numZones; i++) {
 		int row = floor(i / m_cols);
 		int col = floor(i - row * m_cols);
 		float xPos = col * m_zoneWidth, yPos = row * m_zoneHeight;
-		m_zones.push_back(new Zone(this, xPos, xPos + m_zoneWidth, yPos, yPos + m_zoneHeight, zoneCapacity));
+		m_zones.push_back(new Zone(this, xPos, xPos + m_zoneWidth, yPos, yPos + m_zoneHeight, zoneCapacity, row, col));
 	}
 	for (int i = 0; i < m_numZones; i++) {
 		Zone* zone = m_zones[i];
@@ -96,4 +98,157 @@ std::string Grid::to_string()
 	return "Grid (" + std::to_string(m_numZones) + "), size=" + ut::to_string(m_size) + ", cols="
 		+ std::to_string(m_cols) + ", rows=" + std::to_string(m_rows) + ", zone width=" + std::to_string(m_zoneWidth)
 		+ ", zone height=" + std::to_string(m_zoneHeight);
+}
+
+void Grid::closebyEntities(int id, std::map<int, std::weak_ptr<Entity>>* list, Zone * zone, sf::Vector2f position, float distance)
+{
+	for (auto entity : zone->m_entities)
+	{
+		if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+		{
+			(*list)[entity->m_id] = entity;
+		}
+	}
+
+	float x_remain = distance;
+	float y_remain = distance;
+	float d_remain = distance;
+	// TODO: compress code, jesus christ
+
+	// check vertical
+	int nextUpperRow = zone->m_row;
+	int nextLowerRow = zone->m_row;
+
+	while (y_remain > 0)
+	{
+		y_remain -= m_zoneHeight;
+		nextUpperRow--;
+		nextLowerRow++;
+
+		// TODO: optimize, if zone is very close, don't check entities for distances
+		if (nextUpperRow >= 0)
+		{
+			for (auto entity : m_zones[nextUpperRow * m_cols + zone->m_col]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+		if (nextLowerRow < m_rows)
+		{
+			for (auto entity : m_zones[nextLowerRow * m_cols + zone->m_col]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+	}
+
+	// check horizontal
+	int nextLeftCol = zone->m_col;
+	int nextRightCol = zone->m_col;
+
+	while (x_remain > 0)
+	{
+		x_remain -= m_zoneWidth;
+		nextLeftCol--;
+		nextRightCol++;
+
+		if (nextLeftCol >= 0)
+		{
+			for (auto entity : m_zones[zone->m_row * m_cols + nextLeftCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+		if (nextRightCol < m_cols)
+		{
+			for (auto entity : m_zones[zone->m_row * m_cols + nextRightCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+	}
+
+	// check diagonal
+
+	// TODO simplify, shouldn't need that many
+	int nextUpperLeftCol = zone->m_col;
+	int nextUpperRightCol = zone->m_col;
+	int nextUpperLeftRow = zone->m_row;
+	int nextUpperRightRow = zone->m_row;
+
+	int nextLowerLeftCol = zone->m_col;
+	int nextLowerRightCol = zone->m_col;
+	int nextLowerLeftRow = zone->m_row;
+	int nextLowerRightRow = zone->m_row;
+
+	while (d_remain > 0)
+	{
+		d_remain -= m_zoneDiagonal;
+
+		nextUpperLeftCol--;
+		nextUpperRightCol++;
+		nextUpperLeftRow--;
+		nextUpperRightRow--;
+
+		nextLowerLeftCol--;
+		nextLowerRightCol++;
+		nextLowerLeftRow++;
+		nextLowerRightRow++;
+
+		if (nextUpperLeftCol >= 0 && nextUpperLeftRow >= 0)
+		{
+			for (auto entity : m_zones[nextUpperLeftRow * m_cols + nextUpperLeftCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+
+		if (nextUpperRightCol < m_cols && nextUpperRightRow >= 0)
+		{
+			for (auto entity : m_zones[nextUpperRightRow * m_cols + nextUpperRightCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+
+		if (nextLowerLeftCol >= 0 && nextLowerLeftRow < m_rows)
+		{
+			for (auto entity : m_zones[nextLowerLeftRow * m_cols + nextLowerLeftCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+
+		if (nextLowerRightCol < m_cols && nextLowerRightRow < m_rows)
+		{
+			for (auto entity : m_zones[nextLowerRightRow * m_cols + nextLowerRightCol]->m_entities)
+			{
+				if (entity->m_id != id && entity->m_enabled && ut::manhattenDistance(position, entity->m_position) < distance)
+				{
+					(*list)[entity->m_id] = entity;
+				}
+			}
+		}
+	}
 }

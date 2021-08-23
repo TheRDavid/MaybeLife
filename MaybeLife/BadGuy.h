@@ -4,6 +4,6 @@ class BadGuy :
 	public Fighter
 {
 public:
-	BadGuy(Environment* environment, sf::Vector2f position);
+	BadGuy(Environment* environment, sf::Vector2f position, std::shared_ptr<Base> base);
 };
 

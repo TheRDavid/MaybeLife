@@ -2,6 +2,7 @@
 
 #include "Utilities.h"
 #include "Grid.h"
+#include "Peasant.h"
 
 MouseInputManager::MouseInputManager(Environment * environment, sf::RenderWindow * window, sf::View * sceneView, sf::View * uiView)
 {
@@ -53,7 +54,7 @@ void MouseInputManager::handle(sf::Event event)
 			m_window->setView(*m_sceneView);
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
 			sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-			///
+			//Commander::getInstance().addEntity(std::make_shared<Peasant>(m_environment, worldPos));
 		}
 		else if (event.mouseButton.button == sf::Mouse::Button::Left) {
 			m_window->setView(*m_sceneView);

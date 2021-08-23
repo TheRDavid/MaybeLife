@@ -5,23 +5,24 @@ class Entity;
 class Grid;
 class Zone {
 public:
-	Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity);
+	Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity, int row, int col);
 	unsigned long long int m_id = ID();
 	std::vector<Zone*> m_neighbours;
+	int m_row, m_col;
 	float xStart, xEnd, yStart, yEnd, xMid, yMid;
-	std::vector<Entity*> m_entities;
+	std::vector<std::shared_ptr<Entity>> m_entities;
 
 	void update();
 	std::string to_string();
 
-	void addEntity(Entity* entity);
-	void removeEntity(Entity* entity);
-	void addEntityImmediatly(Entity * entity);
-
+	void addEntity(std::shared_ptr<Entity> entity);
+	void removeEntity(std::shared_ptr<Entity> entity);
+	void addEntityImmediatly(std::shared_ptr<Entity> entity);
+	void removeEntityImmediatly(std::shared_ptr<Entity> entity);
 private:
 	Grid* grid;
-	std::vector<Entity*> toRemove;
-	std::vector<Entity*> toAdd;
+	std::vector<std::shared_ptr<Entity>> toRemove;
+	std::vector<std::shared_ptr<Entity>> toAdd;
 	std::mutex entityAccess;
 
 	bool legalPosition(sf::Vector2f position);

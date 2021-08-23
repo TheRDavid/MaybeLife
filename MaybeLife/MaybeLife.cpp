@@ -24,6 +24,7 @@
 
 #include "GUI.h"
 
+#include "GroupMonitorPanel.h"
 #include "StatusPanel.h"
 
 int main()
@@ -45,7 +46,7 @@ int main()
 	int numFoodSources = SimConfig::getInstance().getNumFoodSources();
 
 	sf::Vector2f goodBasePos = sf::Vector2f(300, 300);
-	sf::Vector2f badBasePos = sf::Vector2f(1000, 600);
+	sf::Vector2f badBasePos = sf::Vector2f(1600, 800);
 
 	int numZones = SimConfig::getInstance().getNumZones();
 	int numThreads = SimConfig::getInstance().getNumThreads();
@@ -61,31 +62,34 @@ int main()
 
 	m_window.setPosition(sf::Vector2i(0, 0));
 
-	std::vector<Entity*>* entities = new std::vector<Entity*>();
+	std::vector<std::shared_ptr<Entity>>* entities = new std::vector<std::shared_ptr<Entity>>();
 	entities->reserve(2 + 100 + numGoodGuys + numPeasants + numBadGuys + numSlaves);
 	Environment environment(&m_window, envSize, numZones, numThreads, &sceneView);
+
+	std::shared_ptr<Base> goodBase = std::make_shared<Base>(&environment, goodBasePos, true, goodGuysStartNutrition);
+	std::shared_ptr<Base> badBase = std::make_shared<Base>(&environment, badBasePos, false, badGuysStartNutrition);
+
+	entities->push_back(
+		goodBase
+	);
+
+	entities->push_back(
+		badBase
+	);
 
 	for (int i = 0; i < numFoodSources; i++)
 	{
 		entities->push_back(
-			new FoodSource(&environment, sf::Vector2f(rand() % environment.m_size.x, rand() % environment.m_size.y))
+			std::make_shared<FoodSource>(&environment, sf::Vector2f(rand() % environment.m_size.x, rand() % environment.m_size.y))
 		);
 	}
-
-	entities->push_back(
-		new Base(&environment, goodBasePos, true, goodGuysStartNutrition)
-	);
-
-	entities->push_back(
-		new Base(&environment, badBasePos, false, badGuysStartNutrition)
-	);
-
+	
 	for (int i = 0; i < numGoodGuys; i++) {
 		float posOffsetX = rand() % 200 - 100;
 		float posOffsetY = rand() % 200 - 100;
 		sf::Vector2f position = goodBasePos + sf::Vector2f(posOffsetX, posOffsetY);
 		entities->push_back(
-			new GoodGuy(&environment, position)
+			std::make_shared<GoodGuy>(&environment, position, goodBase)
 		);
 	}
 
@@ -94,16 +98,16 @@ int main()
 		float posOffsetY = rand() % 300 - 150;
 		sf::Vector2f position = goodBasePos + sf::Vector2f(posOffsetX, posOffsetY);
 		entities->push_back(
-			new Peasant(&environment, position)
+			std::make_shared<Peasant>(&environment, position, goodBase)
 		);
 	}
-
+	
 	for (int i = 0; i < numBadGuys; i++) {
 		float posOffsetX = rand() % 200 - 100;
 		float posOffsetY = rand() % 200 - 100;
 		sf::Vector2f position = badBasePos + sf::Vector2f(posOffsetX, posOffsetY);
 		entities->push_back(
-			new BadGuy(&environment, position)
+			std::make_shared<BadGuy>(&environment, position, badBase)
 		);
 	}
 
@@ -112,11 +116,11 @@ int main()
 		float posOffsetY = rand() % 300 - 150;
 		sf::Vector2f position = badBasePos + sf::Vector2f(posOffsetX, posOffsetY);
 		entities->push_back(
-			new Slave(&environment, position)
+			std::make_shared<Slave>(&environment, position, badBase)
 		);
 	}
+	
 
-	int loopNr = 0;
 	m_window.setFramerateLimit(30);
 	InputManager inputManager(&environment, &m_window, &sceneView, &uiView);
 	environment.start(entities);
@@ -126,6 +130,14 @@ int main()
 
 	gui::GUI gui = gui::GUI(&m_window, &guiView);
 	gui.m_mainPanel->addChild(new StatusPanel(&environment, &m_window));
+
+	GroupMonitorPanel* gmp0 = new GroupMonitorPanel(&environment, &m_window, true, goodBase);
+	gmp0->m_position = sf::Vector2f(100, 400);
+	GroupMonitorPanel* gmp1 = new GroupMonitorPanel(&environment, &m_window, false, badBase);
+	gmp1->m_position = sf::Vector2f(100, 800);
+
+	gui.m_mainPanel->addChild(gmp0);
+	gui.m_mainPanel->addChild(gmp1);
 	while (m_window.isOpen())
 	{
 		if (m_window.pollEvent(event))

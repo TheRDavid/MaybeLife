@@ -19,9 +19,9 @@ public:
 
 	void setSelectedZone(Zone* zone);
 	void selectZoneAt(sf::Vector2f position);
-	void setSelectedEntity(Entity* entity);
-	void addEntity(Entity* entity);
-	void deleteEntity(Entity* entity);
+	void setSelectedEntity(std::shared_ptr<Entity> entity);
+	void addEntity(std::shared_ptr<Entity> entity);
+	void deleteEntity(std::shared_ptr<Entity> entity);
 	static Commander& getInstance() {
 		static Commander theInstance;
 		return theInstance;
@@ -30,6 +30,6 @@ public:
 private:
 
 	Zone* m_selectedZone;
-	Entity* m_selectedEntity;
+	std::shared_ptr<Entity> m_selectedEntity;
 };
 

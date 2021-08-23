@@ -6,7 +6,8 @@
 #include "Grid.h"
 #include "Entity.h"
 
-Zone::Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity)
+Zone::Zone(Grid* grid, float xStart, float xEnd, float yStart, float yEnd, int capacity, int row, int col)
+	:m_row(row), m_col(col)
 {
 	m_entities.reserve(25);
 	toAdd.reserve(25);
@@ -29,8 +30,7 @@ void Zone::update()
 	toAdd.clear();
 	entityAccess.unlock();
 
-	toRemove.clear();
-	for (Entity* entity : m_entities) {
+	for (std::shared_ptr<Entity> entity : m_entities) {
 		if (!legalPosition(entity->m_position)) {
 			toRemove.push_back(entity);
 			Zone* newZone = grid->zoneAt(entity->m_position);
@@ -46,6 +46,7 @@ void Zone::update()
 	for (auto entity : toRemove) {
 		m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
 	}
+	toRemove.clear();
 }
 
 bool Zone::legalPosition(sf::Vector2f position)
@@ -58,7 +59,7 @@ std::string Zone::to_string()
 	return "Zone " + std::to_string(m_id) + " [" + std::to_string(xStart) + ", " + std::to_string(yStart) + ", " + std::to_string(xEnd) + ", " + std::to_string(yEnd) + "] #" + std::to_string(m_entities.size());
 }
 
-void Zone::addEntity(Entity * entity)
+void Zone::addEntity(std::shared_ptr<Entity> entity)
 {
 	entity->m_zone = this;
 	entityAccess.lock();
@@ -66,14 +67,19 @@ void Zone::addEntity(Entity * entity)
 	entityAccess.unlock();
 }
 
-void Zone::removeEntity(Entity * entity)
+void Zone::removeEntity(std::shared_ptr<Entity> entity)
 {
 	entityAccess.lock();
 	toRemove.push_back(entity);
 	entityAccess.unlock();
 }
 
-void Zone::addEntityImmediatly(Entity * entity)
+void Zone::removeEntityImmediatly(std::shared_ptr<Entity> entity)
+{
+	m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
+}
+
+void Zone::addEntityImmediatly(std::shared_ptr<Entity> entity)
 {
 	entity->m_zone = this;
 	m_entities.push_back(entity);

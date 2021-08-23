@@ -11,12 +11,14 @@ class Environment
 
 public:
 	Grid* m_entityGrid;
-	std::vector<Entity*>* m_entities;
-	std::vector<Entity*>* m_toAdd;
-	std::vector<Entity*>* m_toRemove;
+	std::vector<std::shared_ptr<Entity>>* m_entities;
+	std::vector<std::shared_ptr<Entity>>* m_toAdd;
+	std::vector<std::shared_ptr<Entity>>* m_toRemove;
 	sf::RenderWindow* m_window;
 
 	int m_numThreads;
+
+	bool tmp_print = false;
 
 	bool m_showZones = false;
 	bool m_showGUI = true;
@@ -41,26 +43,30 @@ public:
 	sf::Vector2f m_renderRectSize;
 
 	Zone* m_selectedZone = nullptr;
-	Entity* m_selectedEntity = nullptr;
+	std::shared_ptr<Entity> m_selectedEntity = nullptr;
 
 	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
 	void updateEntities();
 	void updateZoneRange(int firstZone, int lastZone);
 	void draw();
 	int steps;
-	void start(std::vector<Entity*>* entities);
+	void start(std::vector<std::shared_ptr<Entity>>* entities);
 	std::string stepsToString();
 	bool legalPosition(sf::Vector2f position);
+	sf::Vector2f legalizePosition(sf::Vector2f position);
 	void adjustRenderingRect();
 
 private:
 	sf::View* m_sceneView;
 	std::vector<sf::Vector2i> m_zoneProcessingRanges;
 	sf::VertexArray* m_rects = NULL;
+	sf::VertexArray* m_triangles = NULL;
+
 	sf::VertexArray* m_zoneLines = NULL;
+	sf::VertexArray* m_viewLines = NULL;
 
 	void drawZones();
-	bool inRenderRect(Entity* entity);
+	bool inRenderRect(std::shared_ptr<Entity> entity);
 	bool inRenderRect(Zone* zone);
 
 

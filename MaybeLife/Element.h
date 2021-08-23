@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <memory>
 
 class Element
 {
