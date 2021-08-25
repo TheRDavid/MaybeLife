@@ -11,16 +11,17 @@ FoodSource::FoodSource(Environment * environment, sf::Vector2f position)
 {
 	m_shape = DIAMOND;
 	m_color = sf::Color(255, 255, 50, 255);
-	m_radius = rand() % 60 + 10;
-	m_spawnRate = rand() / double(RAND_MAX) / 3;
-	m_lifeSpan = rand() % 300 + 150;
+	m_radius = (float)(rand() % 120 + 60);
+	m_spawnRate = (float)(rand() / double(RAND_MAX));
+	m_lifeSpan = (int)(rand() % 4000 + 2500);
+	m_collide = false;
 }
 
 void FoodSource::update()
 {
 	if (m_lifeSpan-- <= 0)
 	{
-		std::shared_ptr<FoodSource> newFoodSource = std::make_shared<FoodSource>(m_environment, sf::Vector2f(rand() % m_environment->m_size.x, rand() % m_environment->m_size.y));
+		std::shared_ptr<FoodSource> newFoodSource = std::make_shared<FoodSource>(m_environment, sf::Vector2f((float)(rand() % m_environment->m_size.x), (float)(rand() % m_environment->m_size.y)));
 		Commander::getInstance().addEntity(newFoodSource);
 		Commander::getInstance().deleteEntity(shared_from_this());
 	}

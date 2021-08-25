@@ -138,6 +138,18 @@
     <ClCompile Include="GroupMonitorPanel.cpp">
       <Filter>Source Files\display\SimGUI</Filter>
     </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RuntimeControlPanel.cpp">
+      <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="ProgressBar.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityInspectionPanel.cpp">
+      <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputMacros.h">
@@ -231,6 +243,18 @@
       <Filter>Header Files\sim\concreteEntities</Filter>
     </ClInclude>
     <ClInclude Include="GroupMonitorPanel.h">
+      <Filter>Header Files\display\SimGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RuntimeControlPanel.h">
+      <Filter>Header Files\display\SimGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="ProgressBar.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityInspectionPanel.h">
       <Filter>Header Files\display\SimGUI</Filter>
     </ClInclude>
   </ItemGroup>

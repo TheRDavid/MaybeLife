@@ -22,7 +22,7 @@ public:
 	Zone* zoneAt(sf::Vector2f position);
 	std::string to_string();
 
-	void closebyEntities(int id, std::map<int, std::weak_ptr<Entity>>* list, Zone* zone, sf::Vector2f position, float distance);
+	void closebyEntities(int id, std::map<int, std::shared_ptr<Entity>>* list, Zone* zone, sf::Vector2f position, float distance);
 
 private:
 

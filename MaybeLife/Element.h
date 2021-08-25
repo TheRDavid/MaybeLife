@@ -6,6 +6,8 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 
+#include "Utilities.h"
+
 class Element
 {
 public:
@@ -26,13 +28,13 @@ public:
 
 	void handle(sf::Event event);
 
-	void(Element::*onMouseMove)(sf::Event) = nullptr;
-	void(Element::*onMouseEnter)(sf::Event) = nullptr;
-	void(Element::*onMouseExit)(sf::Event) = nullptr;
-	void(Element::*onMousePressed)(sf::Event) = nullptr;
-	void(Element::*onMouseReleased)(sf::Event) = nullptr;
-	void(Element::*onKeyPressed)(sf::Event) = nullptr;
-	void(Element::*onKeyReleased)(sf::Event) = nullptr;
+	virtual void onMouseEnter(sf::Event event) {};
+	virtual void onMouseExit(sf::Event event) {};
+	virtual void onMouseMove(sf::Event event) {};
+	virtual void onMousePressed(sf::Event event);
+	virtual void onMouseReleased(sf::Event event);
+	virtual void onKeyPressed(sf::Event event) {};
+	virtual void onKeyReleased(sf::Event event) {};
 
 	bool mouseHovering();
 
@@ -50,6 +52,7 @@ public:
 		if (m_dragging) {
 			sf::Vector2i mousePos = sf::Mouse::getPosition(*m_window);
 			sf::Vector2i delta = mousePos - m_lastDragPosition;
+#pragma warning( suppress : 4244 ) // loss of precision (Vector2i to Vector2f) not an issue
 			m_position += sf::Vector2f(delta.x, delta.y);
 			m_lastDragPosition = mousePos;
 		}
@@ -60,7 +63,5 @@ public:
 	void drawChildren(sf::Vector2f relativePosition);
 
 private:
-	void dragStart(sf::Event event);
-	void dragEnd(sf::Event event);
 };
 

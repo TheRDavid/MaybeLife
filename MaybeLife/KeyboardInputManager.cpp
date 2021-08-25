@@ -23,7 +23,7 @@ void KeyboardInputManager::handle(sf::Event event)
 			float relX = 1 - (m_sceneView->getCenter().x + m_sceneView->getSize().x / 2 - worldPos.x) / m_sceneView->getSize().x;
 			float relY = 1 - (m_sceneView->getCenter().y + m_sceneView->getSize().y / 2 - worldPos.y) / m_sceneView->getSize().y;
 			sf::Vector2f relativePos = sf::Vector2f(relX, relY);
-			m_sceneView->zoom(0.9);
+			m_sceneView->zoom(0.9f);
 
 			pixelPos = sf::Mouse::getPosition(*m_window);
 			worldPos = m_window->mapPixelToCoords(pixelPos);
@@ -44,7 +44,7 @@ void KeyboardInputManager::handle(sf::Event event)
 			float relX = 1 - (m_sceneView->getCenter().x + m_sceneView->getSize().x / 2 - worldPos.x) / m_sceneView->getSize().x;
 			float relY = 1 - (m_sceneView->getCenter().y + m_sceneView->getSize().y / 2 - worldPos.y) / m_sceneView->getSize().y;
 			sf::Vector2f relativePos = sf::Vector2f(relX, relY);
-			m_sceneView->zoom(1.1);
+			m_sceneView->zoom(1.1f);
 			pixelPos = sf::Mouse::getPosition(*m_window);
 			worldPos = m_window->mapPixelToCoords(pixelPos);
 

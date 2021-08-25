@@ -1,13 +1,17 @@
 #include "StatusPanel.h"
 
+#include <memory>
+
 #include "Grid.h"
+#include "Entity.h"
+#include "Person.h"
 
 StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 	: Panel(
-		window, 
-		sf::Vector2f(40, 40), 
-		sf::Vector2f(350, 210), 
-		sf::Color(22, 32, 22, 220), 
+		window,
+		sf::Vector2f(40, 40),
+		sf::Vector2f(200, 130),
+		sf::Color(22, 32, 22, 220),
 		sf::Color(255, 255, 255, 255),
 		1,
 		true)
@@ -22,7 +26,7 @@ StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 		0,
 		sf::Color(225, 225, 255, 255),
 		"Uninitialized",
-		24
+		14
 	);
 	addChild(m_statusText);
 	m_name = "StatusPanel";
@@ -36,50 +40,21 @@ inline std::string shorthand(int num) {
 	float shorthandCount;
 	std::string multiplierString = "";
 	if (num > 1000 * 1000 * 1000) {
-		shorthandCount = (float)num / (1000.0 * 1000.0 * 1000.0);
+		shorthandCount = (float)num / (1000.0f * 1000.0f * 1000.0f);
 		multiplierString = " B";
 	}
 	else if (num > 1000 * 1000) {
-		shorthandCount = (float)num / (1000.0 * 1000.0);
+		shorthandCount = (float)num / (1000.0f * 1000.0f);
 		multiplierString = " M";
 	}
 	else if (num > 1000) {
-		shorthandCount = (float)num / (1000.0);
+		shorthandCount = (float)num / (1000.0f);
 		multiplierString = " K";
 	}
 	std::string countText = std::to_string(shorthandCount).substr(0, 5);
 	countText.erase(countText.find_last_not_of('0') + 1, std::string::npos);
 	countText.erase(countText.find_last_not_of('.') + 1, std::string::npos);
 	return countText + multiplierString;
-}
-
-inline std::string timeDescription(int timeSteps) {
-	int year = 365 * 24 * 60 * 60;
-	int month = year / 12;
-	int day = month / 30;
-	int hour = day / 24;
-	int minute = hour / 60;
-	int second = minute / 60;
-
-	int years = timeSteps / year;
-	timeSteps -= years * year;
-
-	int months = timeSteps / month;
-	timeSteps -= months * month;
-
-	int days = timeSteps / day;
-	timeSteps -= days * day;
-
-	int hours = timeSteps / hour;
-	timeSteps -= hours * hour;
-
-	int minutes = timeSteps / minute;
-	timeSteps -= minutes * minute;
-
-	int seconds = timeSteps / second;
-	timeSteps -= seconds * second;
-
-	return (hours < 9 ? "0" : "") + std::to_string(hours + 1) + ":" + (minutes < 9 ? "0" : "") + std::to_string(minutes + 1) + ":" + (seconds < 9 ? "0" : "") + std::to_string(seconds + 1) + " " + (days < 9 ? "0" : "") + std::to_string(days + 1) + "/" + (months < 9 ? "0" : "") + std::to_string(months + 1) + "/" + std::to_string(years);
 }
 
 void StatusPanel::drawSelf(sf::Vector2f relativePosition)
@@ -98,6 +73,17 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 	}
 	m_fpsString.erase(m_fpsString.find_last_not_of('0') + 1, std::string::npos);
 	m_utString.erase(m_utString.find_last_not_of('0') + 1, std::string::npos);
+
+	int totalInViewDistanceReferences = 0;
+
+	for (auto entity : *m_environment->m_entities)
+	{
+		if (auto person = std::dynamic_pointer_cast<Person>(entity))
+		{
+			totalInViewDistanceReferences += person->m_inViewDistance.size();
+		}
+	}
+
 	if (true || AppConfig::getInstance().m_showFPS) {
 		m_statusText->setText(
 			"Entities: " + shorthand(m_environment->m_entities->size()) + "\n"
@@ -105,7 +91,7 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 			+ "Threads: " + std::to_string(m_environment->m_numThreads) + "\n"
 			+ "FPS: " + m_fpsString + "\n"
 			+ "UPS: " + m_utString + "\n"
-			+ "Date: " + timeDescription(m_environment->steps));
+			+ "View Refs: " + shorthand(totalInViewDistanceReferences));
 	}
 	Panel::drawSelf(relativePosition);
 }

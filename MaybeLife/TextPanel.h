@@ -15,7 +15,7 @@ namespace gui {
 		);
 		virtual void drawSelf(sf::Vector2f relativePosition) override;
 		void setText(std::string text);
-	private:
+	protected:
 		sf::Text m_text;
 	};
 

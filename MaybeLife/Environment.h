@@ -1,10 +1,12 @@
 #pragma once
-#include <vector>;
+
+#include <vector>
 #include <mutex>
 #include <future>
 
 #include "Zone.h"
 #include "Entity.h"
+class Base;
 class Grid;
 class Environment
 {
@@ -16,11 +18,14 @@ public:
 	std::vector<std::shared_ptr<Entity>>* m_toRemove;
 	sf::RenderWindow* m_window;
 
+	std::shared_ptr<Base> m_goodBase = nullptr, m_badBase = nullptr;
+
 	int m_numThreads;
 
 	bool tmp_print = false;
-
+	bool m_initiateShutdown = false;
 	bool m_showZones = false;
+	bool m_paused = false, m_pauseAfterNextStep = false;
 	bool m_showGUI = true;
 	bool m_entityCollision = true;
 
@@ -36,14 +41,17 @@ public:
 	sf::Vector2f downLeft = sf::Vector2f(-2, 2);
 	sf::Vector2f gridDirections[8] = { left, upLeft, up, upRight, right, downRight, down, downLeft };
 
-	std::mutex m_insertLock;
+	std::mutex m_insertLock, m_shutdownLock;
+	std::thread* m_updateThread;
 
 	sf::Vector2i m_size;
 	sf::Vector2f m_renderRectPosition;
 	sf::Vector2f m_renderRectSize;
 
 	Zone* m_selectedZone = nullptr;
-	std::shared_ptr<Entity> m_selectedEntity = nullptr;
+	std::weak_ptr<Entity> m_selectedEntity;
+	Zone* m_hoveredZone = nullptr;
+	std::weak_ptr<Entity> m_hoveredEntity;
 
 	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
 	void updateEntities();

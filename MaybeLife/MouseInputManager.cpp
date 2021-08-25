@@ -15,7 +15,7 @@ MouseInputManager::MouseInputManager(Environment * environment, sf::RenderWindow
 void MouseInputManager::handle(sf::Event event)
 {
 	if (event.type == sf::Event::Closed)
-		m_window->close();
+		Commander::getInstance().stopSimulation();
 
 	if (event.type == sf::Event::MouseMoved) {
 		m_window->setView(*m_sceneView);
@@ -23,7 +23,8 @@ void MouseInputManager::handle(sf::Event event)
 
 		// convert it to world coordinates
 		sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
-		Commander::getInstance().setSelectedZone(m_environment->m_entityGrid->zoneAt(worldPos));
+		Commander::getInstance().selectEntityAt_hover(worldPos);
+		Commander::getInstance().setSelectedZone_hover(m_environment->m_entityGrid->zoneAt(worldPos));
 
 		if (m_dragging) {
 			m_window->setView(*m_guiView);
@@ -46,8 +47,10 @@ void MouseInputManager::handle(sf::Event event)
 		if (event.mouseButton.button == sf::Mouse::Button::Right) {
 			m_window->setView(*m_guiView);
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
-			m_startDragPos = m_window->mapPixelToCoords(pixelPos);
-			//std::cout << "Mouse down at: " << ut::to_string(m_startDragPos) << std::endl;
+			sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
+			m_startDragPos = worldPos;
+			Commander::getInstance().selectEntityAt(worldPos);
+			Commander::getInstance().setSelectedZone(m_environment->m_entityGrid->zoneAt(worldPos));
 			m_dragging = true;
 		}
 		else if (event.mouseButton.button == sf::Mouse::Button::Middle) {
@@ -61,6 +64,7 @@ void MouseInputManager::handle(sf::Event event)
 			sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
 			sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
 			Commander::getInstance().selectZoneAt(worldPos);
+			Commander::getInstance().selectEntityAt(worldPos);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {

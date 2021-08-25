@@ -10,57 +10,52 @@ Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f s
 	this->m_draggable = draggable;
 	this->m_size = size;
 	this->m_position = position;
+#pragma warning( suppress : 4244 ) // loss of precision (int to float) unavoidable as we're comparing perfect pixel position to world position
 	m_lastDragPosition = sf::Vector2i(position.x, position.y);
 	this->m_drawPosition = position;
 	m_triangleStrips = sf::VertexArray(sf::TriangleStrip, 30);
 	m_quads = sf::VertexArray(sf::Quads, 20);
-	if (m_draggable)
-	{
-		onMousePressed = &Element::dragStart;
-		onMouseReleased = &Element::dragEnd;
-	}
 }
 
 void Element::handle(sf::Event event)
 {
 	bool hovering = mouseHovering();
-	if (m_draggable)
 
-	if (onMouseMove != nullptr && event.type == event.MouseMoved && hovering)
+	if (event.type == event.MouseMoved && hovering)
 	{
-		(this->*onMouseMove)(event);
+		(this->onMouseMove)(event);
 	}
 
-	if (onMouseEnter != nullptr && event.type == event.MouseMoved && hovering && !m_mouseHover)
+	if (event.type == event.MouseMoved && hovering && !m_mouseHover)
 	{
 		m_mouseHover = true;
-		(this->*onMouseEnter)(event);
+		(this->onMouseEnter)(event);
 	}
 
-	if (onMouseExit != nullptr && event.type == event.MouseMoved && !hovering && m_mouseHover)
+	if (event.type == event.MouseMoved && !hovering && m_mouseHover)
 	{
 		m_mouseHover = false;
-		(this->*onMouseExit)(event);
+		(this->onMouseExit)(event);
 	}
 
-	if (onMousePressed != nullptr && event.type == event.MouseButtonPressed && hovering)
+	if (event.type == event.MouseButtonPressed && hovering)
 	{
-		(this->*onMousePressed)(event);
+		(this->onMousePressed)(event);
 	}
 
-	if (onMouseReleased != nullptr && event.type == event.MouseButtonReleased && hovering)
+	if (event.type == event.MouseButtonReleased && hovering)
 	{
-		(this->*onMouseReleased)(event);
+		(this->onMouseReleased)(event);
 	}
 
-	if (onKeyPressed != nullptr && event.type == event.KeyPressed && m_focused)
+	if (event.type == event.KeyPressed && m_focused)
 	{
-		(this->*onKeyPressed)(event);
+		(this->onKeyPressed)(event);
 	}
 
-	if (onKeyReleased != nullptr && event.type == event.KeyReleased && m_focused)
+	if (event.type == event.KeyReleased && m_focused)
 	{
-		(this->*onKeyReleased)(event);
+		(this->onKeyReleased)(event);
 	}
 	for (Element* child : m_children)
 	{
@@ -95,13 +90,19 @@ void Element::drawChildren(sf::Vector2f relativePosition)
 	}
 }
 
-void Element::dragStart(sf::Event event)
+void Element::onMousePressed(sf::Event event)
 {
-	m_dragging = true;
-	m_lastDragPosition = sf::Mouse::getPosition(*m_window);
+	if (m_draggable)
+	{
+		m_dragging = true;
+		m_lastDragPosition = sf::Mouse::getPosition(*m_window);
+	}
 }
 
-void Element::dragEnd(sf::Event event)
+void Element::onMouseReleased(sf::Event event)
 {
-	m_dragging = false;
+	if (m_draggable)
+	{
+		m_dragging = false;
+	}
 }

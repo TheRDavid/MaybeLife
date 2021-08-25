@@ -19,7 +19,7 @@ public:
 	sf::Vector2f m_position, m_size;
 	bool m_collide;
 
-	unsigned long long int m_id = ID();
+	unsigned int m_id = ID();
 	sf::Color m_color = sf::Color::White;
 	Zone* m_zone;
 	Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color);
@@ -43,9 +43,9 @@ private:
 	void updateCollision();
 	bool colliding(std::shared_ptr<Entity> entity, sf::Vector2f position, Zone* zone);
 	bool colliding(std::shared_ptr<Entity> entity, Zone* zone);
-	static unsigned long long int ID()
+	static unsigned int ID()
 	{
-		static unsigned long long int ID = 0;
+		static unsigned int ID = 0;
 		return ID++;
 	}
 };

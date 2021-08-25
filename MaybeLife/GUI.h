@@ -2,6 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <functional>
+
 #include "Commander.h"
 #include "Panel.h"
 #include "Element.h"
@@ -9,7 +11,7 @@
 namespace gui
 {
 	using namespace gui;
-
+	typedef std::function<void(sf::Event)> action;
 	class GUI
 	{
 	public:

@@ -39,6 +39,8 @@ void Entity::updateCollision()
 	if (colliding(shared_from_this(), m_position, m_zone)) {
 		bool foundDodge = false;
 		sf::Vector2f dodgePosition;
+
+#pragma warning( suppress : 4244 ) // loss of precision (int to float) is wanted, as we're creating a random index
 		int startDir = ut::randomNumber(0, 8), dirCount = 0;
 		//std::cout << m_id << " collides, startDir = " << startDir << std::endl;
 		while (dirCount++ < 8) {

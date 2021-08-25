@@ -6,9 +6,10 @@
 #include "Commander.h"
 
 Person::Person(Environment* environment, sf::Vector2f position, sf::Vector2f size, float speed, bool good, float viewDistance, float wanderStrength, std::shared_ptr<Base> base)
-	: Entity(environment, position, size), m_health(100), m_speed(speed), m_good(good), m_viewDistance(viewDistance), m_wanderStrength(wanderStrength), m_base(base)
+	: Entity(environment, position, size), 
+	m_health(100), m_speed(speed), m_good(good), m_viewDistance(viewDistance), m_wanderStrength(wanderStrength), m_base(base)
 {
-	m_gazeDirection = sf::Vector2f(rand() / RAND_MAX * 360, rand() / RAND_MAX * 360);
+	m_gazeDirection = sf::Vector2f((float)(rand() / RAND_MAX * 360), (float)(rand() / RAND_MAX * 360));
 	m_wanderDirection = sf::Vector2f(ut::randomNumber(-1, 1), ut::randomNumber(-1, 1));
 }
 
@@ -39,14 +40,15 @@ void Person::walkToBase()
 
 void Person::update()
 {
-	m_health -= 0.015f;
+	m_health -= 0.05f;
 	float healthNeeded = 100 - m_health;
 	if (m_health <= 0)
 	{
 		m_health = 0;
 		m_enabled = false;
 		Commander::getInstance().deleteEntity(shared_from_this());
-	}else if (healthNeeded > 80 && m_base->m_nutrition > 0) // run to base to feed
+	}
+	else if (healthNeeded > 80 && m_base->m_nutrition > 0) // run to base to feed
 	{
 		walkToBase();
 		if (ut::manhattenDistance(m_position, m_base->m_position) < 4)
@@ -58,9 +60,44 @@ void Person::update()
 	}
 
 	viewLock.lock();
-	m_inViewDistance.clear();
+	//m_inViewDistance.clear();
 	m_environment->m_entityGrid->closebyEntities(m_id, &m_inViewDistance, m_zone, m_position, m_viewDistance);
 
+	toAddLock.lock();
+	for (auto add : m_toAdd)
+	{
+		m_inViewDistance[add.first] = add.second;
+	}
+	m_toAdd.clear();
+	toAddLock.unlock();
+
+	while (m_inViewDistance.size() > maxInMind)
+	{
+		auto iterator = m_inViewDistance.begin();
+		std::advance(iterator, rand() % m_inViewDistance.size());
+		m_inViewDistance.erase(iterator->first);
+	}
+	toRemoveLock.lock();
+	m_toRemove.clear();
+	for (auto entity : m_inViewDistance)
+	{
+		if (entity.second == nullptr)
+		{
+			m_toRemove.emplace(entity.first);
+		}
+		else if (auto person = std::dynamic_pointer_cast<Person>(entity.second))
+		{
+			if (ut::manhattenDistance(m_position, person->m_position) > m_viewDistance)
+			{
+				m_toRemove.emplace(entity.first);
+			}
+		}
+	}
+	for (auto enitity_id : m_toRemove)
+	{
+		m_inViewDistance.erase(enitity_id);
+	}
+	toRemoveLock.unlock();
 	viewLock.unlock();
 	Entity::update();
 }

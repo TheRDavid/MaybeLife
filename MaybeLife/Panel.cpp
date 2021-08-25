@@ -19,7 +19,7 @@ void Panel::drawSelf(sf::Vector2f relativePosition)
 	m_quads.clear();
 	m_triangleStrips.clear();
 
-	sf::Vector2f thicknessVec = sf::Vector2f(m_edgeThickness, m_edgeThickness);
+	sf::Vector2f thicknessVec = sf::Vector2f((float)m_edgeThickness, (float)m_edgeThickness);
 	sf::Vector2f upperLeft = m_position + relativePosition;
 	sf::Vector2f upperRight = sf::Vector2f(upperLeft.x + m_size.x, upperLeft.y);
 	sf::Vector2f lowerRight = upperLeft + m_size;

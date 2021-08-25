@@ -18,8 +18,8 @@ Grid::Grid(int _numZones, int zoneCapacity, sf::Vector2i size) {
 	m_zoneDiagonal = sqrt(pow(m_zoneWidth, 2) + pow(m_zoneHeight, 2));
 
 	for (int i = 0; i < m_numZones; i++) {
-		int row = floor(i / m_cols);
-		int col = floor(i - row * m_cols);
+		int row = (int)(i / m_cols);
+		int col = (int)(i - row * m_cols);
 		float xPos = col * m_zoneWidth, yPos = row * m_zoneHeight;
 		m_zones.push_back(new Zone(this, xPos, xPos + m_zoneWidth, yPos, yPos + m_zoneHeight, zoneCapacity, row, col));
 	}
@@ -100,7 +100,7 @@ std::string Grid::to_string()
 		+ ", zone height=" + std::to_string(m_zoneHeight);
 }
 
-void Grid::closebyEntities(int id, std::map<int, std::weak_ptr<Entity>>* list, Zone * zone, sf::Vector2f position, float distance)
+void Grid::closebyEntities(int id, std::map<int, std::shared_ptr<Entity>>* list, Zone * zone, sf::Vector2f position, float distance)
 {
 	for (auto entity : zone->m_entities)
 	{
