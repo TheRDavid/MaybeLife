@@ -6,6 +6,11 @@
 #include <thread>
 #include <chrono>
 #include <iostream>
+#include <cstdlib>
+#include <filesystem>
+#include <direct.h>
+#include <ctime>   
+#include <stdio.h>
 
 #include "AppConfig.h"
 #include "Utilities.h"
@@ -13,9 +18,21 @@
 #include "Grid.h"
 #include "Person.h"
 #include "Worker.h"
-
 Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads, sf::View* sceneView)
 {
+	auto end = std::chrono::system_clock::now();
+	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+#pragma warning(suppress:4996)
+	char* timeStr = std::ctime(&end_time);
+	char sessionDir[80];
+	strcpy_s(sessionDir, "recordings\\");
+	strcat_s(sessionDir, timeStr);
+	m_sessionDir = std::string(sessionDir);
+	m_sessionDir += "\\";
+	std::replace(m_sessionDir.begin(), m_sessionDir.end(), ':', '_');
+	std::replace(m_sessionDir.begin(), m_sessionDir.end(), '\n', '_');
+	_mkdir("recordings\\");
+	_mkdir(m_sessionDir.c_str());
 	this->m_sceneView = sceneView;
 	this->m_size = size;
 	m_numThreads = threads;
@@ -31,8 +48,8 @@ Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int
 	m_zoneLines = new sf::VertexArray(sf::Lines, (m_entityGrid->m_cols + m_entityGrid->m_rows) * 2);
 }
 
-void Environment::start(std::vector<std::shared_ptr<Entity>>* entities) {
-
+void Environment::start(std::vector<std::shared_ptr<Entity>>* entities)
+{
 	this->m_entities = entities;
 
 	m_rects = new sf::VertexArray(sf::Quads, 4 * 4 * m_entities->size());
@@ -244,14 +261,24 @@ void Environment::updateEntities()
 
 void Environment::draw()
 {
+	std::vector<std::shared_ptr<Entity>>* displayEntities;
+
+	if (m_liveView)
+	{
+		displayEntities = m_entities;
+	}
+	else {
+		displayEntities = loadFrame();
+	}
+
 #pragma warning( suppress : 4267 ) // loss of percision not an issue, as vertex count has to be an integer
-	int minRectCapacity = m_entities->size() * 2 * 4;
+	int minRectCapacity = displayEntities->size() * 2 * 4;
 	if (m_rects->getVertexCount() < minRectCapacity)
 	{
 		m_rects->resize(minRectCapacity);
 	}
 #pragma warning( suppress : 4267 ) // loss of precision (int to float) not an issue, as this is a set coordinate
-	int minTriangleCapacity = m_entities->size() * 2 * 4;
+	int minTriangleCapacity = displayEntities->size() * 2 * 4;
 	if (m_triangles->getVertexCount() < minRectCapacity)
 	{
 		m_triangles->resize(minTriangleCapacity);
@@ -274,9 +301,31 @@ void Environment::draw()
 	std::vector<sf::Text> textualEntities;
 	textualEntities.reserve(10);
 
-	for (std::shared_ptr<Entity> entity : *m_entities)
+	nlohmann::json capture;
+	std::vector<nlohmann::json*>entityJs;
+
+	if (!m_liveView)
 	{
-		if (entity->m_enabled && inRenderRect(entity)) {
+		for (std::shared_ptr<Entity> entity : *m_entities)
+		{
+			nlohmann::json* instance = new nlohmann::json();
+			entity->jsonify(instance);
+			entityJs.push_back(instance);
+			capture.push_back(*instance);
+		}
+	}
+
+	for (std::shared_ptr<Entity> entity : *displayEntities)
+	{
+		if (m_liveView)
+		{
+			nlohmann::json* instance = new nlohmann::json();
+			entity->jsonify(instance);
+			entityJs.push_back(instance);
+			capture.push_back(*instance);
+		}
+
+		if (!m_liveView || (entity->m_enabled && inRenderRect(entity))) {
 			sf::Vector2f ePos = entity->m_position;
 			sf::Vector2f eSize = entity->m_size;
 			sf::Color col = entity->m_color;
@@ -284,7 +333,7 @@ void Environment::draw()
 			if (auto person = std::dynamic_pointer_cast<Worker>(entity))
 			{
 				sf::Color fadedLineColor = sf::Color(person->m_color.r / 2, person->m_color.g / 2, person->m_color.b / 2, 255);
-				sf::Color fadedFillColor = sf::Color(person->m_color.r / 10,0, person->m_color.b / 10, 255);
+				sf::Color fadedFillColor = sf::Color(person->m_color.r / 10, 0, person->m_color.b / 10, 255);
 				/*sf::Text baseText(std::to_string(person->m_inViewDistance.size()), AppConfig::getInstance().m_mainFont, 15);
 				baseText.setPosition(person->m_position - sf::Vector2f(0, 30));
 				baseText.setFillColor(sf::Color::White);
@@ -299,16 +348,6 @@ void Environment::draw()
 
 
 				//std::cout << person->m_id << " can see " << person->inViewDistance.size() << " others" << std::endl;
-				/*person->viewLock.lock();
-				for (auto kvp : person->m_inViewDistance)
-				{
-					auto visibleEntity = kvp.second;
-					m_viewLines->append(person->m_position);
-					m_viewLines->append(visibleEntity->m_position);
-					(*m_viewLines)[ldx++].color = fadedLineColor;
-					(*m_viewLines)[ldx++].color = fadedLineColor;
-				}
-				person->viewLock.unlock();*/
 			}
 
 			switch (entity->m_shape)
@@ -366,10 +405,22 @@ void Environment::draw()
 
 		}
 	}
+	std::string fileName = m_sessionDir + std::to_string(steps) + ".json";
+
+	std::replace(fileName.begin(), fileName.end(), '\n', '_');
+	std::ofstream out(fileName);
+	out << capture.dump();
+	out.close();
+	for (auto j : entityJs)
+	{
+		delete(j);
+	}
+	recordedFrames.emplace(steps);
 	m_insertLock.unlock();
 
 	m_window->draw(*m_triangles);
 	m_window->draw(*m_rects);
+
 	for (sf::CircleShape cs : circularEntities)
 	{
 		m_window->draw(cs);
@@ -506,4 +557,51 @@ bool Environment::inRenderRect(Zone * zone)
 		(zone->yEnd > m_renderRectPosition.y && zone->yStart < m_renderRectPosition.y + m_renderRectSize.y);
 }
 
+std::vector<std::shared_ptr<Entity>>* Environment::loadFrame()
+{
+	delete(m_loadedEntities);
+	m_loadedEntities = new std::vector<std::shared_ptr<Entity>>();
+	m_loadedEntities->reserve(20 * 1000);
+	nlohmann::json frameData;
+
+	int closestFrame = m_displayFrame;
+	int positiveDelta = 0;
+	int negativeDelta = 0;
+	bool foundFrame = false;
+	while (!foundFrame)
+	{
+		int frameIdx = closestFrame + positiveDelta++;
+		if (frameIdx > 0 && recordedFrames.count(frameIdx) != 0)
+		{
+			closestFrame = frameIdx;
+			foundFrame = true;
+			break;
+		}
+
+		frameIdx = closestFrame - negativeDelta++;
+		if (frameIdx < steps && recordedFrames.count(frameIdx) != 0)
+		{
+			closestFrame = frameIdx;
+			foundFrame = true;
+			break;
+		}
+	}
+
+	m_displayFrame = closestFrame;
+
+	if (closestFrame != -1)
+	{
+		std::string fileName = m_sessionDir + std::to_string(m_displayFrame) + ".json";
+		std::ifstream(fileName) >> frameData;
+
+		for (auto e : frameData)
+		{
+			std::shared_ptr<Entity> loaded = ut::convertToEntity(e);
+			m_loadedEntities->push_back(loaded);
+		}
+		return m_loadedEntities;
+	}
+
+	return nullptr;
+}
 

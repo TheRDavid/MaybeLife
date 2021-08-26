@@ -55,6 +55,9 @@
     <Filter Include="Source Files\sim\concreteEntities">
       <UniqueIdentifier>{cb5544e7-66cf-45ff-9ad5-7096a984a309}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{04441509-5db2-4f7b-be2a-4881a4e3bc73}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MaybeLife.cpp">
@@ -149,6 +152,15 @@
     </ClCompile>
     <ClCompile Include="EntityInspectionPanel.cpp">
       <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="RecordingPlaybackPanel.cpp">
+      <Filter>Source Files\display\SimGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Slider.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Utilities.cpp">
+      <Filter>Source Files\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -256,6 +268,12 @@
     </ClInclude>
     <ClInclude Include="EntityInspectionPanel.h">
       <Filter>Header Files\display\SimGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordingPlaybackPanel.h">
+      <Filter>Header Files\display\SimGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Slider.h">
+      <Filter>Header Files\display\GUI</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

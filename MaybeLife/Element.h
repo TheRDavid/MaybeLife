@@ -11,26 +11,29 @@
 class Element
 {
 public:
+	unsigned int m_id = ID();
 	std::string m_name = "Element";
 	sf::RenderWindow *m_window;
 	Element* m_parent;
 	std::vector<Element*> m_children;
 	sf::Vector2f m_position, m_size, m_drawPosition;
-	sf::VertexArray m_triangleStrips, m_quads;
+	sf::VertexArray m_triangleStrips, m_quads, m_lines;
 
 	sf::Vector2i m_lastDragPosition;
 	bool m_draggable = false;
 	bool m_dragging = false;
 	bool m_mouseHover = false;
 	bool m_focused = false;
+	bool m_blocksCursor = true;
+	bool m_focusable = false;
 
-	Element(sf::RenderWindow* m_window, sf::Vector2f position, sf::Vector2f size, bool draggable);
+	Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable, bool focusable);
 
 	void handle(sf::Event event);
 
-	virtual void onMouseEnter(sf::Event event) {};
-	virtual void onMouseExit(sf::Event event) {};
-	virtual void onMouseMove(sf::Event event) {};
+	virtual void onMouseEnter(sf::Event event);
+	virtual void onMouseExit(sf::Event event);
+	virtual void onMouseMove(sf::Event event);
 	virtual void onMousePressed(sf::Event event);
 	virtual void onMouseReleased(sf::Event event);
 	virtual void onKeyPressed(sf::Event event) {};
@@ -63,5 +66,10 @@ public:
 	void drawChildren(sf::Vector2f relativePosition);
 
 private:
+	static unsigned int ID()
+	{
+		static unsigned int ID = 0;
+		return ID++;
+	}
 };
 

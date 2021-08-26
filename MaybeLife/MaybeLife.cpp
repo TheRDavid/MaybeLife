@@ -25,6 +25,7 @@
 #include "StatusPanel.h"
 #include "RuntimeControlPanel.h"
 #include "EntityInspectionPanel.h"
+#include "RecordingPlaybackPanel.h"
 
 int main()
 {
@@ -138,11 +139,13 @@ int main()
 
 	RuntimeControlPanel* rntcp = new RuntimeControlPanel(&m_window, &environment);
 	EntityInspectionPanel* eip = new EntityInspectionPanel(&m_window, sf::Vector2f(600, 600));
+	RecordingPlaybackPanel* rpp = new RecordingPlaybackPanel(&m_window, sf::Vector2f(0, 300));
 
 	gui.m_mainPanel->addChild(gmp0);
 	gui.m_mainPanel->addChild(gmp1);
 	gui.m_mainPanel->addChild(rntcp);
 	gui.m_mainPanel->addChild(eip);
+	gui.m_mainPanel->addChild(rpp);
 	while (m_window.isOpen())
 	{
 		if (m_window.pollEvent(event))

@@ -101,3 +101,21 @@ void Person::update()
 	viewLock.unlock();
 	Entity::update();
 }
+
+void Person::jsonify(nlohmann::json * data)
+{
+	Entity::jsonify(data);
+	(*data)["health"] = m_health;
+	(*data)["base"] = m_base->m_id;
+	(*data)["speed"] = m_speed;
+	(*data)["viewDistance"] = m_viewDistance;
+	(*data)["wanderStrength"] = m_wanderStrength;
+	(*data)["good"] = m_good;
+	(*data)["maxInMind"] = maxInMind;
+	nlohmann::json entitiesInView;
+	for (auto inView : m_inViewDistance)
+	{
+		entitiesInView["id"] = inView.first;
+	}
+	(*data)["entitiesInView"] = entitiesInView;
+}

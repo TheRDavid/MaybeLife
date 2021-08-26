@@ -192,10 +192,13 @@
     <ClCompile Include="Peasant.cpp" />
     <ClCompile Include="Person.cpp" />
     <ClCompile Include="ProgressBar.cpp" />
+    <ClCompile Include="RecordingPlaybackPanel.cpp" />
     <ClCompile Include="RuntimeControlPanel.cpp" />
     <ClCompile Include="Slave.cpp" />
+    <ClCompile Include="Slider.cpp" />
     <ClCompile Include="StatusPanel.cpp" />
     <ClCompile Include="TextPanel.cpp" />
+    <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="Wall.cpp" />
     <ClCompile Include="Worker.cpp" />
     <ClCompile Include="Zone.cpp" />
@@ -227,9 +230,11 @@
     <ClInclude Include="Peasant.h" />
     <ClInclude Include="Person.h" />
     <ClInclude Include="ProgressBar.h" />
+    <ClInclude Include="RecordingPlaybackPanel.h" />
     <ClInclude Include="RuntimeControlPanel.h" />
     <ClInclude Include="SimConfig.h" />
     <ClInclude Include="Slave.h" />
+    <ClInclude Include="Slider.h" />
     <ClInclude Include="StatusPanel.h" />
     <ClInclude Include="TextPanel.h" />
     <ClInclude Include="Utilities.h" />

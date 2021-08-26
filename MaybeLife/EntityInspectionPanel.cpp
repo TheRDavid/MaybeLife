@@ -27,27 +27,14 @@ void EntityInspectionPanel::drawSelf(sf::Vector2f relativePosition)
 		{
 			std::string group = (person->m_good ? "Good" : "Bad");
 			std::string baseGroup = (person->m_base->m_good ? "Good" : "Bad");
-			text += "PGroup: " + group + "\n"
-				+ "Health: " + std::to_string(person->m_health) + "\n"
+			text += "Group: " + group + "\n"
 				+ "Base: " + baseGroup + "\n"
+				+ "Health: " + std::to_string(person->m_health) + "\n"
 				+ "In view: " + std::to_string(person->m_inViewDistance.size()) + "\n";
 			if (auto worker = std::dynamic_pointer_cast<Worker>(person))
 			{
-				group = (worker->m_good ? "Good" : "Bad");
 				text += "Gathered: " + std::to_string(worker->m_gatheredNutrition) + "\n";
-				text += "WGroup: " + group + "\n";
 
-				if (auto peasant = std::dynamic_pointer_cast<Peasant>(worker))
-				{
-					group = (peasant->m_good ? "Good" : "Bad");
-					text += "Peasant Group: " + group + "\n";
-				}
-				else if (auto slave = std::dynamic_pointer_cast<Slave>(worker))
-				{
-					group = (slave->m_good ? "Good" : "Bad");
-					text += "Slave Group: " + group + "\n";
-				}
-				
 			}
 		}
 	}

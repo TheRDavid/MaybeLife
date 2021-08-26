@@ -4,7 +4,6 @@
 
 #include <functional>
 
-#include "Commander.h"
 #include "Panel.h"
 #include "Element.h"
 
@@ -19,7 +18,8 @@ namespace gui
 		void update();
 		void handle(sf::Event event);
 
-		gui::Panel* m_mainPanel;
+		Panel* m_mainPanel;
+		Element* m_focus = nullptr;
 
 	private:
 		sf::RenderWindow* m_window;

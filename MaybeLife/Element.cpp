@@ -3,8 +3,9 @@
 #include <iostream>
 
 #include "Utilities.h"
+#include "Commander.h"
 
-Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable)
+Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable, bool focusable) : m_focusable(focusable)
 {
 	this->m_window = window;
 	this->m_draggable = draggable;
@@ -15,6 +16,7 @@ Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f s
 	this->m_drawPosition = position;
 	m_triangleStrips = sf::VertexArray(sf::TriangleStrip, 30);
 	m_quads = sf::VertexArray(sf::Quads, 20);
+	m_lines = sf::VertexArray(sf::Lines, 20);
 }
 
 void Element::handle(sf::Event event)
@@ -28,12 +30,20 @@ void Element::handle(sf::Event event)
 
 	if (event.type == event.MouseMoved && hovering && !m_mouseHover)
 	{
+		if (m_blocksCursor)
+		{
+			Commander::getInstance().blockCursor(m_id);
+		}
 		m_mouseHover = true;
 		(this->onMouseEnter)(event);
 	}
 
 	if (event.type == event.MouseMoved && !hovering && m_mouseHover)
 	{
+		if (m_blocksCursor)
+		{
+			Commander::getInstance().unblockCursor(m_id);
+		}
 		m_mouseHover = false;
 		(this->onMouseExit)(event);
 	}
@@ -60,6 +70,16 @@ void Element::handle(sf::Event event)
 	for (Element* child : m_children)
 	{
 		child->handle(event);
+	}
+}
+
+void Element::onMouseEnter(sf::Event event) {
+}
+void Element::onMouseExit(sf::Event event)
+{
+	if (m_focusable)
+	{
+		Commander::getInstance().deRequestFocus(this);
 	}
 }
 
@@ -90,9 +110,17 @@ void Element::drawChildren(sf::Vector2f relativePosition)
 	}
 }
 
+void Element::onMouseMove(sf::Event event)
+{
+	if (m_focusable)
+	{
+		Commander::getInstance().requestFocus(this);
+	}
+}
+
 void Element::onMousePressed(sf::Event event)
 {
-	if (m_draggable)
+	if (m_draggable && !Commander::getInstance().GUIHasFocus())
 	{
 		m_dragging = true;
 		m_lastDragPosition = sf::Mouse::getPosition(*m_window);

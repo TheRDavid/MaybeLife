@@ -8,6 +8,8 @@ public:
 	float m_nutrition, m_workerSpawnRate, m_fighterSpawnRate;
 
 	Base(Environment* environment, sf::Vector2f position, bool good, float startNutrition);
+	Base() {} // for json conversion
 	void update() override;
+	virtual void jsonify(nlohmann::json* data) override;
 };
 

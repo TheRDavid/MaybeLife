@@ -11,3 +11,9 @@ void Fighter::attack(Person * person)
 {
 	person->m_health -= m_attack;
 }
+
+void Fighter::jsonify(nlohmann::json * data)
+{
+	Person::jsonify(data);
+	(*data)["attack"] = m_attack;
+}

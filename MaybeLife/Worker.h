@@ -12,8 +12,10 @@ public:
 	float m_gatheredNutrition;
 
 	Worker(Environment* environment, sf::Vector2f position, sf::Vector2f size, float speed, bool good, float carryStrength, std::shared_ptr<Base> base);
+	Worker() {} // for json conversion
 
 	void pickUp(std::shared_ptr<FoodItem> food);
 	virtual void update() override;
+	virtual void jsonify(nlohmann::json* data) override;
 };
 

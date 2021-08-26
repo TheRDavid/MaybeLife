@@ -9,6 +9,7 @@
 FoodSource::FoodSource(Environment * environment, sf::Vector2f position)
 	: Entity(environment, position, sf::Vector2f(20, 20))
 {
+	m_name = "Food Source";
 	m_shape = DIAMOND;
 	m_color = sf::Color(255, 255, 50, 255);
 	m_radius = (float)(rand() % 120 + 60);
@@ -19,7 +20,7 @@ FoodSource::FoodSource(Environment * environment, sf::Vector2f position)
 
 void FoodSource::update()
 {
-	if (m_lifeSpan-- <= 0)
+	if (m_age >= m_lifeSpan)
 	{
 		std::shared_ptr<FoodSource> newFoodSource = std::make_shared<FoodSource>(m_environment, sf::Vector2f((float)(rand() % m_environment->m_size.x), (float)(rand() % m_environment->m_size.y)));
 		Commander::getInstance().addEntity(newFoodSource);
@@ -36,4 +37,14 @@ void FoodSource::update()
 			Commander::getInstance().addEntity(food);
 		}
 	}
+	Entity::update();
+}
+
+void FoodSource::jsonify(nlohmann::json * data)
+{
+	Entity::jsonify(data);
+	(*data)["type"] = "FoodSource";
+	(*data)["radius"] = m_radius;
+	(*data)["spawnRate"] = m_spawnRate;
+	(*data)["lifeSpan"] = m_lifeSpan;
 }

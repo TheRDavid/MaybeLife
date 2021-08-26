@@ -14,6 +14,8 @@ Worker::Worker(Environment * environment, sf::Vector2f position, sf::Vector2f si
 void Worker::pickUp(std::shared_ptr<FoodItem> food)
 {
 	m_gatheredNutrition = std::min(m_carryStrength, m_gatheredNutrition + food->m_nutrition);
+	unsigned int id = food->m_id;
+	Commander::getInstance().deleteEntity(food);
 	for (auto kvp0 : m_inViewDistance)
 	{
 		auto entity = kvp0.second;
@@ -22,19 +24,18 @@ void Worker::pickUp(std::shared_ptr<FoodItem> food)
 			if (person->m_good == m_good && person->m_id != m_id)
 			{
 				person->toRemoveLock.lock();
-				person->m_toRemove.emplace(food->m_id);
+				person->m_toRemove.emplace(id);
 				person->toRemoveLock.unlock();
 			}
 		}
 	}
-	Commander::getInstance().deleteEntity(food);
 }
 
 void Worker::update()
 {
 	Person::update();
 	float healthNeeded = 100 - m_health;
-	if (healthNeeded > 85 && m_base->m_nutrition > healthNeeded * 0.5f) // feed self
+	if (healthNeeded > 75 && m_base->m_nutrition > healthNeeded * 0.2f) // feed self
 	{
 		walkToBase();
 		if (ut::manhattenDistance(m_position, m_base->m_position) < 4)
@@ -111,4 +112,11 @@ void Worker::update()
 		}
 	}
 
+}
+
+void Worker::jsonify(nlohmann::json * data)
+{
+	Person::jsonify(data);
+	(*data)["carryStrength"] = m_carryStrength;
+	(*data)["gatheredNutrition"] = m_gatheredNutrition;
 }

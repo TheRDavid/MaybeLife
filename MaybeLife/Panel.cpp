@@ -7,7 +7,7 @@
 using namespace gui;
 
 Panel::Panel(sf::RenderWindow * window, sf::Vector2f position, sf::Vector2f size, sf::Color backgroundColor, sf::Color edgeColor, int edgeThickness, bool draggable)
-	: Element(window, position, size, draggable)
+	: Element(window, position, size, draggable, false)
 {
 	this->m_backgroundColor = backgroundColor;
 	this->m_edgeColor = edgeColor;

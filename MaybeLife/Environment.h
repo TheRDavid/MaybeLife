@@ -3,6 +3,10 @@
 #include <vector>
 #include <mutex>
 #include <future>
+#include <fstream>
+#include <unordered_set>
+
+#include "json.hpp"
 
 #include "Zone.h"
 #include "Entity.h"
@@ -13,11 +17,16 @@ class Environment
 
 public:
 	Grid* m_entityGrid;
-	std::vector<std::shared_ptr<Entity>>* m_entities;
+	std::vector<std::shared_ptr<Entity>>* m_entities; 
+	std::vector<std::shared_ptr<Entity>>* m_loadedEntities;
 	std::vector<std::shared_ptr<Entity>>* m_toAdd;
 	std::vector<std::shared_ptr<Entity>>* m_toRemove;
 	sf::RenderWindow* m_window;
 
+	bool m_liveView = true;
+	int m_displayFrame = -1;
+
+	std::string m_sessionDir;
 	std::shared_ptr<Base> m_goodBase = nullptr, m_badBase = nullptr;
 
 	int m_numThreads;
@@ -65,6 +74,8 @@ public:
 	void adjustRenderingRect();
 
 private:
+	std::unordered_set<int> recordedFrames;
+
 	sf::View* m_sceneView;
 	std::vector<sf::Vector2i> m_zoneProcessingRanges;
 	sf::VertexArray* m_rects = NULL;
@@ -73,10 +84,13 @@ private:
 	sf::VertexArray* m_zoneLines = NULL;
 	sf::VertexArray* m_viewLines = NULL;
 
+	int m_lastRecordedStep = 0;
+
 	void drawZones();
 	bool inRenderRect(std::shared_ptr<Entity> entity);
 	bool inRenderRect(Zone* zone);
 
+	std::vector<std::shared_ptr<Entity>>* loadFrame();
 
 	std::future<void> zoneProcessor_0,
 		zoneProcessor_1,

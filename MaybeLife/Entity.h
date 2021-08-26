@@ -1,6 +1,9 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
+
+#include "json.hpp"
+
 class Zone;
 class Environment;
 
@@ -20,6 +23,7 @@ public:
 	bool m_collide;
 
 	unsigned int m_id = ID();
+	unsigned long long int m_age = 0;
 	sf::Color m_color = sf::Color::White;
 	Zone* m_zone;
 	Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size, bool collide, sf::Color color);
@@ -27,6 +31,7 @@ public:
 	Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size);
 	Entity(Environment* environment, sf::Vector2f position);
 	Entity(Environment* environment);
+	Entity();
 	~Entity()
 	{
 		//std::cout << "Deleting " << m_name << std::endl;
@@ -37,6 +42,8 @@ public:
 	std::string to_bounds_string();
 
 	sf::Vector2f bounceFromEdgeIfNecessary(sf::Vector2f dir);
+
+	virtual void jsonify(nlohmann::json* data);
 
 private:
 

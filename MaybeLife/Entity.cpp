@@ -28,8 +28,12 @@ Entity::Entity(Environment* environment, sf::Vector2f position) : Entity(environ
 Entity::Entity(Environment* environment) : Entity(environment, sf::Vector2f(0, 0))
 {
 }
+Entity::Entity() // for json construction
+{
+}
 void Entity::update()
 {
+	m_age++;
 	if (m_environment->m_entityCollision && m_collide) {
 		updateCollision();
 	}
@@ -88,6 +92,20 @@ sf::Vector2f Entity::bounceFromEdgeIfNecessary(sf::Vector2f dir)
 	}
 
 	return newDirection;
+}
+
+void Entity::jsonify(nlohmann::json* data)
+{
+	(*data)["id"] = m_id;
+	(*data)["age"] = m_age;
+	(*data)["name"] = m_name;
+	(*data)["collide"] = m_collide;
+	(*data)["color"] = ut::to_string(m_color);
+	(*data)["enabled"] = m_enabled;
+	(*data)["position"] = ut::to_string(m_position);
+	(*data)["size"] = ut::to_string(m_size);
+	(*data)["shape"] = m_shape;
+	(*data)["zone"] = m_zone->m_id;
 }
 
 std::string Entity::to_string()

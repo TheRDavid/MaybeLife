@@ -144,6 +144,47 @@ void Commander::stopSimulation()
 	m_environment->m_shutdownLock.lock();
 	m_window->close();
 }
+int Commander::getCurrentSimulationStep()
+{
+	return m_environment->steps;
+}
+void Commander::blockCursor(unsigned int guiID)
+{
+	guiBlockers.emplace(guiID);
+}
+void Commander::unblockCursor(unsigned int guiID)
+{
+	guiBlockers.erase(guiID);
+}
+bool Commander::isGUIBlockingCursor()
+{
+	return guiBlockers.size() != 0;
+}
+bool Commander::GUIHasFocus()
+{
+	std::cout << "GUI has focus: " << (gui->m_focus != nullptr ? "yes" : "no") << std::endl;
+	return gui->m_focus != nullptr;
+}
+void Commander::requestFocus(Element * element)
+{
+	gui->m_focus = element;
+}
+void Commander::deRequestFocus(Element * element)
+{
+	if (gui->m_focus == element)
+	{
+		gui->m_focus = nullptr;
+	}
+}
+void Commander::displayRecordedFrame(int frame)
+{
+	m_environment->m_displayFrame = frame;
+	m_environment->m_liveView = false;
+}
+void Commander::displayLiveSimulation()
+{
+	m_environment->m_liveView = true;
+}
 void Commander::stepSimulation()
 {
 	m_environment->m_paused = false;

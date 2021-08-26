@@ -6,3 +6,9 @@ BadGuy::BadGuy(Environment * environment, sf::Vector2f position, std::shared_ptr
 	m_name = "Bad Guy";
 	m_color = sf::Color(255, 100, 100, 255);
 }
+
+void BadGuy::jsonify(nlohmann::json * data)
+{
+	Fighter::jsonify(data);
+	(*data)["type"] = "BadGuy";
+}

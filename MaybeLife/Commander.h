@@ -1,9 +1,12 @@
 #pragma once
 #include <string>
 #include <SFML/Graphics.hpp>
+#include <unordered_set>
 
 #include "Entity.h"
 #include "Zone.h"
+#include "Element.h"
+#include "GUI.h"
 
 class Environment;
 class Commander
@@ -12,6 +15,9 @@ public:
 	Environment* m_environment;
 	sf::RenderWindow* m_window;
 	sf::View* m_sceneView, *m_guiView;
+	gui::GUI* gui;
+
+	std::unordered_set<unsigned int> guiBlockers;
 
 	float m_numGoodGuys = 0;
 	float m_numBadGuys = 0;
@@ -46,6 +52,18 @@ public:
 	void pauseSimulation();
 	void stepSimulation();
 	void stopSimulation();
+
+	int getCurrentSimulationStep();
+
+	void blockCursor(unsigned int guiID);
+	void unblockCursor(unsigned int guiID);
+	bool isGUIBlockingCursor();
+	bool GUIHasFocus();
+	void requestFocus(Element* element);
+	void deRequestFocus(Element* element);
+
+	void displayRecordedFrame(int frame);
+	void displayLiveSimulation();
 
 	static Commander& getInstance() {
 		static Commander theInstance;

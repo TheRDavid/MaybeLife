@@ -7,10 +7,64 @@
 #include <time.h>
 #include <math.h>
 #include <SFML/Graphics.hpp>
+
+#include "json.hpp"
+
+class Entity;
+class Base;
+class BadGuy;
+class Fighter;
+class FoodItem;
+class FoodSource;
+class GoodGuy;
+class Peasant;
+class Slave;
+class Wall;
+class Worker;
+class Person;
+
 namespace ut {
+
+	std::shared_ptr<Entity> convertToEntity(nlohmann::json data);
+	void writeIntoEntity(std::shared_ptr<Entity> entity, nlohmann::json data);
+	void writeIntoBase(std::shared_ptr<Base> entity, nlohmann::json data);
+	void writeIntoBadGuy(std::shared_ptr<BadGuy> entity, nlohmann::json data);
+	void writeIntoFighter(std::shared_ptr<Fighter> entity, nlohmann::json data);
+	void writeIntoFoodItem(std::shared_ptr<FoodItem> entity, nlohmann::json data);
+	void writeIntoFoodSource(std::shared_ptr<FoodSource> entity, nlohmann::json data);
+	void writeIntoGoodGuy(std::shared_ptr<GoodGuy> entity, nlohmann::json data);
+	void writeIntoPeasant(std::shared_ptr<Peasant> entity, nlohmann::json data);
+	void writeIntoPerson(std::shared_ptr<Person> entity, nlohmann::json data);
+	void writeIntoSlave(std::shared_ptr<Slave> entity, nlohmann::json data);
+	void writeIntoWall(std::shared_ptr<Wall> entity, nlohmann::json data);
+	void writeIntoWorker(std::shared_ptr<Worker> entity, nlohmann::json data);
 
 	inline std::string to_string(sf::Vector2f vector) {
 		return "[" + std::to_string(vector.x) + "," + std::to_string(vector.y) + "]";
+	}
+
+	inline sf::Vector2f to_vector2f(std::string str) {
+		std::string stripped = str.substr(1, str.length() - 2);
+		int c0 = stripped.find(",");
+		int c1 = stripped.find(",", c0 + 1);
+
+		return sf::Vector2f(
+			std::stof(stripped.substr(0, c0)),
+			std::stof(stripped.substr(c0 + 1, c1 - c0 - 1))
+		);
+	}
+
+	inline sf::Color to_color(std::string str) {
+		std::string stripped = str.substr(1, str.length() - 2);
+		int c0 = stripped.find(",");
+		int c1 = stripped.find(",", c0 + 1);
+		int c2 = stripped.find(",", c1 + 1);
+
+		return sf::Color(
+			std::stof(stripped.substr(0, c0)),
+			std::stof(stripped.substr(c0 + 1, c1 - c0 - 1)),
+			std::stof(stripped.substr(c1 + 1, c2 - c1 - 1))
+		);
 	}
 
 	inline std::string to_string(sf::Vector2i vector) {
@@ -18,7 +72,7 @@ namespace ut {
 	}
 
 	inline std::string to_string(sf::Color color) {
-		return "[r=" + std::to_string(color.r) + " g=" + std::to_string(color.g) + " b=" + std::to_string(color.b) + " a=" + std::to_string(color.a) + "]";
+		return "[" + std::to_string(color.r) + "," + std::to_string(color.g) + "," + std::to_string(color.b) + "," + std::to_string(color.a) + "]";
 	}
 
 	inline float randomNumber(float Min, float Max)

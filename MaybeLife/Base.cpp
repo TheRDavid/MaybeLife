@@ -30,7 +30,6 @@ void Base::update()
 	{
 		if (rand() / double(RAND_MAX) < m_workerSpawnRate)
 		{
-			std::cout << "Adding worker!" << std::endl;
 			std::shared_ptr<Worker> worker;
 
 			if (m_good)
@@ -40,23 +39,31 @@ void Base::update()
 			else {
 				worker = std::make_shared<Slave>(m_environment, m_position, std::dynamic_pointer_cast<Base>(shared_from_this()));
 			}
-			worker->m_base = std::dynamic_pointer_cast<Base>(shared_from_this());
 			Commander::getInstance().addEntity(worker);
 		}
 		else if (rand() / double(RAND_MAX) < m_fighterSpawnRate) {
-			//std::cout << "Adding fighter!" << std::endl;
-			//std::shared_ptr<Fighter> fighter;
+			std::shared_ptr<Fighter> fighter;
 
 			if (m_good)
 			{
-			//	fighter = std::make_shared<GoodGuy>(m_environment, m_position, std::dynamic_pointer_cast<Base>(shared_from_this()));
+				fighter = std::make_shared<GoodGuy>(m_environment, m_position, std::dynamic_pointer_cast<Base>(shared_from_this()));
 			}
 			else {
-				//fighter = std::make_shared<BadGuy>(m_environment, m_position, std::dynamic_pointer_cast<Base>(shared_from_this()));
+				fighter = std::make_shared<BadGuy>(m_environment, m_position, std::dynamic_pointer_cast<Base>(shared_from_this()));
 			}
-			//fighter->m_base = std::dynamic_pointer_cast<Base>(shared_from_this());
-			//Commander::getInstance().addEntity(fighter);
+			fighter->m_base = std::dynamic_pointer_cast<Base>(shared_from_this());
+			Commander::getInstance().addEntity(fighter);
 		}
 	}
 	Entity::update();
+}
+
+void Base::jsonify(nlohmann::json * data)
+{
+	Entity::jsonify(data);
+	(*data)["type"] = "Base";
+	(*data)["good"] = m_good;
+	(*data)["nutrition"] = m_nutrition;
+	(*data)["workerSpawnRate"] = m_workerSpawnRate;
+	(*data)["fighterSpawnRate"] = m_fighterSpawnRate;
 }
