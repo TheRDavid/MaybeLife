@@ -8,19 +8,23 @@
 #include "Element.h"
 #include "GUI.h"
 
+class MouseInputManager;
 class Environment;
 class Commander
 {
 public:
 	Environment* m_environment;
+	MouseInputManager* m_mouseInputManager;
 	sf::RenderWindow* m_window;
 	sf::View* m_sceneView, *m_guiView;
 	gui::GUI* gui;
 
 	std::unordered_set<unsigned int> guiBlockers;
 
-	float m_numGoodGuys = 0;
-	float m_numBadGuys = 0;
+	int m_numGoodGuys = 0;
+	int m_numBadGuys = 0;
+
+	void registerMouseInputManager(MouseInputManager* mim);
 
 	float goodToBadRatio();
 
@@ -63,7 +67,24 @@ public:
 	void deRequestFocus(Element* element);
 
 	void displayRecordedFrame(int frame);
-	void displayLiveSimulation();
+	void displayLiveSimulation(); 
+	bool displayIsLiveSimulation();
+
+	bool isRecording();
+	void record();
+	void stopRecording();
+
+	sf::Vector2i getMousePixelPosition();
+
+	sf::Vector2f getMouseWorldPosition();
+
+	bool currentlyMakingArealSelection();
+	bool activeMouseSelectionArea();
+	ut::rectf mouseSelectionArea();
+	void cancelArealSelection();
+	std::vector<std::weak_ptr<Entity>> getSelectedEntities();
+
+	sf::Vector2f convertWorldToGUICoordinates(sf::Vector2f worldCoords);
 
 	static Commander& getInstance() {
 		static Commander theInstance;

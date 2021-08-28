@@ -14,11 +14,12 @@ FoodItem::FoodItem(Environment * environment, sf::Vector2f position)
 
 void FoodItem::update()
 {
+	Entity::update();
 	if (m_age >= 60 * 60)
 	{
-		Commander::getInstance().deleteEntity(shared_from_this());
+		//std::cout << "FoodItem " << m_id << " dies" << std::endl;
+		//Commander::getInstance().deleteEntity(shared_from_this());
 	}
-	Entity::update();
 }
 
 void FoodItem::jsonify(nlohmann::json * data)

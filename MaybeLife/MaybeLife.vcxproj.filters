@@ -162,6 +162,9 @@
     <ClCompile Include="Utilities.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
+    <ClCompile Include="Checkbox.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputMacros.h">
@@ -273,6 +276,9 @@
       <Filter>Header Files\display\SimGUI</Filter>
     </ClInclude>
     <ClInclude Include="Slider.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Checkbox.h">
       <Filter>Header Files\display\GUI</Filter>
     </ClInclude>
   </ItemGroup>

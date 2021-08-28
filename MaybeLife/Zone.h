@@ -19,11 +19,11 @@ public:
 	void removeEntity(std::shared_ptr<Entity> entity);
 	void addEntityImmediatly(std::shared_ptr<Entity> entity);
 	void removeEntityImmediatly(std::shared_ptr<Entity> entity);
+	std::mutex entityAccess;
 private:
 	Grid* grid;
 	std::vector<std::shared_ptr<Entity>> toRemove;
 	std::vector<std::shared_ptr<Entity>> toAdd;
-	std::mutex entityAccess;
 
 	bool legalPosition(sf::Vector2f position);
 

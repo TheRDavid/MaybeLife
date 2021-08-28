@@ -28,7 +28,6 @@ void Zone::update()
 		m_entities.push_back(entity);
 	}
 	toAdd.clear();
-	entityAccess.unlock();
 
 	for (std::shared_ptr<Entity> entity : m_entities) {
 		if (!legalPosition(entity->m_position)) {
@@ -47,6 +46,7 @@ void Zone::update()
 		m_entities.erase(std::remove(m_entities.begin(), m_entities.end(), entity), m_entities.end());
 	}
 	toRemove.clear();
+	entityAccess.unlock();
 }
 
 bool Zone::legalPosition(sf::Vector2f position)

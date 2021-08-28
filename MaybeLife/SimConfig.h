@@ -47,6 +47,10 @@ public:
 		return m_data["numThreads"];
 	}
 
+	int recordByDefault() {
+		return m_data["record"];
+	}
+
 	static SimConfig& getInstance() {
 		static SimConfig m_theInstance;
 		return m_theInstance;

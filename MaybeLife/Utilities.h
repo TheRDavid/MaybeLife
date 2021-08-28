@@ -39,14 +39,23 @@ namespace ut {
 	void writeIntoWall(std::shared_ptr<Wall> entity, nlohmann::json data);
 	void writeIntoWorker(std::shared_ptr<Worker> entity, nlohmann::json data);
 
+	struct rectf
+	{
+		float x0,y0,x1,y1;
+	};
+
 	inline std::string to_string(sf::Vector2f vector) {
 		return "[" + std::to_string(vector.x) + "," + std::to_string(vector.y) + "]";
 	}
 
+	inline std::string to_string_integers(sf::Vector2f vector) {
+		return "[" + std::to_string((int)vector.x) + "," + std::to_string((int)vector.y) + "]";
+	}
+
 	inline sf::Vector2f to_vector2f(std::string str) {
 		std::string stripped = str.substr(1, str.length() - 2);
-		int c0 = stripped.find(",");
-		int c1 = stripped.find(",", c0 + 1);
+		size_t c0 = stripped.find(",");
+		size_t c1 = stripped.find(",", c0 + 1);
 
 		return sf::Vector2f(
 			std::stof(stripped.substr(0, c0)),
@@ -54,16 +63,23 @@ namespace ut {
 		);
 	}
 
+	inline bool pointInRect(rectf rect, sf::Vector2f point)
+	{
+		return
+			point.x >= rect.x0 && point.x <= rect.x1 &&
+			point.y >= rect.y0 && point.y <= rect.y1;
+	}
+
 	inline sf::Color to_color(std::string str) {
 		std::string stripped = str.substr(1, str.length() - 2);
-		int c0 = stripped.find(",");
-		int c1 = stripped.find(",", c0 + 1);
-		int c2 = stripped.find(",", c1 + 1);
+		size_t c0 = stripped.find(",");
+		size_t c1 = stripped.find(",", c0 + 1);
+		size_t c2 = stripped.find(",", c1 + 1);
 
 		return sf::Color(
-			std::stof(stripped.substr(0, c0)),
-			std::stof(stripped.substr(c0 + 1, c1 - c0 - 1)),
-			std::stof(stripped.substr(c1 + 1, c2 - c1 - 1))
+			std::stoi(stripped.substr(0, c0)),
+			std::stoi(stripped.substr(c0 + 1, c1 - c0 - 1)),
+			std::stoi(stripped.substr(c1 + 1, c2 - c1 - 1))
 		);
 	}
 

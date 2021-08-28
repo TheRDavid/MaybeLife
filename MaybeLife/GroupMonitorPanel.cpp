@@ -27,7 +27,6 @@ GroupMonitorPanel::GroupMonitorPanel(Environment * environment, sf::RenderWindow
 		true), m_good(good), m_base(base)
 {
 	this->m_environment = environment;
-	std::cout << "GMP with base: " << m_base->to_string() << std::endl;
 	m_statusText = new gui::TextPanel(
 		window,
 		sf::Vector2f(20, 15),

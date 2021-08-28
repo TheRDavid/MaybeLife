@@ -67,7 +67,14 @@ std::shared_ptr<Entity> ut::convertToEntity(nlohmann::json data)
 		entity = bentity;
 	}
 
-	writeIntoEntity(entity, data);
+	if (type.compare("Entity") == 0)
+	{
+		std::cout << "skipping read entity of " << data["id"] << " for it has no goddamn type" << std::endl;
+	}
+	else {
+
+		writeIntoEntity(entity, data);
+	}
 
 	return entity;
 }

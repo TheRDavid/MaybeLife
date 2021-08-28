@@ -3,11 +3,14 @@
 #include "Commander.h"
 #include "Peasant.h"
 #include "Slave.h"
+#include "json.hpp"
 
-EntityInspectionPanel::EntityInspectionPanel(sf::RenderWindow * window, sf::Vector2f position)
-	:gui::Panel(window, position, sf::Vector2f(240, 180), sf::Color(22, 32, 22, 220), sf::Color::Yellow, 1, true)
+EntityInspectionPanel::EntityInspectionPanel(sf::RenderWindow * window)
+	:gui::Panel(window, sf::Vector2f(0, 0), sf::Vector2f(0, 0), sf::Color(22, 32, 22, 180), sf::Color::Yellow, 1, true)
 {
-	m_textPanel = new gui::TextPanel(window, sf::Vector2f(20, 20), sf::Vector2f(0, 0), sf::Color::Transparent, sf::Color::Transparent, 0, sf::Color::White, "Uninitialized", 14);
+	m_position = sf::Vector2f(m_window->getSize().x - 360, 0);
+	m_size = sf::Vector2f(360, m_window->getSize().y);
+	m_textPanel = new gui::TextPanel(window, sf::Vector2f(20, 20), sf::Vector2f(0, 0), sf::Color::Transparent, sf::Color::Transparent, 0, sf::Color::White, "Uninitialized", 13);
 	addChild(m_textPanel);
 }
 
@@ -15,26 +18,26 @@ void EntityInspectionPanel::drawSelf(sf::Vector2f relativePosition)
 {
 	Panel::drawSelf(relativePosition);
 	std::string text = "Uninitialized";
-	m_entity = Commander::getInstance().getSelectedEntity();
-	if (!m_entity.expired())
+
+	std::vector<std::weak_ptr<Entity>> selectedEntities = Commander::getInstance().getSelectedEntities();
+	if (selectedEntities.size() == 0)
 	{
-		auto entity = m_entity.lock();
-		text = "ID: " + std::to_string(entity->m_id) + "\n"
-			+ "Enabled: " + std::to_string(entity->m_enabled) + "\n"
-			+ "Name: " + entity->m_name + "\n";
-
-		if (auto person = std::dynamic_pointer_cast<Person>(entity))
+		m_entity = Commander::getInstance().getSelectedEntity();
+		if (!m_entity.expired())
 		{
-			std::string group = (person->m_good ? "Good" : "Bad");
-			std::string baseGroup = (person->m_base->m_good ? "Good" : "Bad");
-			text += "Group: " + group + "\n"
-				+ "Base: " + baseGroup + "\n"
-				+ "Health: " + std::to_string(person->m_health) + "\n"
-				+ "In view: " + std::to_string(person->m_inViewDistance.size()) + "\n";
-			if (auto worker = std::dynamic_pointer_cast<Worker>(person))
+			nlohmann::json rep;
+			m_entity.lock()->jsonify(&rep);
+			text = rep.dump(4);
+		}
+	}
+	else {
+		for (auto entity : selectedEntities)
+		{
+			if (!entity.expired())
 			{
-				text += "Gathered: " + std::to_string(worker->m_gatheredNutrition) + "\n";
-
+				nlohmann::json rep;
+				entity.lock()->jsonify(&rep);
+				text += rep.dump(4) + "\n";
 			}
 		}
 	}

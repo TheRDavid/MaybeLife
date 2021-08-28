@@ -5,12 +5,13 @@
 #include "Grid.h"
 #include "Entity.h"
 #include "Person.h"
+#include "Commander.h"
 
 StatusPanel::StatusPanel(Environment * environment, sf::RenderWindow * window)
 	: Panel(
 		window,
 		sf::Vector2f(40, 40),
-		sf::Vector2f(200, 130),
+		sf::Vector2f(250, 190),
 		sf::Color(22, 32, 22, 220),
 		sf::Color(255, 255, 255, 255),
 		1,
@@ -74,7 +75,7 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 	m_fpsString.erase(m_fpsString.find_last_not_of('0') + 1, std::string::npos);
 	m_utString.erase(m_utString.find_last_not_of('0') + 1, std::string::npos);
 
-	int totalInViewDistanceReferences = 0;
+	size_t totalInViewDistanceReferences = 0;
 
 	for (auto entity : *m_environment->m_entities)
 	{
@@ -86,12 +87,16 @@ void StatusPanel::drawSelf(sf::Vector2f relativePosition)
 
 	if (true || AppConfig::getInstance().m_showFPS) {
 		m_statusText->setText(
+			"Timestep: " + std::to_string(m_environment->steps) + "\n"
 			"Entities: " + shorthand(m_environment->m_entities->size()) + "\n"
 			+ "Zones: " + shorthand(m_environment->m_entityGrid->m_numZones) + "\n"
 			+ "Threads: " + std::to_string(m_environment->m_numThreads) + "\n"
 			+ "FPS: " + m_fpsString + "\n"
 			+ "UPS: " + m_utString + "\n"
-			+ "View Refs: " + shorthand(totalInViewDistanceReferences));
+			+ "View Refs: " + shorthand(totalInViewDistanceReferences) + "\n"
+			+ "Mouse (pixel): " + ut::to_string(Commander::getInstance().getMousePixelPosition()) + "\n"
+			+ "Mouse (world): " + ut::to_string_integers(Commander::getInstance().getMouseWorldPosition()) + "\n"
+		);
 	}
 	Panel::drawSelf(relativePosition);
 }

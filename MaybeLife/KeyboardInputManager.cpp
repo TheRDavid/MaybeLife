@@ -56,5 +56,8 @@ void KeyboardInputManager::handle(sf::Event event)
 			m_sceneView->setCenter(m_sceneView->getCenter() + sf::Vector2f(relDelta.x * m_sceneView->getSize().x, relDelta.y * m_sceneView->getSize().y));
 			m_environment->adjustRenderingRect();
 		}
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+			Commander::getInstance().cancelArealSelection();
+		}
 	}
 }

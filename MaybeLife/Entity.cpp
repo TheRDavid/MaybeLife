@@ -14,6 +14,7 @@ Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f siz
 	this->m_size = size;
 	this->m_color = color;
 	this->m_collide = collide;
+	m_name = "Entity";
 
 }
 Entity::Entity(Environment* environment, sf::Vector2f position, sf::Vector2f size, bool collide) : Entity(environment, position, size, collide, sf::Color::White)
@@ -97,6 +98,7 @@ sf::Vector2f Entity::bounceFromEdgeIfNecessary(sf::Vector2f dir)
 void Entity::jsonify(nlohmann::json* data)
 {
 	(*data)["id"] = m_id;
+	(*data)["type"] = "Entity";
 	(*data)["age"] = m_age;
 	(*data)["name"] = m_name;
 	(*data)["collide"] = m_collide;
@@ -110,7 +112,14 @@ void Entity::jsonify(nlohmann::json* data)
 
 std::string Entity::to_string()
 {
-	return "Entity \"" + m_name+"\" (" + std::to_string(m_id) + ") " + to_bounds_string();
+	return "Entity \"" + m_name+"\" (" + std::to_string(m_id) + ") " + to_bounds_string()
+		+ ", enabled=" + std::to_string(m_enabled)
+		+ ", age=" + std::to_string(m_age)
+		+ ", color=" + ut::to_string(m_color)
+		+ ", collide=" + std::to_string(m_collide)
+		+ ", shape=" + std::to_string(m_shape)
+		+ ", zone=" + std::to_string(m_zone->m_id)
+		;
 }
 bool operator<(const Entity& l, const Entity& r)
 {

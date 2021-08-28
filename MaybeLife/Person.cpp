@@ -87,7 +87,7 @@ void Person::update()
 		}
 		else if (auto person = std::dynamic_pointer_cast<Person>(entity.second))
 		{
-			if (ut::manhattenDistance(m_position, person->m_position) > m_viewDistance)
+			if (entity.second.use_count() > 0 && ut::manhattenDistance(m_position, person->m_position) > m_viewDistance)
 			{
 				m_toRemove.emplace(entity.first);
 			}
@@ -113,9 +113,12 @@ void Person::jsonify(nlohmann::json * data)
 	(*data)["good"] = m_good;
 	(*data)["maxInMind"] = maxInMind;
 	nlohmann::json entitiesInView;
+	viewLock.lock();
+	int idn = 0;
 	for (auto inView : m_inViewDistance)
 	{
-		entitiesInView["id"] = inView.first;
+		entitiesInView[std::to_string(idn++)] = inView.first;
 	}
+	viewLock.unlock();
 	(*data)["entitiesInView"] = entitiesInView;
 }

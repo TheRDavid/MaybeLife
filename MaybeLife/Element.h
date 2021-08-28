@@ -26,6 +26,7 @@ public:
 	bool m_focused = false;
 	bool m_blocksCursor = true;
 	bool m_focusable = false;
+	bool m_enabled = true;
 
 	Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f size, bool draggable, bool focusable);
 

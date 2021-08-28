@@ -65,7 +65,7 @@ int main()
 
 	std::vector<std::shared_ptr<Entity>>* entities = new std::vector<std::shared_ptr<Entity>>();
 	entities->reserve(2 + 100 + numGoodGuys + numPeasants + numBadGuys + numSlaves);
-	Environment environment(&m_window, envSize, numZones, numThreads, &sceneView);
+	Environment environment(&m_window, envSize, numZones, numThreads, &sceneView, &guiView);
 
 	std::shared_ptr<Base> goodBase = std::make_shared<Base>(&environment, goodBasePos, true, goodGuysStartNutrition);
 	std::shared_ptr<Base> badBase = std::make_shared<Base>(&environment, badBasePos, false, badGuysStartNutrition);
@@ -138,7 +138,7 @@ int main()
 	gmp0->m_position = sf::Vector2f(100, 400);
 
 	RuntimeControlPanel* rntcp = new RuntimeControlPanel(&m_window, &environment);
-	EntityInspectionPanel* eip = new EntityInspectionPanel(&m_window, sf::Vector2f(600, 600));
+	EntityInspectionPanel* eip = new EntityInspectionPanel(&m_window);
 	RecordingPlaybackPanel* rpp = new RecordingPlaybackPanel(&m_window, sf::Vector2f(0, 300));
 
 	gui.m_mainPanel->addChild(gmp0);

@@ -10,10 +10,22 @@ MouseInputManager::MouseInputManager(Environment * environment, sf::RenderWindow
 	this->m_window = window;
 	this->m_sceneView = sceneView;
 	this->m_guiView = uiView;
+	Commander::getInstance().registerMouseInputManager(this);
 }
 
 void MouseInputManager::handle(sf::Event event)
 {
+	if (event.type == sf::Event::MouseMoved) {
+		m_window->setView(*m_sceneView);
+		m_mousePixelPos = sf::Mouse::getPosition(*m_window);
+		m_mouseWorldPos = m_window->mapPixelToCoords(m_mousePixelPos);
+
+		if (m_makingArealSelection)
+		{
+			m_arealSelectionStop = m_mouseWorldPos;
+		}
+	}
+
 	if (event.type == sf::Event::Closed)
 		Commander::getInstance().stopSimulation();
 
@@ -67,10 +79,22 @@ void MouseInputManager::handle(sf::Event event)
 				sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
 				Commander::getInstance().selectZoneAt(worldPos);
 				Commander::getInstance().selectEntityAt(worldPos);
+				if (!m_makingArealSelection)
+				{
+					m_makingArealSelection = true;
+					m_arealSelectionStart = worldPos;
+					m_arealSelectionStop = worldPos;
+				}
 			}
 		}
 		if (event.type == sf::Event::MouseButtonReleased) {
 			m_dragging = false;
+			if (event.mouseButton.button == sf::Mouse::Button::Left) {
+				m_makingArealSelection = false;
+				m_activeArealSelection = true;
+				sf::Vector2i pixelPos = sf::Mouse::getPosition(*m_window);
+				sf::Vector2f worldPos = m_window->mapPixelToCoords(pixelPos);
+			}
 		}
 	}
 	//std::cout << "Dragging: " << m_dragging << " from " << ut::to_string(m_startDragPos) << std::endl;

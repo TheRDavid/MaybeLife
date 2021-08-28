@@ -6,9 +6,19 @@
 #include "Environment.h"
 #include "Grid.h"
 #include "Utilities.h"
+#include "MouseInputManager.h"
+
+void Commander::registerMouseInputManager(MouseInputManager * mim)
+{
+	m_mouseInputManager = mim;
+}
 
 float Commander::goodToBadRatio()
 {
+	if (m_numBadGuys == 0 && m_numGoodGuys == 0)
+	{
+		return 0.5f;
+	}
 	return m_numGoodGuys / (m_numBadGuys + m_numGoodGuys);
 }
 
@@ -116,16 +126,17 @@ void Commander::addEntity(std::shared_ptr<Entity> entity)
 	zone->addEntity(entity);
 	//std::cout << "Adding entity" << std::endl << entity->to_string() << std::endl << "to zone" << std::endl << zone->to_string() << std::endl;
 	m_environment->m_insertLock.lock();
-	m_environment->m_entities->push_back(entity);
+	m_environment->m_toAdd->push_back(entity);
 	m_environment->m_insertLock.unlock();
 }
 
 void Commander::deleteEntity(std::shared_ptr<Entity> entity)
 {
-	entity->m_enabled = false;
-	entity->m_zone->removeEntity(entity);
+	entity->m_enabled = false; // HERE IS WHERE THE INVISIBLE OJECTS COME FROM?!
 	m_environment->m_insertLock.lock();
+	entity->m_zone->removeEntity(entity);
 	m_environment->m_toRemove->push_back(entity);
+	//std::cout << "Entity " << entity->to_string() << " was scheduled for removal" << std::endl;
 	//m_environment->m_entities->erase(std::remove(m_environment->m_entities->begin(), m_environment->m_entities->end(), entity), m_environment->m_entities->end());
 	m_environment->m_insertLock.unlock();
 }
@@ -162,17 +173,19 @@ bool Commander::isGUIBlockingCursor()
 }
 bool Commander::GUIHasFocus()
 {
-	std::cout << "GUI has focus: " << (gui->m_focus != nullptr ? "yes" : "no") << std::endl;
+	//std::cout << "GUI has focus: " << (gui->m_focus != nullptr ? "yes" : "no") << std::endl;
 	return gui->m_focus != nullptr;
 }
 void Commander::requestFocus(Element * element)
 {
+	//std::cout << element->m_name << " requesting focus" << std::endl;
 	gui->m_focus = element;
 }
 void Commander::deRequestFocus(Element * element)
 {
 	if (gui->m_focus == element)
 	{
+		//std::cout << element->m_name << " de-requesting focus" << std::endl;
 		gui->m_focus = nullptr;
 	}
 }
@@ -185,6 +198,78 @@ void Commander::displayLiveSimulation()
 {
 	m_environment->m_liveView = true;
 }
+bool Commander::displayIsLiveSimulation()
+{
+	return m_environment->m_liveView;
+}
+
+bool Commander::isRecording()
+{
+	return m_environment->m_recording;
+}
+
+void Commander::record()
+{
+	m_environment->m_recording = true;
+}
+
+void Commander::stopRecording()
+{
+	m_environment->m_recording = false;
+}
+
+sf::Vector2i Commander::getMousePixelPosition()
+{
+	return m_mouseInputManager->m_mousePixelPos;
+}
+
+sf::Vector2f Commander::getMouseWorldPosition()
+{
+	return m_mouseInputManager->m_mouseWorldPos;
+}
+
+bool Commander::currentlyMakingArealSelection()
+{
+	return m_mouseInputManager->m_makingArealSelection;
+}
+
+bool Commander::activeMouseSelectionArea()
+{
+	return m_mouseInputManager->m_activeArealSelection;
+}
+
+void Commander::cancelArealSelection()
+{
+	m_mouseInputManager->m_activeArealSelection = false;
+	m_mouseInputManager->m_makingArealSelection = false;
+	m_environment->m_selectedEntities.clear();
+}
+
+std::vector<std::weak_ptr<Entity>> Commander::getSelectedEntities()
+{
+	return m_environment->m_selectedEntities;
+}
+
+ut::rectf Commander::mouseSelectionArea()
+{
+	return {
+		m_mouseInputManager->m_arealSelectionStart.x,
+		m_mouseInputManager->m_arealSelectionStart.y,
+		m_mouseInputManager->m_arealSelectionStop.x,
+		m_mouseInputManager->m_arealSelectionStop.y
+	};
+}
+
+sf::Vector2f Commander::convertWorldToGUICoordinates(sf::Vector2f worldCoords)
+{
+	std::cout << "1.: " << ut::to_string(worldCoords) << std::endl;
+	worldCoords = m_sceneView->getInverseTransform().transformPoint(worldCoords);
+	std::cout << "2.: " << ut::to_string(worldCoords) << std::endl;
+	worldCoords = m_guiView->getTransform().transformPoint(worldCoords);
+	std::cout << "3.: " << ut::to_string(worldCoords) << std::endl;
+	return worldCoords;
+}
+
 void Commander::stepSimulation()
 {
 	m_environment->m_paused = false;

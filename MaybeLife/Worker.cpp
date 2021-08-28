@@ -15,6 +15,7 @@ void Worker::pickUp(std::shared_ptr<FoodItem> food)
 {
 	m_gatheredNutrition = std::min(m_carryStrength, m_gatheredNutrition + food->m_nutrition);
 	unsigned int id = food->m_id;
+	//std::cout << "FoodItem " << food->m_id << " is removed by pickup" << std::endl;
 	Commander::getInstance().deleteEntity(food);
 	for (auto kvp0 : m_inViewDistance)
 	{

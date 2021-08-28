@@ -21,55 +21,58 @@ Element::Element(sf::RenderWindow* window, sf::Vector2f position, sf::Vector2f s
 
 void Element::handle(sf::Event event)
 {
-	bool hovering = mouseHovering();
-
-	if (event.type == event.MouseMoved && hovering)
+	if (m_enabled)
 	{
-		(this->onMouseMove)(event);
-	}
+		bool hovering = mouseHovering();
 
-	if (event.type == event.MouseMoved && hovering && !m_mouseHover)
-	{
-		if (m_blocksCursor)
+		if (event.type == event.MouseMoved && hovering)
 		{
-			Commander::getInstance().blockCursor(m_id);
+			(this->onMouseMove)(event);
 		}
-		m_mouseHover = true;
-		(this->onMouseEnter)(event);
-	}
 
-	if (event.type == event.MouseMoved && !hovering && m_mouseHover)
-	{
-		if (m_blocksCursor)
+		if (event.type == event.MouseMoved && hovering && !m_mouseHover)
 		{
-			Commander::getInstance().unblockCursor(m_id);
+			if (m_blocksCursor)
+			{
+				Commander::getInstance().blockCursor(m_id);
+			}
+			m_mouseHover = true;
+			(this->onMouseEnter)(event);
 		}
-		m_mouseHover = false;
-		(this->onMouseExit)(event);
-	}
 
-	if (event.type == event.MouseButtonPressed && hovering)
-	{
-		(this->onMousePressed)(event);
-	}
+		if (event.type == event.MouseMoved && !hovering && m_mouseHover)
+		{
+			if (m_blocksCursor)
+			{
+				Commander::getInstance().unblockCursor(m_id);
+			}
+			m_mouseHover = false;
+			(this->onMouseExit)(event);
+		}
 
-	if (event.type == event.MouseButtonReleased && hovering)
-	{
-		(this->onMouseReleased)(event);
-	}
+		if (event.type == event.MouseButtonPressed && hovering)
+		{
+			(this->onMousePressed)(event);
+		}
 
-	if (event.type == event.KeyPressed && m_focused)
-	{
-		(this->onKeyPressed)(event);
-	}
+		if (event.type == event.MouseButtonReleased && hovering)
+		{
+			(this->onMouseReleased)(event);
+		}
 
-	if (event.type == event.KeyReleased && m_focused)
-	{
-		(this->onKeyReleased)(event);
-	}
-	for (Element* child : m_children)
-	{
-		child->handle(event);
+		if (event.type == event.KeyPressed && m_focused)
+		{
+			(this->onKeyPressed)(event);
+		}
+
+		if (event.type == event.KeyReleased && m_focused)
+		{
+			(this->onKeyReleased)(event);
+		}
+		for (Element* child : m_children)
+		{
+			child->handle(event);
+		}
 	}
 }
 

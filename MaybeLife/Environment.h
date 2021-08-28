@@ -37,6 +37,7 @@ public:
 	bool m_paused = false, m_pauseAfterNextStep = false;
 	bool m_showGUI = true;
 	bool m_entityCollision = true;
+	bool m_recording;
 
 	sf::RectangleShape m_processedZoneRect;
 
@@ -61,8 +62,9 @@ public:
 	std::weak_ptr<Entity> m_selectedEntity;
 	Zone* m_hoveredZone = nullptr;
 	std::weak_ptr<Entity> m_hoveredEntity;
+	std::vector<std::weak_ptr<Entity>> m_selectedEntities;
 
-	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView);
+	Environment(sf::RenderWindow* renderWindow, sf::Vector2i size, int numZones, int threads, sf::View* sceneView, sf::View* guiView);
 	void updateEntities();
 	void updateZoneRange(int firstZone, int lastZone);
 	void draw();
@@ -73,10 +75,14 @@ public:
 	sf::Vector2f legalizePosition(sf::Vector2f position);
 	void adjustRenderingRect();
 
-private:
-	std::unordered_set<int> recordedFrames;
 
-	sf::View* m_sceneView;
+private:
+	std::vector<std::shared_ptr<Entity>>* m_displayEntities;
+	int m_lastDisplayFrame = -1;
+	std::unordered_set<int> recordedFrames;
+	std::vector<nlohmann::json*>entityJs;
+
+	sf::View* m_sceneView, *m_guiView;
 	std::vector<sf::Vector2i> m_zoneProcessingRanges;
 	sf::VertexArray* m_rects = NULL;
 	sf::VertexArray* m_triangles = NULL;
@@ -108,8 +114,7 @@ private:
 		zoneProcessor_13,
 		zoneProcessor_14,
 		zoneProcessor_15,
-		zoneProcessor_16
-		;
+		zoneProcessor_16;
 };
 
 

@@ -16,10 +16,22 @@
 #include "Utilities.h"
 #include "Commander.h"
 #include "Grid.h"
+#include "BadGuy.h"
+#include "Slave.h"
+#include "Base.h"
+#include "GoodGuy.h"
+#include "Peasant.h"
 #include "Person.h"
+#include "Fighter.h"
 #include "Worker.h"
-Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads, sf::View* sceneView)
+#include "FoodItem.h"
+#include "FoodSource.h"
+#include "Wall.h"
+#include "SimConfig.h"
+
+Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int _numZones, int threads, sf::View* sceneView, sf::View* guiView)
 {
+	m_entities = new std::vector<std::shared_ptr<Entity>>();
 	auto end = std::chrono::system_clock::now();
 	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 #pragma warning(suppress:4996)
@@ -34,6 +46,7 @@ Environment::Environment(sf::RenderWindow * renderWindow, sf::Vector2i size, int
 	_mkdir("recordings\\");
 	_mkdir(m_sessionDir.c_str());
 	this->m_sceneView = sceneView;
+	this->m_guiView = guiView;
 	this->m_size = size;
 	m_numThreads = threads;
 	steps = 0;
@@ -85,6 +98,8 @@ void Environment::start(std::vector<std::shared_ptr<Entity>>* entities)
 		std::cout << "New Thread: " << i << " zones " << firstZone << " to " << lastZone << std::endl;
 		m_zoneProcessingRanges.push_back(sf::Vector2i(firstZone, lastZone));
 	}
+	recordedFrames = std::unordered_set<int>();
+	m_recording = SimConfig::getInstance().recordByDefault();
 	m_updateThread = new std::thread(&Environment::updateEntities, this);
 }
 
@@ -159,8 +174,8 @@ void Environment::updateEntities()
 				m_entities->push_back(entity);
 			}
 			m_toAdd->clear();
-
 			for (auto entity : *m_toRemove) {
+				//std::cout << "Entity " << entity->m_id << " was removed" << std::endl;
 				m_entities->erase(std::remove(m_entities->begin(), m_entities->end(), entity), m_entities->end());
 			}
 			m_toRemove->clear();
@@ -261,24 +276,28 @@ void Environment::updateEntities()
 
 void Environment::draw()
 {
-	std::vector<std::shared_ptr<Entity>>* displayEntities;
-
 	if (m_liveView)
 	{
-		displayEntities = m_entities;
+		m_displayEntities = m_entities;
 	}
-	else {
-		displayEntities = loadFrame();
+	else if (m_lastDisplayFrame != m_displayFrame) {
+		m_displayEntities = loadFrame();
+		m_lastDisplayFrame = m_displayFrame;
+	}
+
+	if (m_displayEntities == nullptr)
+	{
+		m_displayEntities = m_entities;
 	}
 
 #pragma warning( suppress : 4267 ) // loss of percision not an issue, as vertex count has to be an integer
-	int minRectCapacity = displayEntities->size() * 2 * 4;
+	int minRectCapacity = m_displayEntities->size() * 2 * 4;
 	if (m_rects->getVertexCount() < minRectCapacity)
 	{
 		m_rects->resize(minRectCapacity);
 	}
 #pragma warning( suppress : 4267 ) // loss of precision (int to float) not an issue, as this is a set coordinate
-	int minTriangleCapacity = displayEntities->size() * 2 * 4;
+	int minTriangleCapacity = m_displayEntities->size() * 2 * 4;
 	if (m_triangles->getVertexCount() < minRectCapacity)
 	{
 		m_triangles->resize(minTriangleCapacity);
@@ -294,7 +313,6 @@ void Environment::draw()
 	m_viewLines->clear();
 	int lineIndex = 0;
 	int idx = 0, ldx = 0, tdx = 0;
-	m_insertLock.lock();
 
 	std::vector<sf::CircleShape> circularEntities;
 	circularEntities.reserve(10);
@@ -303,119 +321,239 @@ void Environment::draw()
 
 	nlohmann::json capture;
 	std::vector<nlohmann::json*>entityJs;
+	m_insertLock.lock();
 
-	if (!m_liveView)
+	if (!m_liveView && m_recording)
 	{
 		for (std::shared_ptr<Entity> entity : *m_entities)
 		{
 			nlohmann::json* instance = new nlohmann::json();
 			entity->jsonify(instance);
+			std::string type = (*instance)["type"];
+			if (type.compare("Entity") == 0)
+			{
+				std::cout << entity->to_string() << std::endl << "\t -> did not give me a concrete type!!" << std::endl;
+
+				if (auto base = std::dynamic_pointer_cast<Base>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Base!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<BadGuy>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to BadGuy!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<Fighter>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Fighter!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<FoodItem>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to FoodItem!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<FoodSource>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to FoodSource!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<GoodGuy>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to GoodGuy!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<Peasant>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Peasant!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<Person>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Person!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<Worker>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Worker!!" << std::endl;
+				}
+
+				if (auto base = std::dynamic_pointer_cast<Slave>(entity))
+				{
+					std::cout << entity->to_string() << std::endl << "\t -> can be cast to Slave!!" << std::endl;
+				}
+			}
 			entityJs.push_back(instance);
 			capture.push_back(*instance);
 		}
 	}
 
-	for (std::shared_ptr<Entity> entity : *displayEntities)
+	for (std::shared_ptr<Entity> entity : *m_displayEntities)
 	{
-		if (m_liveView)
+		if (entity == nullptr)
 		{
-			nlohmann::json* instance = new nlohmann::json();
-			entity->jsonify(instance);
-			entityJs.push_back(instance);
-			capture.push_back(*instance);
+			m_toRemove->push_back(entity);
 		}
-
-		if (!m_liveView || (entity->m_enabled && inRenderRect(entity))) {
-			sf::Vector2f ePos = entity->m_position;
-			sf::Vector2f eSize = entity->m_size;
-			sf::Color col = entity->m_color;
-
-			if (auto person = std::dynamic_pointer_cast<Worker>(entity))
+		else {
+			if (m_liveView && m_recording)
 			{
-				sf::Color fadedLineColor = sf::Color(person->m_color.r / 2, person->m_color.g / 2, person->m_color.b / 2, 255);
-				sf::Color fadedFillColor = sf::Color(person->m_color.r / 10, 0, person->m_color.b / 10, 255);
-				/*sf::Text baseText(std::to_string(person->m_inViewDistance.size()), AppConfig::getInstance().m_mainFont, 15);
-				baseText.setPosition(person->m_position - sf::Vector2f(0, 30));
-				baseText.setFillColor(sf::Color::White);
-				m_window->draw(baseText);*/
-				float radius = 1 + person->m_viewDistance;
-				sf::CircleShape circle(radius);
-				circle.setPosition(person->m_position - sf::Vector2f(radius, radius));
-				circle.setFillColor(fadedFillColor);
-				circle.setOutlineColor(sf::Color::Transparent);
-				circle.setOutlineThickness(1);
-				m_window->draw(circle);
+				nlohmann::json* instance = new nlohmann::json();
+				entity->jsonify(instance);
+				std::string type = (*instance)["type"];
+				if (type.compare("Entity") == 0)
+				{
+					std::cout << entity->to_string() << std::endl << "\t => did not give me a concrete type!!" << std::endl;
 
+					if (auto base = std::dynamic_pointer_cast<Base>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Base!!" << std::endl;
+					}
 
-				//std::cout << person->m_id << " can see " << person->inViewDistance.size() << " others" << std::endl;
+					if (auto base = std::dynamic_pointer_cast<BadGuy>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to BadGuy!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<Fighter>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Fighter!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<FoodItem>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to FoodItem!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<FoodSource>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to FoodSource!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<GoodGuy>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to GoodGuy!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<Peasant>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Peasant!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<Person>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Person!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<Worker>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Worker!!" << std::endl;
+					}
+
+					if (auto base = std::dynamic_pointer_cast<Slave>(entity))
+					{
+						std::cout << entity->to_string() << std::endl << "\t => can be cast to Slave!!" << std::endl;
+					}
+				}
+				entityJs.push_back(instance);
+				capture.push_back(*instance);
 			}
 
-			switch (entity->m_shape)
-			{
-			case DIAMOND:
-			{
-				m_rects->append(sf::Vector2f(ePos.x, ePos.y - eSize.y / 2));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x + eSize.x / 2, ePos.y));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x, ePos.y + eSize.y / 2));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x - eSize.x / 2, ePos.y));
-				(*m_rects)[idx++].color = col;
-				break;
-			}
-			case TRIANGLE:
-			{
-				m_triangles->append(sf::Vector2f(ePos.x - eSize.x / 2.0f, ePos.y - eSize.y / 2));
-				(*m_triangles)[tdx++].color = col;
-				m_triangles->append(sf::Vector2f(ePos.x + eSize.x / 2, ePos.y - eSize.y / 2));
-				(*m_triangles)[tdx++].color = col;
-				m_triangles->append(sf::Vector2f(ePos.x, ePos.y + eSize.y / 2));
-				(*m_triangles)[tdx++].color = col;
-				break;
-			}
-			case CIRCLE:
-			{
-				float radius = (entity->m_size.x + entity->m_size.y) / 2;
-				sf::CircleShape circle(radius);
-				circle.setPosition(entity->m_position - sf::Vector2f(radius, radius));
-				circle.setFillColor(entity->m_color);
-				circularEntities.push_back(circle);
-				break;
-			}
-			default:
-				m_rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
-				(*m_rects)[idx++].color = col;
-				m_rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
-				(*m_rects)[idx++].color = col;
-			}
-			// check if base, draw stored nutrishion
-			if (auto base = std::dynamic_pointer_cast<Base>(entity))
-			{
-				sf::Text baseText(std::to_string((int)(base->m_nutrition * 100) / 100), AppConfig::getInstance().m_mainFont, 20);
-				baseText.setPosition(base->m_position - sf::Vector2f(0, 30));
-				baseText.setOrigin(sf::Vector2f(baseText.getLocalBounds().width / 2, baseText.getLocalBounds().height / 2));
-				baseText.setFillColor(sf::Color::White);
-				textualEntities.push_back(baseText);
-			}
+			if (!m_liveView || (entity->m_enabled && inRenderRect(entity))) {
+				sf::Vector2f ePos = entity->m_position;
+				sf::Vector2f eSize = entity->m_size;
+				sf::Color col = entity->m_color;
 
+				if (auto person = std::dynamic_pointer_cast<Worker>(entity))
+				{
+					sf::Color fadedLineColor = sf::Color(person->m_color.r / 2, person->m_color.g / 2, person->m_color.b / 2, 255);
+					sf::Color fadedFillColor = sf::Color(person->m_color.r / 4, person->m_color.g / 4, person->m_color.b / 4, 30);
+					/*sf::Text baseText(std::to_string(person->m_inViewDistance.size()), AppConfig::getInstance().m_mainFont, 15);
+					baseText.setPosition(person->m_position - sf::Vector2f(0, 30));
+					baseText.setFillColor(sf::Color::White);
+					m_window->draw(baseText);*/
+					float radius = 1 + person->m_viewDistance;
+					sf::CircleShape circle(radius);
+					circle.setPosition(person->m_position - sf::Vector2f(radius, radius));
+					circle.setFillColor(fadedFillColor);
+					circle.setOutlineColor(sf::Color::Transparent);
+					circle.setOutlineThickness(1);
+					m_window->draw(circle);
+
+
+					//std::cout << person->m_id << " can see " << person->inViewDistance.size() << " others" << std::endl;
+				}
+
+				switch (entity->m_shape)
+				{
+				case DIAMOND:
+				{
+					m_rects->append(sf::Vector2f(ePos.x, ePos.y - eSize.y / 2));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x + eSize.x / 2, ePos.y));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x, ePos.y + eSize.y / 2));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x - eSize.x / 2, ePos.y));
+					(*m_rects)[idx++].color = col;
+					break;
+				}
+				case TRIANGLE:
+				{
+					m_triangles->append(sf::Vector2f(ePos.x - eSize.x / 2.0f, ePos.y - eSize.y / 2));
+					(*m_triangles)[tdx++].color = col;
+					m_triangles->append(sf::Vector2f(ePos.x + eSize.x / 2, ePos.y - eSize.y / 2));
+					(*m_triangles)[tdx++].color = col;
+					m_triangles->append(sf::Vector2f(ePos.x, ePos.y + eSize.y / 2));
+					(*m_triangles)[tdx++].color = col;
+					break;
+				}
+				case CIRCLE:
+				{
+					float radius = (entity->m_size.x + entity->m_size.y) / 2;
+					sf::CircleShape circle(radius);
+					circle.setPosition(entity->m_position - sf::Vector2f(radius, radius));
+					circle.setFillColor(entity->m_color);
+					circularEntities.push_back(circle);
+					break;
+				}
+				default:
+					m_rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y - eSize.y));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y - eSize.y));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x + eSize.x, ePos.y + eSize.y));
+					(*m_rects)[idx++].color = col;
+					m_rects->append(sf::Vector2f(ePos.x - eSize.x, ePos.y + eSize.y));
+					(*m_rects)[idx++].color = col;
+				}
+				// check if base, draw stored nutrishion
+				if (auto base = std::dynamic_pointer_cast<Base>(entity))
+				{
+					sf::Text baseText(std::to_string((int)(base->m_nutrition * 100) / 100), AppConfig::getInstance().m_mainFont, 20);
+					baseText.setPosition(base->m_position - sf::Vector2f(0, 30));
+					baseText.setOrigin(sf::Vector2f(baseText.getLocalBounds().width / 2, baseText.getLocalBounds().height / 2));
+					baseText.setFillColor(sf::Color::White);
+					textualEntities.push_back(baseText);
+				}
+
+			}
 		}
 	}
-	std::string fileName = m_sessionDir + std::to_string(steps) + ".json";
-
-	std::replace(fileName.begin(), fileName.end(), '\n', '_');
-	std::ofstream out(fileName);
-	out << capture.dump();
-	out.close();
-	for (auto j : entityJs)
+	if (m_recording)
 	{
-		delete(j);
+		std::string fileName = m_sessionDir + std::to_string(steps) + ".json";
+
+		std::replace(fileName.begin(), fileName.end(), '\n', '_');
+		std::ofstream out(fileName);
+		out << capture.dump();
+		out.close();
+		for (auto j : entityJs)
+		{
+			delete(j);
+		}
+		recordedFrames.emplace(steps);
 	}
-	recordedFrames.emplace(steps);
 	m_insertLock.unlock();
 
 	m_window->draw(*m_triangles);
@@ -428,6 +566,35 @@ void Environment::draw()
 	for (sf::Text te : textualEntities)
 	{
 		m_window->draw(te);
+	}
+
+	if (Commander::getInstance().currentlyMakingArealSelection() || Commander::getInstance().activeMouseSelectionArea())
+	{
+		sf::RectangleShape rectangle;
+		ut::rectf rect = Commander::getInstance().mouseSelectionArea();
+		sf::Vector2f r_position = sf::Vector2f(std::min(rect.x0, rect.x1), std::min(rect.y0, rect.y1));
+		sf::Vector2f r_size = sf::Vector2f(std::max(rect.x0, rect.x1) - r_position.x, std::max(rect.y0, rect.y1) - r_position.y);
+		rectangle.setSize(r_size);
+		rectangle.setFillColor(sf::Color(185,185,255,50));
+		rectangle.setOutlineColor(sf::Color(200, 200, 255, 120));
+		rectangle.setOutlineThickness(1);
+		rectangle.setPosition(r_position);
+		m_window->draw(rectangle);
+		ut::rectf validRect = { r_position.x, r_position.y, r_position.x + r_size.x, r_position.y + r_size.y };
+		std::vector<std::shared_ptr<Entity>> selectedEntities = m_entityGrid->allEntitiesWithin(
+			validRect);
+
+		sf::Text numSelectedEntitiesText(std::to_string(selectedEntities.size()) + " Entities", AppConfig::getInstance().m_mainFont, 14);
+		sf::Vector2i pixelPos = m_window->mapCoordsToPixel(sf::Vector2f(validRect.x0, validRect.y0));
+		numSelectedEntitiesText.setPosition(sf::Vector2f(pixelPos.x, pixelPos.y));
+		numSelectedEntitiesText.setFillColor(sf::Color::White);
+		m_window->setView(*m_guiView);
+		m_window->draw(numSelectedEntitiesText);
+		m_window->setView(*m_sceneView);
+		m_selectedEntities.clear();
+		for (auto entity : selectedEntities) {
+			m_selectedEntities.push_back(entity);
+		}
 	}
 
 	if (!m_hoveredEntity.expired())
@@ -559,6 +726,7 @@ bool Environment::inRenderRect(Zone * zone)
 
 std::vector<std::shared_ptr<Entity>>* Environment::loadFrame()
 {
+	int stepMax = steps;
 	delete(m_loadedEntities);
 	m_loadedEntities = new std::vector<std::shared_ptr<Entity>>();
 	m_loadedEntities->reserve(20 * 1000);
@@ -570,27 +738,33 @@ std::vector<std::shared_ptr<Entity>>* Environment::loadFrame()
 	bool foundFrame = false;
 	while (!foundFrame)
 	{
-		int frameIdx = closestFrame + positiveDelta++;
-		if (frameIdx > 0 && recordedFrames.count(frameIdx) != 0)
+		int frameIdx0 = closestFrame + positiveDelta++;
+		if (frameIdx0 > 0 && recordedFrames.count(frameIdx0) != 0)
 		{
-			closestFrame = frameIdx;
+			closestFrame = frameIdx0;
 			foundFrame = true;
 			break;
 		}
 
-		frameIdx = closestFrame - negativeDelta++;
-		if (frameIdx < steps && recordedFrames.count(frameIdx) != 0)
+		int frameIdx1 = closestFrame - negativeDelta++;
+		if (frameIdx1 < steps && recordedFrames.count(frameIdx1) != 0)
 		{
-			closestFrame = frameIdx;
+			closestFrame = frameIdx1;
 			foundFrame = true;
+			break;
+		}
+
+		if (frameIdx1 < 0 && frameIdx0 > stepMax)
+		{
 			break;
 		}
 	}
-
+	//std::cout << "Closest frame: " << closestFrame << std::endl;
 	m_displayFrame = closestFrame;
 
-	if (closestFrame != -1)
+	if (foundFrame)
 	{
+
 		std::string fileName = m_sessionDir + std::to_string(m_displayFrame) + ".json";
 		std::ifstream(fileName) >> frameData;
 

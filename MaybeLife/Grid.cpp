@@ -252,3 +252,46 @@ void Grid::closebyEntities(int id, std::map<int, std::shared_ptr<Entity>>* list,
 		}
 	}
 }
+
+std::vector<Zone*> Grid::allZonesWithin(ut::rectf rect)
+{
+	std::vector<Zone*> selectedZones;
+	selectedZones.reserve(100);
+
+	int firstCol = rect.x0 / m_size.x * m_cols;
+	int lastCol = rect.x1 / m_size.x * m_cols;
+	int firstRow = rect.y0 / m_size.y * m_rows;
+	int lastRow = rect.y1 / m_size.y * m_rows;
+
+	for (int col = std::max(0, firstCol); col <= lastCol && col < m_cols; col++)
+	{
+		for (int row = std::max(0, firstRow); row <= lastRow && row < m_rows; row++)
+		{
+			selectedZones.push_back(m_zones[row*m_cols + col]);
+		}
+	}
+
+	return selectedZones;
+}
+
+std::vector<std::shared_ptr<Entity>> Grid::allEntitiesWithin(ut::rectf rect)
+{
+	std::vector<Zone*> selectedZones = allZonesWithin(rect);
+	std::vector<std::shared_ptr<Entity>> selectedEntities;
+	selectedEntities.reserve(2000);
+
+	for (Zone* zone : selectedZones)
+	{
+		zone->entityAccess.lock();
+		for (auto entity : zone->m_entities)
+		{
+			if (ut::pointInRect(rect, entity->m_position))
+			{
+				selectedEntities.push_back(entity);
+			}
+		}
+		zone->entityAccess.unlock();
+	}
+
+	return selectedEntities;
+}
