@@ -19,7 +19,7 @@ void Worker::pickUp(std::shared_ptr<FoodItem> food)
 	Commander::getInstance().deleteEntity(food);
 	for (auto kvp0 : m_inViewDistance)
 	{
-		auto entity = kvp0.second;
+		auto entity = kvp0.second.lock();
 		if (auto person = std::dynamic_pointer_cast<Person>(entity))
 		{
 			if (person->m_good == m_good && person->m_id != m_id)
@@ -68,13 +68,13 @@ void Worker::update()
 			float closestDistance = std::numeric_limits<float>::max();
 			for (auto kvp : m_inViewDistance)
 			{
-				auto entity = kvp.second;
+				auto entity = kvp.second.lock();
 				if (auto food = std::dynamic_pointer_cast<FoodItem>(entity))
 				{
 					// tell all your friends!
 					for (auto kvp0 : m_inViewDistance)
 					{
-						auto entity = kvp0.second;
+						auto entity = kvp0.second.lock();
 						if (auto person = std::dynamic_pointer_cast<Person>(entity))
 						{
 							if (person->m_good == m_good && person->m_id != m_id)

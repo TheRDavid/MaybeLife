@@ -6,7 +6,7 @@
 #include "Commander.h"
 
 Person::Person(Environment* environment, sf::Vector2f position, sf::Vector2f size, float speed, bool good, float viewDistance, float wanderStrength, std::shared_ptr<Base> base)
-	: Entity(environment, position, size), 
+	: Entity(environment, position, size),
 	m_health(100), m_speed(speed), m_good(good), m_viewDistance(viewDistance), m_wanderStrength(wanderStrength), m_base(base)
 {
 	m_gazeDirection = sf::Vector2f((float)(rand() / RAND_MAX * 360), (float)(rand() / RAND_MAX * 360));
@@ -66,7 +66,10 @@ void Person::update()
 	toAddLock.lock();
 	for (auto add : m_toAdd)
 	{
-		m_inViewDistance[add.first] = add.second;
+		if (add.second != nullptr && add.second->m_enabled)
+		{
+			m_inViewDistance[add.first] = add.second;
+		}
 	}
 	m_toAdd.clear();
 	toAddLock.unlock();
@@ -79,17 +82,25 @@ void Person::update()
 	}
 	toRemoveLock.lock();
 	m_toRemove.clear();
-	for (auto entity : m_inViewDistance)
+	for (auto e : m_inViewDistance)
 	{
-		if (entity.second == nullptr)
+		if (e.second.expired())
 		{
-			m_toRemove.emplace(entity.first);
+			m_toRemove.insert(e.first);
 		}
-		else if (auto person = std::dynamic_pointer_cast<Person>(entity.second))
-		{
-			if (entity.second.use_count() > 0 && ut::manhattenDistance(m_position, person->m_position) > m_viewDistance)
+		else {
+			auto entity = e.second.lock();
+			if (!entity->m_enabled)
 			{
-				m_toRemove.emplace(entity.first);
+				std::cout << "Removing, as it's not enabled" << std::endl;
+				m_toRemove.insert(e.first);
+			}
+			else if (auto person = std::dynamic_pointer_cast<Person>(entity))
+			{
+				if (ut::manhattenDistance(m_position, person->m_position) > m_viewDistance)
+				{
+					m_toRemove.insert(e.first);
+				}
 			}
 		}
 	}

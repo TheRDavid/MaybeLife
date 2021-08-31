@@ -16,7 +16,7 @@ public:
 	sf::RenderWindow *m_window;
 	Element* m_parent;
 	std::vector<Element*> m_children;
-	sf::Vector2f m_position, m_size, m_drawPosition;
+	sf::Vector2f m_position, m_size, m_drawPosition, m_childrenOffset = sf::Vector2f(0,0);
 	sf::VertexArray m_triangleStrips, m_quads, m_lines;
 
 	sf::Vector2i m_lastDragPosition;

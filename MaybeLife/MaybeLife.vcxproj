@@ -203,6 +203,7 @@
     <ClCompile Include="ProgressBar.cpp" />
     <ClCompile Include="RecordingPlaybackPanel.cpp" />
     <ClCompile Include="RuntimeControlPanel.cpp" />
+    <ClCompile Include="Scrollbar.cpp" />
     <ClCompile Include="Slave.cpp" />
     <ClCompile Include="Slider.cpp" />
     <ClCompile Include="StatusPanel.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="ProgressBar.h" />
     <ClInclude Include="RecordingPlaybackPanel.h" />
     <ClInclude Include="RuntimeControlPanel.h" />
+    <ClInclude Include="Scrollbar.h" />
     <ClInclude Include="SimConfig.h" />
     <ClInclude Include="Slave.h" />
     <ClInclude Include="Slider.h" />

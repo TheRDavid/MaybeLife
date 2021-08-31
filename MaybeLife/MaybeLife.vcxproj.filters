@@ -165,6 +165,9 @@
     <ClCompile Include="Checkbox.cpp">
       <Filter>Source Files\display\GUI</Filter>
     </ClCompile>
+    <ClCompile Include="Scrollbar.cpp">
+      <Filter>Source Files\display\GUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InputMacros.h">
@@ -279,6 +282,9 @@
       <Filter>Header Files\display\GUI</Filter>
     </ClInclude>
     <ClInclude Include="Checkbox.h">
+      <Filter>Header Files\display\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrollbar.h">
       <Filter>Header Files\display\GUI</Filter>
     </ClInclude>
   </ItemGroup>

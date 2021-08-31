@@ -173,19 +173,16 @@ bool Commander::isGUIBlockingCursor()
 }
 bool Commander::GUIHasFocus()
 {
-	//std::cout << "GUI has focus: " << (gui->m_focus != nullptr ? "yes" : "no") << std::endl;
 	return gui->m_focus != nullptr;
 }
 void Commander::requestFocus(Element * element)
 {
-	//std::cout << element->m_name << " requesting focus" << std::endl;
 	gui->m_focus = element;
 }
 void Commander::deRequestFocus(Element * element)
 {
 	if (gui->m_focus == element)
 	{
-		//std::cout << element->m_name << " de-requesting focus" << std::endl;
 		gui->m_focus = nullptr;
 	}
 }

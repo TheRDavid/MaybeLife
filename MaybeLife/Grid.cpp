@@ -100,7 +100,7 @@ std::string Grid::to_string()
 		+ ", zone height=" + std::to_string(m_zoneHeight);
 }
 
-void Grid::closebyEntities(int id, std::map<int, std::shared_ptr<Entity>>* list, Zone * zone, sf::Vector2f position, float distance)
+void Grid::closebyEntities(int id, std::map<int, std::weak_ptr<Entity>>* list, Zone * zone, sf::Vector2f position, float distance)
 {
 	for (auto entity : zone->m_entities)
 	{

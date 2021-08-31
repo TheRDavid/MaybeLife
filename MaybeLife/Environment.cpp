@@ -625,7 +625,7 @@ void Environment::draw()
 			selectedPerson->viewLock.lock();
 			for (auto kvp : selectedPerson->m_inViewDistance)
 			{
-				auto visibleEntity = kvp.second;
+				auto visibleEntity = kvp.second.lock();
 				m_viewLines->append(selectedPerson->m_position);
 				m_viewLines->append(visibleEntity->m_position);
 				(*m_viewLines)[ldx++].color = selectedPerson->m_color;

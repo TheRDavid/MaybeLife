@@ -14,7 +14,7 @@ TextPanel::TextPanel(sf::RenderWindow * window, sf::Vector2f position, sf::Vecto
 void TextPanel::drawSelf(sf::Vector2f relativePosition)
 {
 	Panel::drawSelf(relativePosition);
-	m_text.setPosition(relativePosition + m_position);
+	m_text.setPosition(relativePosition + m_position - sf::Vector2f(m_childrenOffset.x * m_text.getLocalBounds().width, m_childrenOffset.y * m_text.getLocalBounds().height));
 	m_window->draw(m_text);
 }
 

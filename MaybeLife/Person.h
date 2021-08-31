@@ -17,7 +17,8 @@ public:
 	sf::Vector2f m_gazeDirection, m_wanderDirection;
 	std::map<int, std::shared_ptr<Entity>> m_toAdd;
 	std::unordered_set<int> m_toRemove;
-	std::map<int, std::shared_ptr<Entity>> m_inViewDistance;
+	// TODO: Convert to weak pointers
+	std::map<int, std::weak_ptr<Entity>> m_inViewDistance;
 	Person(Environment* environment, sf::Vector2f position, sf::Vector2f size, float speed, bool good, float viewDistance, float wanderStrength, std::shared_ptr<Base> base);
 	Person() {} // for json conversion
 

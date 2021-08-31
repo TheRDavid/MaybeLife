@@ -109,7 +109,7 @@ void Element::drawChildren(sf::Vector2f relativePosition)
 {
 	for (Element* child : m_children)
 	{
-		child->draw(relativePosition + m_position);
+		child->draw(relativePosition + m_position - m_childrenOffset);
 	}
 }
 
